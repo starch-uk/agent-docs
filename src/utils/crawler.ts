@@ -474,14 +474,10 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
         evaluate: (...args: any[]) => Promise<any>;
         click: (selector: Readonly<string>) => Promise<unknown>;
         isClosed: () => boolean;
-        $: (
-          selector: Readonly<string>
-        ) => Promise<{
+        $: (selector: Readonly<string>) => Promise<{
           click: (options?: Readonly<{ timeout?: number }>) => Promise<unknown>;
         } | null>;
-        $$: (
-          selector: Readonly<string>
-        ) => Promise<
+        $$: (selector: Readonly<string>) => Promise<
           {
             click: (
               options?: Readonly<{ timeout?: number }>
