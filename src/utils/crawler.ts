@@ -6,8 +6,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
 /* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for timeouts, lengths, and DOM operations */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access -- page.evaluate returns any type from browser context */
- 
- 
 
 import { PlaywrightCrawler } from 'crawlee';
 
