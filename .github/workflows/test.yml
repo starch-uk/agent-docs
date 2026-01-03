@@ -1,4 +1,6 @@
 name: Test
+permissions:
+    contents: read
 
 on:
   push:
@@ -36,4 +38,12 @@ jobs:
         run: pnpm format:check
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm test:coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
+        if: matrix.node-version == 24
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false

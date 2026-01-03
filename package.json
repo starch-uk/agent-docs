@@ -20,6 +20,7 @@
     "format:check": "prettier --check \"**/*.{ts,md,json,yml,yaml}\"",
     "prepare": "husky install"
   },
+	"packageManager": "pnpm@10.27.0",
   "keywords": [
     "ai",
     "agent",
