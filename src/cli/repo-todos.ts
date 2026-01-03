@@ -61,13 +61,15 @@ async function main(): Promise<void> {
 
     // Validate todo count
     const inspectPrefix = 'Inspect ';
-    const files = todos.map((t: Readonly<{ content: string }>) => t.content.replace(inspectPrefix, ''));
+    const files = todos.map((t: Readonly<{ content: string }>) =>
+      t.content.replace(inspectPrefix, '')
+    );
     const isValid = validateTodoCount(files, todos);
 
     if (!isValid) {
       console.error('ERROR: Todo count does not match file count!');
       const exitCode = 1;
-    process.exit(exitCode);
+      process.exit(exitCode);
     }
 
     // Check for duplicates
@@ -76,7 +78,9 @@ async function main(): Promise<void> {
     if (duplicates.length > noDuplicates) {
       const duplicateCountStr = String(duplicates.length);
       console.error(`ERROR: Found ${duplicateCountStr} duplicate todo IDs:`);
-      duplicates.forEach((id) => { console.error(`  - ${id}`); });
+      duplicates.forEach((id) => {
+        console.error(`  - ${id}`);
+      });
       const exitCode = 1;
       process.exit(exitCode);
     }

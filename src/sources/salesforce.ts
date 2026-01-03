@@ -62,7 +62,7 @@ function sanitizeFilename(name: string): string {
 function getFilenameFromUrl(url: string, index: number): string {
   try {
     const urlObj = new URL(url);
-    const {pathname} = urlObj;
+    const { pathname } = urlObj;
     const searchParamId = urlObj.searchParams.get('id');
     const pathnameLast = pathname.split('/').pop();
     const articleId = searchParamId ?? pathnameLast ?? null;
@@ -118,24 +118,28 @@ async function downloadConcurrently(
   options: Readonly<SalesforceDownloadOptions>
 ): Promise<{ url: string; filePath: string; title: string }[]> {
   const concurrency = options.concurrency ?? DEFAULT_CONCURRENCY;
-  const downloaded: { url: string; filePath: string; title: string }[] =
-    [];
+  const downloaded: { url: string; filePath: string; title: string }[] = [];
 
   for (let i = 0; i < urls.length; i += concurrency) {
     const batch = urls.slice(i, i + concurrency);
-    const promises = batch.map(async (result: Readonly<{ readonly url: string; readonly title: string }>, batchIndex: number) => {
-      const index = i + batchIndex;
-      const filename = getFilenameFromUrl(result.url, index);
-      const filePath = join(folderPath, filename);
+    const promises = batch.map(
+      async (
+        result: Readonly<{ readonly url: string; readonly title: string }>,
+        batchIndex: number
+      ) => {
+        const index = i + batchIndex;
+        const filename = getFilenameFromUrl(result.url, index);
+        const filePath = join(folderPath, filename);
 
-      await downloadContentToFile(result.url, filePath, options);
+        await downloadContentToFile(result.url, filePath, options);
 
-      return {
-        filePath,
-        title: result.title,
-        url: result.url,
-      };
-    });
+        return {
+          filePath,
+          title: result.title,
+          url: result.url,
+        };
+      }
+    );
 
     const batchResults = await Promise.all(promises);
     downloaded.push(...batchResults);
@@ -152,7 +156,13 @@ async function downloadConcurrently(
  */
 async function createTodoFile(
   folderPath: Readonly<string>,
-  downloaded: Readonly<readonly { readonly url: string; readonly filePath: string; readonly title: string }[]>
+  downloaded: Readonly<
+    readonly {
+      readonly url: string;
+      readonly filePath: string;
+      readonly title: string;
+    }[]
+  >
 ): Promise<string> {
   const todoPath = join(folderPath, 'TODO.md');
   const lines = [
@@ -160,11 +170,20 @@ async function createTodoFile(
     '',
     'This file lists all downloaded Salesforce Help documents that should be reviewed.',
     '',
-    ...downloaded.map((item: Readonly<{ readonly url: string; readonly filePath: string; readonly title: string }>, index: number) => {
-      const relativePath = item.filePath.replace(folderPath + '/', '');
-      const indexStr = String(index + FIRST_ITEM_INDEX);
-      return `${indexStr}. [ ] ${relativePath} - ${item.title}\n   URL: ${item.url}`;
-    }),
+    ...downloaded.map(
+      (
+        item: Readonly<{
+          readonly url: string;
+          readonly filePath: string;
+          readonly title: string;
+        }>,
+        index: number
+      ) => {
+        const relativePath = item.filePath.replace(folderPath + '/', '');
+        const indexStr = String(index + FIRST_ITEM_INDEX);
+        return `${indexStr}. [ ] ${relativePath} - ${item.title}\n   URL: ${item.url}`;
+      }
+    ),
   ];
 
   await writeFile(todoPath, lines.join('\n'), 'utf-8');
@@ -203,14 +222,17 @@ async function searchAndDownloadSalesforceHelp( // eslint-disable-line jsdoc/req
   if (options.verbose === true) {
     const resultCountStr = String(searchResults.length);
     const limitStr = String(limit);
-    console.log(
-      `Found ${resultCountStr} results (limited to top ${limitStr})`
-    );
+    console.log(`Found ${resultCountStr} results (limited to top ${limitStr})`);
   }
 
   // Deduplicate results by URL (should already be deduplicated, but ensure)
   const uniqueResults = Array.from(
-    new Map(searchResults.map((r: Readonly<{ url: string; title: string }>) => [r.url, r])).values()
+    new Map(
+      searchResults.map((r: Readonly<{ url: string; title: string }>) => [
+        r.url,
+        r,
+      ])
+    ).values()
   );
 
   if (options.verbose === true) {
@@ -339,7 +361,12 @@ async function dumpSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc --
 
   // Deduplicate results by URL
   const uniqueResults = Array.from(
-    new Map(searchResults.map((r: Readonly<{ url: string; title: string }>) => [r.url, r])).values()
+    new Map(
+      searchResults.map((r: Readonly<{ url: string; title: string }>) => [
+        r.url,
+        r,
+      ])
+    ).values()
   );
 
   // Limit to specified number of results
@@ -363,23 +390,25 @@ async function dumpSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc --
 
   // Fetch all pages in parallel (removed extractSalesforceLinks to avoid multiple crawlers hanging)
   const pageContents = await Promise.all(
-    pagesToProcess.map(async (result: Readonly<{ url: string; title: string }>) => {
-      try {
-        const content = await crawlSalesforcePage(result.url);
-        return { content, title: result.title, url: result.url };
-      } catch (error: unknown) {
-        if (options.verbose === true) {
+    pagesToProcess.map(
+      async (result: Readonly<{ url: string; title: string }>) => {
+        try {
+          const content = await crawlSalesforcePage(result.url);
+          return { content, title: result.title, url: result.url };
+        } catch (error: unknown) {
+          if (options.verbose === true) {
+            const errorStr = String(error);
+            console.error(`Failed to fetch ${result.url}: ${errorStr}`);
+          }
           const errorStr = String(error);
-          console.error(`Failed to fetch ${result.url}: ${errorStr}`);
+          return {
+            content: `Error: ${errorStr}`,
+            title: result.title,
+            url: result.url,
+          };
         }
-        const errorStr = String(error);
-        return {
-          content: `Error: ${errorStr}`,
-          title: result.title,
-          url: result.url,
-        };
       }
-    })
+    )
   );
 
   // Use page contents directly (removed link extraction to prevent hanging from multiple crawlers)

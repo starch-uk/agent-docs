@@ -36,27 +36,36 @@ program
     'Maximum number of results to download (default: 20)',
     parseInt
   )
-  .action(async (item: string, options: Readonly<{ concurrency?: number; limit?: number; verbose?: boolean }>) => {
-    try {
-      const result = await searchAndDownloadSalesforceHelp(item, {
-        concurrency: options.concurrency,
-        limit: options.limit,
-        verbose: options.verbose,
-      });
+  .action(
+    async (
+      item: string,
+      options: Readonly<{
+        concurrency?: number;
+        limit?: number;
+        verbose?: boolean;
+      }>
+    ) => {
+      try {
+        const result = await searchAndDownloadSalesforceHelp(item, {
+          concurrency: options.concurrency,
+          limit: options.limit,
+          verbose: options.verbose,
+        });
 
-      const fileCountStr = String(result.fileCount);
-      console.log(`\nDownloaded ${fileCountStr} files to:`);
-      console.log(result.folderPath);
-      console.log(`\nTodo file: ${result.todoFilePath}`);
-      console.log(
-        `\nReview the TODO.md file in the folder to process each document.`
-      );
-    } catch (error) {
-      console.error('Error searching Salesforce Help:', error);
-      const exitCode = 1;
-      process.exit(exitCode);
+        const fileCountStr = String(result.fileCount);
+        console.log(`\nDownloaded ${fileCountStr} files to:`);
+        console.log(result.folderPath);
+        console.log(`\nTodo file: ${result.todoFilePath}`);
+        console.log(
+          `\nReview the TODO.md file in the folder to process each document.`
+        );
+      } catch (error) {
+        console.error('Error searching Salesforce Help:', error);
+        const exitCode = 1;
+        process.exit(exitCode);
+      }
     }
-  });
+  );
 
 program
   .command('get')
@@ -100,18 +109,27 @@ program
     'Maximum number of results to download (default: 20)',
     parseInt
   )
-  .action(async (item: string, options: Readonly<{ concurrency?: number; limit?: number; verbose?: boolean }>) => {
-    try {
-      await dumpSalesforceHelp(item, {
-        concurrency: options.concurrency,
-        limit: options.limit,
-        verbose: options.verbose,
-      });
-    } catch (error) {
-      console.error('Error dumping Salesforce Help:', error);
-      const exitCode = 1;
-      process.exit(exitCode);
+  .action(
+    async (
+      item: string,
+      options: Readonly<{
+        concurrency?: number;
+        limit?: number;
+        verbose?: boolean;
+      }>
+    ) => {
+      try {
+        await dumpSalesforceHelp(item, {
+          concurrency: options.concurrency,
+          limit: options.limit,
+          verbose: options.verbose,
+        });
+      } catch (error) {
+        console.error('Error dumping Salesforce Help:', error);
+        const exitCode = 1;
+        process.exit(exitCode);
+      }
     }
-  });
+  );
 
 program.parse();

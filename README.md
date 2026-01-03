@@ -63,6 +63,7 @@ pnpm sf-docs-helper dump "REST API" --limit 5
 ```
 
 The `dump` command:
+
 - Searches Salesforce Help (help.salesforce.com)
 - Filters results to Developer Documentation and Product Documentation
 - Retrieves all results via pagination
@@ -79,6 +80,7 @@ pnpm sf-docs-helper search "AuraEnabled annotation"
 ```
 
 The `search` command:
+
 - Searches Salesforce Help and retrieves all results via pagination
 - Deduplicates results
 - Downloads all content to a temporary folder

@@ -94,8 +94,7 @@ describe('searchAndDownloadSalesforceHelp', () => {
       expect(todoContent).toContain('URL:');
       expect(todoContent).toMatch(/\[\s*\]/); // Checkbox format
       // Verify it has the expected number of items
-      const checkboxCount =
-        (todoContent.match(/\[\s*\]/g) ?? []).length;
+      const checkboxCount = (todoContent.match(/\[\s*\]/g) ?? []).length;
       expect(checkboxCount).toBe(EXPECTED_SEARCH_RESULT_COUNT);
     }
   });
@@ -109,8 +108,7 @@ describe('searchAndDownloadSalesforceHelp', () => {
   });
 
   it('should respect limit option', async () => {
-    const mockResults =
-      getMultipleSearchResultsFixture(MULTIPLE_RESULTS_COUNT);
+    const mockResults = getMultipleSearchResultsFixture(MULTIPLE_RESULTS_COUNT);
     const mockFolderPath = '/tmp/sf-docs-helper-123';
     const articleContent = await loadFixture('article-auraenabled.txt');
 
@@ -357,8 +355,7 @@ describe('dumpSalesforceHelp', () => {
   });
 
   it('should respect limit option', async () => {
-    const mockResults =
-      getMultipleSearchResultsFixture(MULTIPLE_RESULTS_COUNT);
+    const mockResults = getMultipleSearchResultsFixture(MULTIPLE_RESULTS_COUNT);
     const articleContent = await loadFixture('article-auraenabled.txt');
 
     vi.mocked(crawler.searchSalesforceHelp).mockResolvedValue(mockResults);

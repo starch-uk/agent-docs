@@ -59,7 +59,20 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
     headless: true,
     navigationTimeoutSecs: 90,
     // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- page object from PlaywrightCrawler cannot be made readonly
-    async requestHandler({ page }: { page: { waitForSelector: (selector: string, options?: { timeout?: number }) => Promise<unknown>; evaluate: <T>(fn: (maxResults: Readonly<number>) => T, ...args: unknown[]) => Promise<T> } }): Promise<void> {
+    async requestHandler({
+      page,
+    }: {
+      page: {
+        waitForSelector: (
+          selector: string,
+          options?: { timeout?: number }
+        ) => Promise<unknown>;
+        evaluate: <T>(
+          fn: (maxResults: Readonly<number>) => T,
+          ...args: unknown[]
+        ) => Promise<T>;
+      };
+    }): Promise<void> {
       // Wait for search results to load - JavaScript-rendered pages need more time
       // Coveo search results may take longer to render
       await new Promise((resolve) => setTimeout(resolve, initialWaitMs));
@@ -70,8 +83,8 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
           '.coveo-result, .coveo-list-layout, [data-coveo-uri], .CoveoResultLink, a[href*="articleView"]',
           {
             timeout: selectorTimeoutMs,
-            }
-          );
+          }
+        );
         // Additional wait for Coveo to fully render results
         const coveoWaitTimeoutMs = coveoWaitMs;
         await new Promise((resolve) => setTimeout(resolve, coveoWaitTimeoutMs));
@@ -94,108 +107,126 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
 
       // Extract results using page.evaluate to query the rendered DOM
       // Note: page.evaluate runs in browser context where document is available
-       
-      const extractedResults = await page.evaluate((maxResults: Readonly<number>): { url: string; title: string }[] => {
-         
-        const doc = (globalThis as { readonly document?: { readonly querySelectorAll: (selector: string) => { readonly [index: number]: { readonly getAttribute: (attr: string) => string | null; readonly textContent: string | null; readonly parentElement: { readonly textContent: string | null; readonly querySelector: (selector: string) => { readonly textContent: string | null } | null } | null }; readonly length: number } } }).document;
-        const foundResults: { url: string; title: string }[] = [];
-        const seenUrls = new Set<string>();
 
-        // Prioritize Coveo selectors (Salesforce Help uses Coveo for search)
-        const selectors = [
-          '.coveo-result a',
-          '.coveo-list-layout .CoveoResultLink',
-          '.coveo-list-layout a',
-          '[data-coveo-uri]',
-          '.CoveoResult a',
-          '.CoveoResultLink',
-          'a[href*="developer.salesforce.com/docs/"]',
-          'a[href*="articleView"]',
-          'a[href*="/s/articleView"]',
-          'a[href*="apexcode"]',
-          'a[href*="apex"]',
-          '.search-result a',
-          '.result-item a',
-          '.result a',
-          'h3 a, h4 a, h2 a',
-          '[data-href*="articleView"]',
-          '[data-href*="developer.salesforce.com/docs/"]',
-          '.slds-text-heading_small a',
-          '.slds-text-heading_medium a',
-          'article a[href*="articleView"]',
-          'article a[href*="developer.salesforce.com/docs/"]',
-          '[class*="result"] a',
-          '[class*="search"] a',
-        ];
-
-        for (const selector of selectors) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- doc can be undefined
-          if (doc === null || doc === undefined) continue;
-          const links = doc.querySelectorAll(selector);
-
-          const linksLoopStart = 0;
-          for (let i = linksLoopStart; i < links.length; i++) {
-            const link = links[i];
-            // Coveo uses data-coveo-uri attribute, fallback to href
-            const href =
-              link.getAttribute('href') ?? link.getAttribute('data-coveo-uri');
-            if (href === null || href === '') continue;
-
-            // Normalize URL
-            let url = href;
-            if (!url.startsWith('http')) {
-              url = url.startsWith('/')
-                ? `https://help.salesforce.com${url}`
-                : `https://help.salesforce.com/${url}`;
+      const extractedResults = await page.evaluate(
+        (maxResults: Readonly<number>): { url: string; title: string }[] => {
+          const doc = (
+            globalThis as {
+              readonly document?: {
+                readonly querySelectorAll: (selector: string) => {
+                  readonly [index: number]: {
+                    readonly getAttribute: (attr: string) => string | null;
+                    readonly textContent: string | null;
+                    readonly parentElement: {
+                      readonly textContent: string | null;
+                      readonly querySelector: (
+                        selector: string
+                      ) => { readonly textContent: string | null } | null;
+                    } | null;
+                  };
+                  readonly length: number;
+                };
+              };
             }
+          ).document;
+          const foundResults: { url: string; title: string }[] = [];
+          const seenUrls = new Set<string>();
 
-            // Accept both articleView URLs (help.salesforce.com) and /docs/ URLs (developer.salesforce.com)
-            const isArticleView = url.includes('articleView');
-            const isDeveloperDocs = url.includes(
-              'developer.salesforce.com/docs/'
-            );
-            if ((!isArticleView && !isDeveloperDocs) || seenUrls.has(url))
-              continue;
+          // Prioritize Coveo selectors (Salesforce Help uses Coveo for search)
+          const selectors = [
+            '.coveo-result a',
+            '.coveo-list-layout .CoveoResultLink',
+            '.coveo-list-layout a',
+            '[data-coveo-uri]',
+            '.CoveoResult a',
+            '.CoveoResultLink',
+            'a[href*="developer.salesforce.com/docs/"]',
+            'a[href*="articleView"]',
+            'a[href*="/s/articleView"]',
+            'a[href*="apexcode"]',
+            'a[href*="apex"]',
+            '.search-result a',
+            '.result-item a',
+            '.result a',
+            'h3 a, h4 a, h2 a',
+            '[data-href*="articleView"]',
+            '[data-href*="developer.salesforce.com/docs/"]',
+            '.slds-text-heading_small a',
+            '.slds-text-heading_medium a',
+            'article a[href*="articleView"]',
+            'article a[href*="developer.salesforce.com/docs/"]',
+            '[class*="result"] a',
+            '[class*="search"] a',
+          ];
 
-            // Extract title
-            let title = link.textContent?.trim() ?? '';
-            const minTitleLength = 5;
-            if (title.length < minTitleLength) {
-              // Try parent or nearby elements
-               
-              const parent = link.parentElement;
-              if (parent !== null) {
-                 
-                title = parent.textContent?.trim() ?? '';
-                if (title.length < minTitleLength) {
-                   
-                   
-                  const heading = parent.querySelector(
-                    'h3, h4, .title, .result-title'
-                  );
-                   
-                  title = heading?.textContent?.trim() ?? '';
+          for (const selector of selectors) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- doc can be undefined
+            if (doc === null || doc === undefined) continue;
+            const links = doc.querySelectorAll(selector);
+
+            const linksLoopStart = 0;
+            for (let i = linksLoopStart; i < links.length; i++) {
+              const link = links[i];
+              // Coveo uses data-coveo-uri attribute, fallback to href
+              const href =
+                link.getAttribute('href') ??
+                link.getAttribute('data-coveo-uri');
+              if (href === null || href === '') continue;
+
+              // Normalize URL
+              let url = href;
+              if (!url.startsWith('http')) {
+                url = url.startsWith('/')
+                  ? `https://help.salesforce.com${url}`
+                  : `https://help.salesforce.com/${url}`;
+              }
+
+              // Accept both articleView URLs (help.salesforce.com) and /docs/ URLs (developer.salesforce.com)
+              const isArticleView = url.includes('articleView');
+              const isDeveloperDocs = url.includes(
+                'developer.salesforce.com/docs/'
+              );
+              if ((!isArticleView && !isDeveloperDocs) || seenUrls.has(url))
+                continue;
+
+              // Extract title
+              let title = link.textContent?.trim() ?? '';
+              const minTitleLength = 5;
+              if (title.length < minTitleLength) {
+                // Try parent or nearby elements
+
+                const parent = link.parentElement;
+                if (parent !== null) {
+                  title = parent.textContent?.trim() ?? '';
+                  if (title.length < minTitleLength) {
+                    const heading = parent.querySelector(
+                      'h3, h4, .title, .result-title'
+                    );
+
+                    title = heading?.textContent?.trim() ?? '';
+                  }
+                }
+              }
+
+              if (title.length >= minTitleLength) {
+                seenUrls.add(url);
+                foundResults.push({ title, url });
+
+                if (foundResults.length >= maxResults) {
+                  return foundResults;
                 }
               }
             }
 
-            if (title.length >= minTitleLength) {
-              seenUrls.add(url);
-              foundResults.push({ title, url });
-
-              if (foundResults.length >= maxResults) {
-                return foundResults;
-              }
-            }
+            const noResults = 0;
+            if (foundResults.length > noResults) break;
           }
 
-          const noResults = 0;
-          if (foundResults.length > noResults) break;
-        }
-
-        const sliceStart = 0;
-        return foundResults.slice(sliceStart, maxResults);
-      }, limit);
+          const sliceStart = 0;
+          return foundResults.slice(sliceStart, maxResults);
+        },
+        limit
+      );
 
       results = extractedResults;
     },
@@ -220,7 +251,20 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
     headless: true,
     navigationTimeoutSecs: 90,
     // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- page object from PlaywrightCrawler cannot be made readonly
-    async requestHandler({ page }: { page: { waitForSelector: (selector: string, options?: { timeout?: number }) => Promise<unknown>; evaluate: <T>(fn: (maxResults: Readonly<number>) => T, ...args: unknown[]) => Promise<T> } }): Promise<void> {
+    async requestHandler({
+      page,
+    }: {
+      page: {
+        waitForSelector: (
+          selector: string,
+          options?: { timeout?: number }
+        ) => Promise<unknown>;
+        evaluate: <T>(
+          fn: (maxResults: Readonly<number>) => T,
+          ...args: unknown[]
+        ) => Promise<T>;
+      };
+    }): Promise<void> {
       // Wait for Coveo search results (Salesforce Help uses Coveo)
       const fallbackWaitMs = 5000;
       await new Promise((resolve) => setTimeout(resolve, fallbackWaitMs));
@@ -249,90 +293,108 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
         }
       }
 
-       
-      const helpResults = await page.evaluate((maxResults: Readonly<number>): { url: string; title: string }[] => {
-         
-        const doc = (globalThis as { readonly document?: { readonly querySelectorAll: (selector: string) => { readonly [index: number]: { readonly getAttribute: (attr: string) => string | null; readonly textContent: string | null; readonly parentElement: { readonly textContent: string | null; readonly querySelector: (selector: string) => { readonly textContent: string | null } | null } | null }; readonly length: number } } }).document;
-        const foundResults: { url: string; title: string }[] = [];
-        const seenUrls = new Set<string>();
-
-        // Prioritize Coveo selectors (Salesforce Help uses Coveo for search)
-        const selectors = [
-          '.coveo-result a',
-          '.coveo-list-layout .CoveoResultLink',
-          '.coveo-list-layout a',
-          '[data-coveo-uri]',
-          '.CoveoResult a',
-          '.CoveoResultLink',
-          'a[href*="articleView"]',
-          'a[href*="/s/articleView"]',
-          'a[href*="apexcode"]',
-          'a[href*="apex"]',
-          '.search-result a',
-          '[data-result] a',
-          '[class*="result"] a',
-          '[class*="search"] a',
-        ];
-
-        for (const selector of selectors) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- doc can be undefined
-          if (doc === null || doc === undefined) continue;
-          const links = doc.querySelectorAll(selector);
-
-          const helpLinksLoopStart = 0;
-          for (let i = helpLinksLoopStart; i < links.length; i++) {
-            const link = links[i];
-            const href =
-              link.getAttribute('href') ?? link.getAttribute('data-coveo-uri');
-            if (href === null || href === '') continue;
-
-            let url = href;
-            if (!url.startsWith('http')) {
-              url = url.startsWith('/')
-                ? `https://help.salesforce.com${url}`
-                : `https://help.salesforce.com/${url}`;
+      const helpResults = await page.evaluate(
+        (maxResults: Readonly<number>): { url: string; title: string }[] => {
+          const doc = (
+            globalThis as {
+              readonly document?: {
+                readonly querySelectorAll: (selector: string) => {
+                  readonly [index: number]: {
+                    readonly getAttribute: (attr: string) => string | null;
+                    readonly textContent: string | null;
+                    readonly parentElement: {
+                      readonly textContent: string | null;
+                      readonly querySelector: (
+                        selector: string
+                      ) => { readonly textContent: string | null } | null;
+                    } | null;
+                  };
+                  readonly length: number;
+                };
+              };
             }
+          ).document;
+          const foundResults: { url: string; title: string }[] = [];
+          const seenUrls = new Set<string>();
 
-            if (!url.includes('articleView') || seenUrls.has(url)) continue;
+          // Prioritize Coveo selectors (Salesforce Help uses Coveo for search)
+          const selectors = [
+            '.coveo-result a',
+            '.coveo-list-layout .CoveoResultLink',
+            '.coveo-list-layout a',
+            '[data-coveo-uri]',
+            '.CoveoResult a',
+            '.CoveoResultLink',
+            'a[href*="articleView"]',
+            'a[href*="/s/articleView"]',
+            'a[href*="apexcode"]',
+            'a[href*="apex"]',
+            '.search-result a',
+            '[data-result] a',
+            '[class*="result"] a',
+            '[class*="search"] a',
+          ];
 
-            let title = link.textContent?.trim() ?? '';
+          for (const selector of selectors) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- doc can be undefined
+            if (doc === null || doc === undefined) continue;
+            const links = doc.querySelectorAll(selector);
 
-            // Filter out release notes
-            if (
-              url.includes('release-notes') ||
-              url.includes('/rn_') ||
-              (url.includes('release') &&
-                title.toLowerCase().includes('release notes'))
-            ) {
-              continue;
-            }
-            const minTitleLength = 5;
-            if (title.length < minTitleLength) {
-               
-              const parent = link.parentElement;
-              if (parent !== null) {
-                 
-                title = parent.textContent?.trim() ?? '';
+            const helpLinksLoopStart = 0;
+            for (let i = helpLinksLoopStart; i < links.length; i++) {
+              const link = links[i];
+              const href =
+                link.getAttribute('href') ??
+                link.getAttribute('data-coveo-uri');
+              if (href === null || href === '') continue;
+
+              let url = href;
+              if (!url.startsWith('http')) {
+                url = url.startsWith('/')
+                  ? `https://help.salesforce.com${url}`
+                  : `https://help.salesforce.com/${url}`;
+              }
+
+              if (!url.includes('articleView') || seenUrls.has(url)) continue;
+
+              let title = link.textContent?.trim() ?? '';
+
+              // Filter out release notes
+              if (
+                url.includes('release-notes') ||
+                url.includes('/rn_') ||
+                (url.includes('release') &&
+                  title.toLowerCase().includes('release notes'))
+              ) {
+                continue;
+              }
+              const minTitleLength = 5;
+              if (title.length < minTitleLength) {
+                const parent = link.parentElement;
+                if (parent !== null) {
+                  title = parent.textContent?.trim() ?? '';
+                }
+              }
+
+              if (title.length >= minTitleLength) {
+                seenUrls.add(url);
+                foundResults.push({ title, url });
+
+                if (foundResults.length >= maxResults) {
+                  return foundResults;
+                }
               }
             }
 
-            if (title.length >= minTitleLength) {
-              seenUrls.add(url);
-              foundResults.push({ title, url });
-
-              if (foundResults.length >= maxResults) {
-                return foundResults;
-              }
-            }
+            const noResults = 0;
+            if (foundResults.length > noResults) break;
           }
 
-          const noResults = 0;
-          if (foundResults.length > noResults) break;
-        }
-
-        const sliceStart = 0;
-        return foundResults.slice(sliceStart, maxResults);
-      }, limit);
+          const sliceStart = 0;
+          return foundResults.slice(sliceStart, maxResults);
+        },
+        limit
+      );
 
       results = helpResults;
     },
@@ -368,9 +430,10 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
  * @rejects {Error} When page crawl fails or times out.
  */
 /* eslint-enable jsdoc/check-tag-names */
-async function crawlSalesforcePage(url: Readonly<string>): Promise<string> { // eslint-disable-line jsdoc/require-jsdoc -- JSDoc is above the eslint-disable/enable block
+async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
+  // eslint-disable-line jsdoc/require-jsdoc -- JSDoc is above the eslint-disable/enable block
   let content = '';
-  
+
   // Timeout constants
   const navigationTimeoutMs = 60000;
   const pageInitWaitMs = 2000;
@@ -391,12 +454,47 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> { // 
   const crawler = new PlaywrightCrawler({
     headless: true,
     navigationTimeoutSecs: 60,
-     
-     
-     
+
     // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- type definition parameters cannot be readonly
-    async requestHandler({ page }: Readonly<{ page: { goto: (url: Readonly<string>, options?: Readonly<{ timeout?: number; waitUntil?: 'commit' | 'domcontentloaded' | 'load' | 'networkidle' }>) => Promise<unknown>; waitForSelector: (selector: Readonly<string>, options?: Readonly<{ timeout?: number }>) => Promise<unknown>; // eslint-disable-next-line @typescript-eslint/no-explicit-any -- page.evaluate has overloaded signatures that TypeScript can't express cleanly
-evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) => Promise<unknown>; isClosed: () => boolean; $: (selector: Readonly<string>) => Promise<{ click: (options?: Readonly<{ timeout?: number }>) => Promise<unknown> } | null>; $$: (selector: Readonly<string>) => Promise<{ click: (options?: Readonly<{ timeout?: number }>) => Promise<unknown> }[]>; waitForFunction: (fn: () => boolean, options?: Readonly<{ timeout?: number }>) => Promise<unknown> } }>): Promise<void> { // eslint-disable-line @typescript-eslint/prefer-readonly-parameter-types -- fn parameter in type definition cannot be readonly
+    async requestHandler({
+      page,
+    }: Readonly<{
+      page: {
+        goto: (
+          url: Readonly<string>,
+          options?: Readonly<{
+            timeout?: number;
+            waitUntil?: 'commit' | 'domcontentloaded' | 'load' | 'networkidle';
+          }>
+        ) => Promise<unknown>;
+        waitForSelector: (
+          selector: Readonly<string>,
+          options?: Readonly<{ timeout?: number }>
+        ) => Promise<unknown>; // eslint-disable-next-line @typescript-eslint/no-explicit-any -- page.evaluate has overloaded signatures that TypeScript can't express cleanly
+        evaluate: (...args: any[]) => Promise<any>;
+        click: (selector: Readonly<string>) => Promise<unknown>;
+        isClosed: () => boolean;
+        $: (
+          selector: Readonly<string>
+        ) => Promise<{
+          click: (options?: Readonly<{ timeout?: number }>) => Promise<unknown>;
+        } | null>;
+        $$: (
+          selector: Readonly<string>
+        ) => Promise<
+          {
+            click: (
+              options?: Readonly<{ timeout?: number }>
+            ) => Promise<unknown>;
+          }[]
+        >;
+        waitForFunction: (
+          fn: () => boolean,
+          options?: Readonly<{ timeout?: number }>
+        ) => Promise<unknown>;
+      };
+    }>): Promise<void> {
+      // eslint-disable-line @typescript-eslint/prefer-readonly-parameter-types -- fn parameter in type definition cannot be readonly
       // Navigate to page - use domcontentloaded to avoid hanging
       await page.goto(url, {
         timeout: navigationTimeoutMs,
@@ -430,16 +528,17 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
         for (let i = acceptLoopStart; i < acceptSelectors.length; i++) {
           const selector = acceptSelectors[i];
           try {
-             
             if (page.isClosed()) {
               break;
             }
             const acceptButtonTimeoutMs = 2000;
-             
+
             const acceptButton = await Promise.race([
               page.$(selector),
               new Promise<null>((resolve) =>
-                setTimeout(() => { resolve(null); }, acceptButtonTimeoutMs)
+                setTimeout(() => {
+                  resolve(null);
+                }, acceptButtonTimeoutMs)
               ),
             ]).catch(() => null);
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- acceptButton can be null, but linter thinks types have no overlap
@@ -447,10 +546,11 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
               // Add timeout to click to avoid hanging
               try {
                 await Promise.race([
-                   
                   acceptButton.click({ timeout: clickTimeoutMs }),
                   new Promise((_, reject) =>
-                    setTimeout(() => { reject(new Error('Click timeout')); }, clickTimeoutMs)
+                    setTimeout(() => {
+                      reject(new Error('Click timeout'));
+                    }, clickTimeoutMs)
                   ),
                 ]);
                 cookieHandled = true;
@@ -460,7 +560,9 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
               if (cookieHandled) {
                 // Use regular setTimeout instead of page.waitForTimeout to avoid hanging
                 // when page context is invalid
-                await new Promise((resolve) => setTimeout(resolve, cookieClickWaitMs));
+                await new Promise((resolve) =>
+                  setTimeout(resolve, cookieClickWaitMs)
+                );
                 break;
               }
             }
@@ -478,42 +580,52 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             }
             // Limit to first 10 buttons to avoid hanging on many buttons
             // Add timeout to page.$$ to avoid hanging
-             
+
             const buttons = await Promise.race([
-               
               page.$$('button'),
               new Promise<never>((_, reject) => {
                 const buttonQueryTimeoutMs = 5000;
-                setTimeout(
-                  () => { reject(new Error('Button query timeout')); },
-                  buttonQueryTimeoutMs
-                );
+                setTimeout(() => {
+                  reject(new Error('Button query timeout'));
+                }, buttonQueryTimeoutMs);
               }),
             ]).catch(() => []);
             const maxButtonsToCheck = 10;
-             
-            const buttonLimit = Math.min((buttons as { readonly length: number }).length, maxButtonsToCheck);
+
+            const buttonLimit = Math.min(
+              (buttons as { readonly length: number }).length,
+              maxButtonsToCheck
+            );
             const buttonLoopStart = 0;
             for (let i = buttonLoopStart; i < buttonLimit; i++) {
               try {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- buttons is array-like from Playwright
-                const button = (buttons as readonly unknown[])[i] as { readonly isVisible: () => Promise<boolean>; readonly textContent: () => Promise<string | null>; readonly click: (options?: { readonly timeout?: number }) => Promise<unknown> };
+                const button = (buttons as readonly unknown[])[i] as {
+                  readonly isVisible: () => Promise<boolean>;
+                  readonly textContent: () => Promise<string | null>;
+                  readonly click: (options?: {
+                    readonly timeout?: number;
+                  }) => Promise<unknown>;
+                };
                 // Quick visibility check with timeout
-                 
+
                 const isVisible = await Promise.race([
                   button.isVisible(),
                   new Promise<boolean>((resolve) =>
-                    setTimeout(() => { resolve(false); }, buttonClickWaitMs)
+                    setTimeout(() => {
+                      resolve(false);
+                    }, buttonClickWaitMs)
                   ),
                 ]).catch(() => false);
 
                 if (!isVisible) continue;
 
-                 
                 const text = await Promise.race([
                   button.textContent(),
                   new Promise<string | null>((resolve) =>
-                    setTimeout(() => { resolve(null); }, buttonClickWaitMs)
+                    setTimeout(() => {
+                      resolve(null);
+                    }, buttonClickWaitMs)
                   ),
                 ]).catch(() => null);
 
@@ -523,17 +635,21 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                   (text.includes('Accept All') || text.includes('Accept'))
                 ) {
                   // Add timeout to click to avoid hanging
-                   
+
                   await Promise.race([
                     button.click({ timeout: buttonClickTimeoutMs }),
                     new Promise((_, reject) =>
-                      setTimeout(() => { reject(new Error('Click timeout')); }, buttonClickTimeoutMs)
+                      setTimeout(() => {
+                        reject(new Error('Click timeout'));
+                      }, buttonClickTimeoutMs)
                     ),
                   ]).catch(() => {
                     // Intentionally ignore click errors
                   });
                   cookieHandled = true;
-                  await new Promise((resolve) => setTimeout(resolve, buttonClickWaitMs));
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, buttonClickWaitMs)
+                  );
                   break;
                 }
               } catch {
@@ -547,54 +663,65 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
 
         // Try to close any modal/dialog that might be blocking content
         try {
-           
           if (page.isClosed()) {
             // Page is closed, skip
           } else {
-             
             const closeButtons = await Promise.race([
-               
               page.$$(
                 '[aria-label*="Close"], [aria-label*="close"], .close, [class*="close"], [data-dismiss]'
               ),
               new Promise<never>((_, reject) =>
-                setTimeout(() => { reject(new Error('Modal query timeout')); }, clickTimeoutMs)
+                setTimeout(() => {
+                  reject(new Error('Modal query timeout'));
+                }, clickTimeoutMs)
               ),
             ]).catch(() => []);
             const closeButtonsLoopStart = 0;
-             
-            for (let i = closeButtonsLoopStart; i < (closeButtons as { readonly length: number }).length; i++) {
+
+            for (
+              let i = closeButtonsLoopStart;
+              i < (closeButtons as { readonly length: number }).length;
+              i++
+            ) {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- closeButtons is array-like from Playwright
-              const btn = (closeButtons as readonly unknown[])[i] as { readonly isVisible: () => Promise<boolean>; readonly click: (options?: { readonly timeout?: number }) => Promise<unknown> };
+              const btn = (closeButtons as readonly unknown[])[i] as {
+                readonly isVisible: () => Promise<boolean>;
+                readonly click: (options?: {
+                  readonly timeout?: number;
+                }) => Promise<unknown>;
+              };
               try {
                 // Check if page is still valid before clicking
-                 
+
                 if (page.isClosed()) {
                   break;
                 }
                 // Check if button is still attached
-                 
+
                 const isVisible = await Promise.race([
                   btn.isVisible().catch(() => false),
                   new Promise<boolean>((resolve) =>
-                    setTimeout(() => { resolve(false); }, buttonClickWaitMs)
+                    setTimeout(() => {
+                      resolve(false);
+                    }, buttonClickWaitMs)
                   ),
                 ]).catch(() => false);
                 if (!isVisible) {
                   continue;
                 }
                 // Wrap click with timeout to prevent hanging
-                 
+
                 await Promise.race([
                   btn.click({ timeout: buttonClickTimeoutMs }),
                   new Promise((_, reject) =>
-                    setTimeout(
-                      () => { reject(new Error('Close button click timeout')); },
-                      closeButtonTimeoutMs
-                    )
+                    setTimeout(() => {
+                      reject(new Error('Close button click timeout'));
+                    }, closeButtonTimeoutMs)
                   ),
                 ]);
-                await new Promise((resolve) => setTimeout(resolve, buttonClickWaitMs));
+                await new Promise((resolve) =>
+                  setTimeout(resolve, buttonClickWaitMs)
+                );
               } catch {
                 // Continue to next button
               }
@@ -606,12 +733,14 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
 
         // Scroll to trigger lazy loading
         try {
-           
           if (!page.isClosed()) {
             await page.evaluate(() => {
               const scrollTopValue = 0;
               const scrollDivisorValue = 2;
-              window.scrollTo(scrollTopValue, document.body.scrollHeight / scrollDivisorValue);
+              window.scrollTo(
+                scrollTopValue,
+                document.body.scrollHeight / scrollDivisorValue
+              );
             });
           }
         } catch {
@@ -620,7 +749,6 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
         await new Promise((resolve) => setTimeout(resolve, scrollWaitMs));
 
         try {
-           
           if (!page.isClosed()) {
             await page.evaluate(() => {
               const scrollTopValue = 0;
@@ -667,14 +795,19 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
 
       const contentSelectorsLoopStart = 0;
       const selectorWaitTimeoutMs = 5000;
-      for (let i = contentSelectorsLoopStart; i < contentSelectors.length; i++) {
+      for (
+        let i = contentSelectorsLoopStart;
+        i < contentSelectors.length;
+        i++
+      ) {
         const selector = contentSelectors[i];
         try {
-           
           if (page.isClosed()) {
             break;
           }
-          await page.waitForSelector(selector, { timeout: selectorWaitTimeoutMs });
+          await page.waitForSelector(selector, {
+            timeout: selectorWaitTimeoutMs,
+          });
           contentFound = true;
           break;
         } catch {
@@ -687,12 +820,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
       if (contentFound) {
         // Wait for content to be fully rendered - try waiting for text content
         try {
-           
           if (!page.isClosed()) {
             // Wait for substantial text content to appear in main area
             // Use a more lenient check - just wait for some content to appear
             await Promise.race([
-               
               page
                 .waitForFunction(
                   (): boolean => {
@@ -754,7 +885,7 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                   },
                   { timeout: longWaitMs }
                 )
-                 
+
                 .catch(() => {
                   // Intentionally ignore timeout errors
                 }),
@@ -769,20 +900,27 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
         const scrollStart = 0;
         for (let scroll = scrollStart; scroll < scrollCount; scroll++) {
           try {
-             
             if (!page.isClosed()) {
               await page.evaluate(
-                (args: Readonly<{ scrollIndex: Readonly<number>; divisor: Readonly<number> }>) => {
+                (
+                  args: Readonly<{
+                    scrollIndex: Readonly<number>;
+                    divisor: Readonly<number>;
+                  }>
+                ) => {
                   const scrollTopValue = 0;
                   const scrollIndexOffsetValue = 1;
                   window.scrollTo(
                     scrollTopValue,
-                    (document.body.scrollHeight / args.divisor) * (args.scrollIndex + scrollIndexOffsetValue)
+                    (document.body.scrollHeight / args.divisor) *
+                      (args.scrollIndex + scrollIndexOffsetValue)
                   );
                 },
                 { divisor: scrollDivisor, scrollIndex: scroll }
               );
-              await new Promise((resolve) => setTimeout(resolve, scrollBackWaitMs));
+              await new Promise((resolve) =>
+                setTimeout(resolve, scrollBackWaitMs)
+              );
             }
           } catch {
             // Continue
@@ -790,7 +928,6 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
         }
         // Scroll back to top
         try {
-           
           if (!page.isClosed()) {
             await page.evaluate(() => {
               const scrollTopValue = 0;
@@ -827,7 +964,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
              * @returns Found element or null.
              */
             // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element is DOM API type that cannot be made readonly
-            const findInShadowDOM = (element: Element | null, selector: Readonly<string>): Element | null => {
+            const findInShadowDOM = (
+              element: Element | null,
+              selector: Readonly<string>
+            ): Element | null => {
               if (element === null) return null;
 
               /**
@@ -837,7 +977,11 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                * @returns Found element or null.
                */
               // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element is DOM API type that cannot be made readonly
-              const traverse = (el: Element | null, depth: Readonly<number> = 0): Element | null => { // eslint-disable-line @typescript-eslint/no-magic-numbers -- depth default of 0 is standard for recursion
+              const traverse = (
+                el: Element | null,
+                depth: Readonly<number> = 0
+              ): Element | null => {
+                // eslint-disable-line @typescript-eslint/no-magic-numbers -- depth default of 0 is standard for recursion
                 const maxDepth = 10;
                 if (el === null || depth > maxDepth) return null; // Safety limit
 
@@ -856,7 +1000,7 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                     const shadowChildren = el.shadowRoot.querySelectorAll('*');
                     for (const child of shadowChildren) {
                       const depthIncrement = 1;
-                       
+
                       const result = traverse(child, depth + depthIncrement);
                       if (result !== null) return result;
                     }
@@ -866,7 +1010,7 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 }
 
                 // Also check regular children (for elements that might have shadow roots)
-                 
+
                 const children = Array.from(el.children);
                 for (const child of children) {
                   const result = traverse(child, depth);
@@ -910,11 +1054,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             const mainEl =
               doc.querySelector('[role="main"]') ?? doc.querySelector('main');
             if (mainEl !== null) {
-               
-               
               const mainElTextLengthDefault = 0;
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent.trim() can return empty string
-              const mainElTextLength = mainEl.textContent?.trim()?.length ?? mainElTextLengthDefault;
+              const mainElTextLength =
+                mainEl.textContent?.trim()?.length ?? mainElTextLengthDefault;
               debugInfo.mainElements.push({
                 children: mainEl.children.length,
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- className can be empty string
@@ -926,17 +1069,32 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
 
             // Try to find elements with substantial text
             const allElements = doc.querySelectorAll('*');
-            const textElements: { tag: string; text: string; length: number; className?: string; textLength?: number; textPreview?: string }[] = [];
+            const textElements: {
+              tag: string;
+              text: string;
+              length: number;
+              className?: string;
+              textLength?: number;
+              textPreview?: string;
+            }[] = [];
             const maxElements = 100;
             const textLoopStart = 0;
-            for (let i = textLoopStart; i < Math.min(allElements.length, maxElements); i++) {
+            for (
+              let i = textLoopStart;
+              i < Math.min(allElements.length, maxElements);
+              i++
+            ) {
               const el = allElements[i];
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
               const text = el.textContent?.trim() ?? '';
               const minTextLengthForElement = 200;
-              if (text.length > minTextLengthForElement && !text.toLowerCase().includes('cookie')) {
+              if (
+                text.length > minTextLengthForElement &&
+                !text.toLowerCase().includes('cookie')
+              ) {
                 const classNameValue = el.className;
-                const classNameStr = typeof classNameValue === 'string' ? classNameValue : '';
+                const classNameStr =
+                  typeof classNameValue === 'string' ? classNameValue : '';
                 const textPreviewLength = 100;
                 textElements.push({
                   className: classNameStr,
@@ -949,10 +1107,13 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 });
               }
             }
-             
+
             const sliceStart = 0;
             const maxTextElementsSlice = 10;
-            debugInfo.textElements = textElements.slice(sliceStart, maxTextElementsSlice); // First 10
+            debugInfo.textElements = textElements.slice(
+              sliceStart,
+              maxTextElementsSlice
+            ); // First 10
 
             /**
              * Function to remove unwanted elements.
@@ -960,7 +1121,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
              * @param selectors - CSS selectors for elements to remove.
              */
             // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Document and Element are DOM API types
-            const removeElements = (element: Document | Element, selectors: Readonly<string>): void => {
+            const removeElements = (
+              element: Document | Element,
+              selectors: Readonly<string>
+            ): void => {
               const unwanted = element.querySelectorAll(selectors);
               // eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
               unwanted.forEach((el: Element) => {
@@ -1010,9 +1174,7 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                   // eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
                   if (allTextElements.length > 0) {
                     // Use the container itself if it has substantial text
-                     
-                     
-                     
+
                     const containerText =
                       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
                       contentContainer.textContent?.trim() ?? '';
@@ -1043,32 +1205,34 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             }
 
             debugInfo.contentContainerFound = !!contentContainer;
-             
+
             debugInfo.contentContainerClasses = contentContainer
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-              ? contentContainer.className ?? ''
+              ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
+                (contentContainer.className ?? '')
               : null;
-             
+
             const contentContainerTextLengthDefault = 0;
-             
+
             const contentContainerTextLength = contentContainer
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-              ? contentContainer.textContent?.trim()?.length ?? contentContainerTextLengthDefault
+              ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
+                (contentContainer.textContent?.trim()?.length ??
+                contentContainerTextLengthDefault)
               : contentContainerTextLengthDefault;
             debugInfo.contentContainerTextLength = contentContainerTextLength;
 
             debugInfo.bodyContentFound = !!bodyContent;
-             
+
             debugInfo.bodyContentClasses = bodyContent
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-              ? bodyContent.className ?? ''
+              ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
+                (bodyContent.className ?? '')
               : null;
-             
+
             const bodyContentTextLengthDefault = 0;
-             
+
             const bodyContentTextLength = bodyContent
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-              ? bodyContent.textContent?.trim()?.length ?? bodyContentTextLengthDefault
+              ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
+                (bodyContent.textContent?.trim()?.length ??
+                bodyContentTextLengthDefault)
               : bodyContentTextLengthDefault;
             debugInfo.bodyContentTextLength = bodyContentTextLength;
 
@@ -1118,10 +1282,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             // Update debug info with main element details
             debugInfo.mainElementFound = !!mainElement;
             debugInfo.mainElementTag = mainElement ? mainElement.tagName : null;
-             
+
             debugInfo.mainElementClasses = mainElement
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-              ? mainElement.className ?? ''
+              ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
+                (mainElement.className ?? '')
               : null;
 
             // First, try to get comprehensive content from main area
@@ -1192,7 +1356,12 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 const title = link.getAttribute('title')?.trim();
                 const minTitleLength = 10;
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- title can be null/undefined/empty
-                if (title !== null && title !== undefined && title !== '' && title.length > minTitleLength) {
+                if (
+                  title !== null &&
+                  title !== undefined &&
+                  title !== '' &&
+                  title.length > minTitleLength
+                ) {
                   titleTexts.push(title);
                 }
               });
@@ -1210,7 +1379,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
               debugInfo.mainTextLength = mainText.length;
               const textPreviewLength = 300;
               // eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard substring start
-              debugInfo.mainTextPreview = mainText.substring(0, textPreviewLength);
+              debugInfo.mainTextPreview = mainText.substring(
+                0,
+                textPreviewLength
+              );
 
               // Filter out JavaScript-like content
               const jsPatterns = [
@@ -1230,7 +1402,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
               // If it looks like JavaScript code, try to extract only documentation parts
               const minJsPatternCount = 2;
               const minMainTextLengthForJs = 200;
-              if (jsPatternCount > minJsPatternCount && mainText.length > minMainTextLengthForJs) {
+              if (
+                jsPatternCount > minJsPatternCount &&
+                mainText.length > minMainTextLengthForJs
+              ) {
                 // Extract only from paragraphs and text elements that don't look like code
                 const paragraphs = clone.querySelectorAll(
                   'p, div, span, li, td, th, dd, dt, h1, h2, h3, h4, h5, h6'
@@ -1267,8 +1442,13 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                     bestLength = filteredText.length;
                   }
                 }
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- mainText can be empty string, 200 is minimum length threshold
-              } else if (mainText !== null && mainText !== undefined && mainText !== '' && mainText.length > 200) {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- mainText can be empty string, 200 is minimum length threshold
+              } else if (
+                mainText !== null &&
+                mainText !== undefined &&
+                mainText !== '' &&
+                mainText.length > 200
+              ) {
                 // Check cookie content - be more lenient
                 const cookieKeywords = [
                   'cookie',
@@ -1280,12 +1460,18 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                   mainText.toLowerCase().includes(keyword)
                 ).length;
                 // Only reject if it's clearly just cookie text (high ratio and short)
-                const minWordCountForRatio = 1;  
+                const minWordCountForRatio = 1;
                 const cookieRatio =
-                  cookieTextCount / Math.max(minWordCountForRatio, mainText.split(/\s+/).length);
+                  cookieTextCount /
+                  Math.max(minWordCountForRatio, mainText.split(/\s+/).length);
                 const maxCookieRatioForReject = 0.1;
                 const minMainTextLengthForReject = 500;
-                if (!(cookieRatio > maxCookieRatioForReject && mainText.length < minMainTextLengthForReject)) {
+                if (
+                  !(
+                    cookieRatio > maxCookieRatioForReject &&
+                    mainText.length < minMainTextLengthForReject
+                  )
+                ) {
                   bestText = mainText;
                   bestLength = mainText.length;
                 }
@@ -1299,9 +1485,13 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             debugInfo.paragraphCount = allParagraphs.length;
             const paragraphTexts = [];
             const maxParagraphs = 50;
-             
+
             const paragraphLoopStart = 0;
-            for (let i = paragraphLoopStart; i < Math.min(allParagraphs.length, maxParagraphs); i++) {
+            for (
+              let i = paragraphLoopStart;
+              i < Math.min(allParagraphs.length, maxParagraphs);
+              i++
+            ) {
               const p = allParagraphs[i];
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
               const text = p.textContent?.trim() ?? '';
@@ -1332,7 +1522,11 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             const collectedTexts: string[] = [];
             const maxTextElementsCollect = 300;
             const textElementsLoopStart = 0;
-            for (let i = textElementsLoopStart; i < Math.min(allTextElements.length, maxTextElementsCollect); i++) {
+            for (
+              let i = textElementsLoopStart;
+              i < Math.min(allTextElements.length, maxTextElementsCollect);
+              i++
+            ) {
               const el = allTextElements[i];
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
               const text = el.textContent?.trim() ?? '';
@@ -1385,7 +1579,12 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 const text = element.textContent?.trim() ?? null;
                 const minSelectorTextLength = 200;
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- text can be null/undefined/empty, but linter thinks it can't
-                if (text !== null && text !== undefined && text !== '' && text.length > minSelectorTextLength) {
+                if (
+                  text !== null &&
+                  text !== undefined &&
+                  text !== '' &&
+                  text.length > minSelectorTextLength
+                ) {
                   // Check if it's not just cookie consent text
                   const cookieKeywords = [
                     'cookie',
@@ -1400,7 +1599,12 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                   // Only consider if it's not mostly cookie text (more than 2 keywords and short text)
                   const maxCookieKeywordsForReject = 2;
                   const minTextLengthForReject = 1000;
-                  if (!(cookieTextCount > maxCookieKeywordsForReject && text.length < minTextLengthForReject)) {
+                  if (
+                    !(
+                      cookieTextCount > maxCookieKeywordsForReject &&
+                      text.length < minTextLengthForReject
+                    )
+                  ) {
                     // Prefer longer content to ensure we get complete documentation
                     if (text.length > bestLength) {
                       bestText = text;
@@ -1431,7 +1635,12 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 const title = link.getAttribute('title')?.trim();
                 const minTitleLengthForCollection = 10;
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- title can be null/undefined/empty, but linter thinks types have no overlap
-                if (title !== null && title !== undefined && title !== '' && title.length > minTitleLengthForCollection) {
+                if (
+                  title !== null &&
+                  title !== undefined &&
+                  title !== '' &&
+                  title.length > minTitleLengthForCollection
+                ) {
                   titleTexts.push(title);
                 }
               });
@@ -1469,7 +1678,12 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 const title = link.getAttribute('title')?.trim();
                 const minTitleLengthForCollection = 10;
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- title can be null/undefined/empty, but linter thinks types have no overlap
-                if (title !== null && title !== undefined && title !== '' && title.length > minTitleLengthForCollection) {
+                if (
+                  title !== null &&
+                  title !== undefined &&
+                  title !== '' &&
+                  title.length > minTitleLengthForCollection
+                ) {
                   titleTexts.push(title);
                 }
               });
@@ -1514,7 +1728,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                 // If it has substantial content and not mostly cookie text
                 const maxCookieKeywordsForAccept = 3;
                 const minTextLengthForAccept = 2000;
-                if (cookieTextCount < maxCookieKeywordsForAccept || text.length > minTextLengthForAccept) {
+                if (
+                  cookieTextCount < maxCookieKeywordsForAccept ||
+                  text.length > minTextLengthForAccept
+                ) {
                   // Remove unwanted elements from this element
                   removeElements(
                     el,
@@ -1531,7 +1748,7 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             }
 
             // Last resort: get body text but filter cookie content more aggressively
-            const {body} = doc;
+            const { body } = doc;
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- body can be null, but linter thinks it's always truthy
             if (body) {
               // Remove all unwanted elements more aggressively
@@ -1574,7 +1791,10 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                     // If less than 5% cookie-related words, it's likely real content
                     const maxCookieRatioValue = 0.05;
                     const minMainTextLengthValue = 5000;
-                    if (cookieRatio < maxCookieRatioValue || mainText.length > minMainTextLengthValue) {
+                    if (
+                      cookieRatio < maxCookieRatioValue ||
+                      mainText.length > minMainTextLengthValue
+                    ) {
                       // Prefer longer content
                       if (mainText.length > bestMainLength) {
                         bestMainText = mainText;
@@ -1683,18 +1903,22 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
                   bodyText.match(/cookie|consent|accept all/gi) ?? []
                 ).length;
                 const wordCount = bodyText.split(/\s+/).length;
-                 
-                 
+
                 const cookieRatioDefault = 0;
-                 
+
                 const minWordCountForRatio = 0;
                 const cookieRatio =
-                  wordCount > minWordCountForRatio ? cookieMatches / wordCount : cookieRatioDefault;
+                  wordCount > minWordCountForRatio
+                    ? cookieMatches / wordCount
+                    : cookieRatioDefault;
 
                 // Return if it's not mostly cookies (less than 20% cookie-related words)
                 const maxCookieRatioForAccept = 0.2;
                 const minBodyTextLengthForAccept = 5000;
-                if (cookieRatio < maxCookieRatioForAccept || bodyText.length > minBodyTextLengthForAccept) {
+                if (
+                  cookieRatio < maxCookieRatioForAccept ||
+                  bodyText.length > minBodyTextLengthForAccept
+                ) {
                   return { content: bodyText, debugInfo };
                 }
               }
@@ -1738,15 +1962,19 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
               const codeCharCount = (rawBodyText.match(/[{}();=]/g) ?? [])
                 .length;
               const totalChars = rawBodyText.length;
-               
+
               const codeRatioDefault = 0;
               // eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard comparison value
-              const codeRatio = totalChars > 0 ? codeCharCount / totalChars : codeRatioDefault;
+              const codeRatio =
+                totalChars > 0 ? codeCharCount / totalChars : codeRatioDefault;
 
               // If it doesn't look like mostly code, return it
               const minRawBodyTextLength = 100;
               const maxCodeRatio = 0.1;
-              if (rawBodyText.length > minRawBodyTextLength && codeRatio < maxCodeRatio) {
+              if (
+                rawBodyText.length > minRawBodyTextLength &&
+                codeRatio < maxCodeRatio
+              ) {
                 return { content: rawBodyText, debugInfo };
               }
             }
@@ -1755,16 +1983,16 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
           }),
           new Promise<{ content: string; debugInfo: unknown }>((_, reject) => {
             const evaluateTimeoutMs = 30000;
-            setTimeout(() => { reject(new Error('page.evaluate timeout')); }, evaluateTimeoutMs);
+            setTimeout(() => {
+              reject(new Error('page.evaluate timeout'));
+            }, evaluateTimeoutMs);
           }),
         ]);
 
         // Extract content and debug info from result
-         
+
         if (
-           
           evalResult !== null &&
-           
           evalResult !== undefined &&
           typeof evalResult === 'object' &&
           'content' in evalResult
@@ -1784,13 +2012,18 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
       // If content is empty or too short, try fallback extraction
       const minContentLength = 100;
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- content can be null/undefined/empty, but linter thinks types have no overlap
-      if (content === null || content === undefined || content === '' || content.length < minContentLength) {
+      if (
+        content === null ||
+        content === undefined ||
+        content === '' ||
+        content.length < minContentLength
+      ) {
         if (!page.isClosed()) {
           try {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- page.evaluate returns any due to overloaded signatures
             const fallbackContent = await Promise.race([
               page.evaluate(() => {
-                const {body} = document;
+                const { body } = document;
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- body can be null, but linter thinks it's always truthy
                 if (body) {
                   // Clone body to avoid modifying original
@@ -1811,19 +2044,16 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
               }),
               new Promise<string>((_, reject) => {
                 const fallbackTimeoutMs = 10000;
-                setTimeout(
-                  () => { reject(new Error('fallback evaluate timeout')); },
-                  fallbackTimeoutMs
-                );
+                setTimeout(() => {
+                  reject(new Error('fallback evaluate timeout'));
+                }, fallbackTimeoutMs);
               }),
             ]).catch(() => '');
 
             // Use fallback if it has more content
-             
+
             if (
-               
               fallbackContent !== null &&
-               
               fallbackContent !== undefined &&
               fallbackContent !== '' &&
               // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- fallbackContent is any from page.evaluate, content can be null, 0 is default
@@ -1839,7 +2069,12 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
       // Debug: Log content length for troubleshooting
       const minContentLengthForRetry = 50;
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- content can be null/undefined/empty, but linter thinks types have no overlap
-      if (content === null || content === undefined || content === '' || content.length < minContentLengthForRetry) {
+      if (
+        content === null ||
+        content === undefined ||
+        content === '' ||
+        content.length < minContentLengthForRetry
+      ) {
         // Try one more time with a longer wait and different approach
         await new Promise((resolve) => setTimeout(resolve, finalWaitMs));
 
@@ -1850,7 +2085,7 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
 
           // Try to get all text content, filtering out cookie content
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- DOM API
-          const {body} = doc;
+          const { body } = doc;
           // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- body can be null
           if (body) {
             // Remove all unwanted elements
@@ -1867,18 +2102,22 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- DOM API
             const walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT);
             const textParts: string[] = [];
-             
+
             let node: Node | null = null;
 
             // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- DOM API
             while ((node = walker.nextNode())) {
-               
               const text = node.textContent?.trim();
               const minTextNodeLength = 10;
               // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- text can be null/undefined, but linter thinks it can't
-              if (text !== null && text !== undefined && text !== '' && text.length > minTextNodeLength) {
+              if (
+                text !== null &&
+                text !== undefined &&
+                text !== '' &&
+                text.length > minTextNodeLength
+              ) {
                 // Filter out cookie-related text
-                 
+
                 const lowerText = text.toLowerCase();
                 if (
                   !lowerText.includes('cookie') &&
@@ -1902,14 +2141,23 @@ evaluate: (...args: any[]) => Promise<any>; click: (selector: Readonly<string>) 
 
         const minRetryContentLength = 200;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- retryContent is any from page.evaluate, can be null/undefined/empty
-        if (retryContent !== null && retryContent !== undefined && retryContent !== '' && retryContent.length >= minRetryContentLength) {
+        if (
+          retryContent !== null &&
+          retryContent !== undefined &&
+          retryContent !== '' &&
+          retryContent.length >= minRetryContentLength
+        ) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- retryContent is any from page.evaluate
           content = retryContent;
         } else {
-           
           const minContentLengthForError = 50;
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- content can be null/undefined/empty, but linter thinks types have no overlap
-          if (content === null || content === undefined || content === '' || content.length < minContentLengthForError) {
+          if (
+            content === null ||
+            content === undefined ||
+            content === '' ||
+            content.length < minContentLengthForError
+          ) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- content can be null, 0 is default, optional chain needed
             const contentLength = content?.length ?? 0;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-magic-numbers -- retryContent is any from page.evaluate, can be null, 0 is default

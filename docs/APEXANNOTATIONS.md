@@ -20,11 +20,11 @@ Exposes method/property to Lightning Components (Aura/LWC).
 @AuraEnabled(continuation=true cacheable=true)  // Space separator, not comma
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `cacheable` | Boolean | `false` | Cached; no DML/future/callouts allowed |
-| `scope` | String | — | `'global'` enables global cache (API 55.0+) |
-| `continuation` | Boolean | `false` | Returns Continuation object |
+| Parameter      | Type    | Default | Description                                 |
+| -------------- | ------- | ------- | ------------------------------------------- |
+| `cacheable`    | Boolean | `false` | Cached; no DML/future/callouts allowed      |
+| `scope`        | String  | —       | `'global'` enables global cache (API 55.0+) |
+| `continuation` | Boolean | `false` | Returns Continuation object                 |
 
 **Requirements**: `public static` | **Restrictions**: `cacheable=true` prohibits DML, `@future`, callouts; API 55.0+ no overloads
 
@@ -65,14 +65,14 @@ global class AccountRestService {
         String accountId = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
         return [SELECT Id, Name FROM Account WHERE Id = :accountId];
     }
-    
+
     @HttpPost
     global static Account createAccount(String name) {
         Account acc = new Account(Name = name);
         insert acc;
         return acc;
     }
-    
+
     @HttpDelete
     global static void deleteAccount() {
         RestRequest req = RestContext.request;
@@ -82,25 +82,26 @@ global class AccountRestService {
 }
 ```
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `urlMapping` | String | Yes | URL path (must start with `/`, max 255 chars) |
+| Parameter    | Type   | Required | Description                                   |
+| ------------ | ------ | -------- | --------------------------------------------- |
+| `urlMapping` | String | Yes      | URL path (must start with `/`, max 255 chars) |
 
 **Requirements**: Class must be `global` | **URL rules**: Wildcards `*` allowed; case-sensitive matching
 
 ### HTTP Method Annotations
 
-| Annotation | HTTP Method | Signature |
-|------------|-------------|-----------|
-| `@HttpGet` | GET | `global static ReturnType methodName()` |
-| `@HttpPost` | POST | `global static ReturnType methodName()` |
-| `@HttpPut` | PUT | `global static ReturnType methodName()` |
-| `@HttpPatch` | PATCH | `global static ReturnType methodName()` |
-| `@HttpDelete` | DELETE | `global static ReturnType methodName()` |
+| Annotation    | HTTP Method | Signature                               |
+| ------------- | ----------- | --------------------------------------- |
+| `@HttpGet`    | GET         | `global static ReturnType methodName()` |
+| `@HttpPost`   | POST        | `global static ReturnType methodName()` |
+| `@HttpPut`    | PUT         | `global static ReturnType methodName()` |
+| `@HttpPatch`  | PATCH       | `global static ReturnType methodName()` |
+| `@HttpDelete` | DELETE      | `global static ReturnType methodName()` |
 
 **Requirements**: `global static`; must be in `@RestResource` class
 
 **Access request body**:
+
 ```apex
 RestRequest req = RestContext.request;
 Map<String, Object> data = (Map<String, Object>) JSON.deserializeUntyped(req.requestBody.toString());
@@ -119,8 +120,8 @@ Executes method asynchronously in separate thread.
 @Future(callout=true)
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
+| Parameter | Type    | Default | Description               |
+| --------- | ------- | ------- | ------------------------- |
 | `callout` | Boolean | `false` | Enables external callouts |
 
 **Requirements**: `public static void` | **Param types**: Primitives, arrays/collections of primitives/IDs only (no sObjects)
@@ -159,15 +160,15 @@ Exposes method to Flow, Process Builder, Agentforce, Einstein bots.
 public static List<ReturnType> methodName(List<InputType> inputs) { }
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `label` | String | Display label in UI |
-| `description` | String | Description in UI |
-| `callout` | Boolean | Enables external callouts |
-| `category` | String | Category in Flow Builder |
-| `configurationEditor` | String | Custom property editor |
-| `capabilityType` | String | Capability integration (`Name://Name`) |
-| `iconName` | String | Custom icon (SVG from static resource or SLDS) |
+| Parameter             | Type    | Description                                    |
+| --------------------- | ------- | ---------------------------------------------- |
+| `label`               | String  | Display label in UI                            |
+| `description`         | String  | Description in UI                              |
+| `callout`             | Boolean | Enables external callouts                      |
+| `category`            | String  | Category in Flow Builder                       |
+| `configurationEditor` | String  | Custom property editor                         |
+| `capabilityType`      | String  | Capability integration (`Name://Name`)         |
+| `iconName`            | String  | Custom icon (SVG from static resource or SLDS) |
 
 **Requirements**: `public static` or `global static`; outer class only; one per class
 **Params**: Single `List` (primitives, sObjects, or `@InvocableVariable` classes)
@@ -195,13 +196,13 @@ Exposes property as Flow input/output variable.
 public Type variableName;
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `label` | String | — | Display label |
-| `description` | String | — | Description |
-| `required` | Boolean | `false` | Required input (ignored for outputs) |
-| `defaultValue` | String | — | Default value (Boolean/Decimal/Double/Integer/Long/String) |
-| `placeholderText` | String | — | Placeholder text (Double/Integer/String) |
+| Parameter         | Type    | Default | Description                                                |
+| ----------------- | ------- | ------- | ---------------------------------------------------------- |
+| `label`           | String  | —       | Display label                                              |
+| `description`     | String  | —       | Description                                                |
+| `required`        | Boolean | `false` | Required input (ignored for outputs)                       |
+| `defaultValue`    | String  | —       | Default value (Boolean/Decimal/Double/Integer/Long/String) |
+| `placeholderText` | String  | —       | Placeholder text (Double/Integer/String)                   |
 
 **Requirements**: Member variable (not static/local/final); `public` or `global`
 **Types**: Primitives (except Object), sObjects, Lists
@@ -210,7 +211,7 @@ public Type variableName;
 public class AccountUpdateRequest {
     @InvocableVariable(label='Account ID' required=true)
     public Id accountId;
-    
+
     @InvocableVariable(label='New Status')
     public String status;
 }
@@ -243,11 +244,11 @@ Marks test class/method. Test code doesn't count against org limits.
 @IsTest(IsParallel=true)      // Enable parallel execution
 ```
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
+| Parameter    | Type    | Default | Description                               |
+| ------------ | ------- | ------- | ----------------------------------------- |
 | `SeeAllData` | Boolean | `false` | Access org data (avoid; use `@TestSetup`) |
-| `OnInstall` | Boolean | `false` | Run during package installation |
-| `IsParallel` | Boolean | `false` | Allow parallel execution |
+| `OnInstall`  | Boolean | `false` | Run during package installation           |
+| `IsParallel` | Boolean | `false` | Allow parallel execution                  |
 
 **Requirements**: Class should be `private`; methods must be `static void`
 **Restrictions**: `SeeAllData=true` + `IsParallel=true` incompatible; `IsParallel=true` prohibits `Test.getStandardPricebookId()`, `System.schedule()`, `System.enqueueJob()`, `ContentNote` insert, `User`/`GroupMember` creation
@@ -334,9 +335,9 @@ Controls JSON serialization/deserialization access.
 public class MyClass { }
 ```
 
-| Parameter | Values | Description |
-|-----------|--------|-------------|
-| `serializable` | `'always'`, `'never'`, `'sameNamespace'`, `'samePackage'` | Serialization control |
+| Parameter        | Values                                                    | Description             |
+| ---------------- | --------------------------------------------------------- | ----------------------- |
+| `serializable`   | `'always'`, `'never'`, `'sameNamespace'`, `'samePackage'` | Serialization control   |
 | `deserializable` | `'always'`, `'never'`, `'sameNamespace'`, `'samePackage'` | Deserialization control |
 
 **Defaults**: API 48.0-: `deserializable='always'`, `serializable='sameNamespace'` | API 49.0+: Both `'sameNamespace'`
@@ -357,9 +358,9 @@ public class CrossNamespaceClass { }
 
 ## Compatibility Matrix
 
-| Status | Combinations |
-|--------|--------------|
-| ✓ Compatible | `@AuraEnabled` + `@Deprecated`, `@IsTest` + `@TestSetup`, `@TestVisible` + access modifiers |
+| Status         | Combinations                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ✓ Compatible   | `@AuraEnabled` + `@Deprecated`, `@IsTest` + `@TestSetup`, `@TestVisible` + access modifiers                                                      |
 | ✗ Incompatible | `@AuraEnabled` + `@InvocableMethod`, `@AuraEnabled` + `@RemoteAction`, `@Future` + `@AuraEnabled(cacheable=true)`, `@Future(callout=true)` + DML |
 
 ---
@@ -384,6 +385,7 @@ Annotation {
 ## Common Patterns
 
 ### Lightning Component
+
 ```apex
 @AuraEnabled(cacheable=true)
 public static List<Account> getAccounts() {
@@ -392,6 +394,7 @@ public static List<Account> getAccounts() {
 ```
 
 ### REST API
+
 ```apex
 @RestResource(urlMapping='/account/*')
 global class AccountRestService {
@@ -405,6 +408,7 @@ global class AccountRestService {
 ```
 
 ### Flow Invocable
+
 ```apex
 @InvocableMethod(label='Update Account')
 public static List<String> updateAccount(List<Id> accountIds) {
@@ -416,6 +420,7 @@ public static List<String> updateAccount(List<Id> accountIds) {
 ```
 
 ### Test Class
+
 ```apex
 @IsTest
 private class MyServiceTest {
@@ -436,14 +441,14 @@ private class MyServiceTest {
 
 ## Best Practices
 
-| Practice | Description |
-|----------|-------------|
-| Specify `cacheable` | Always explicit for `@AuraEnabled` |
-| Avoid `SeeAllData` | Use `@TestSetup` instead |
-| Prefer Queueable | Over `@Future` for complex async |
-| Use `@TestVisible` sparingly | Prefer testing public interfaces |
-| Document suppressions | Comment why `@SuppressWarnings` used |
-| Validate REST inputs | Always sanitize in `@RestResource` |
+| Practice                     | Description                          |
+| ---------------------------- | ------------------------------------ |
+| Specify `cacheable`          | Always explicit for `@AuraEnabled`   |
+| Avoid `SeeAllData`           | Use `@TestSetup` instead             |
+| Prefer Queueable             | Over `@Future` for complex async     |
+| Use `@TestVisible` sparingly | Prefer testing public interfaces     |
+| Document suppressions        | Comment why `@SuppressWarnings` used |
+| Validate REST inputs         | Always sanitize in `@RestResource`   |
 
 ---
 

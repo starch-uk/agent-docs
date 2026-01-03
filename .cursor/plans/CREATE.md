@@ -242,7 +242,8 @@ pnpm sf-docs-helper dump "@Future" --limit 5
 **What to inspect (SYSTEMATICALLY - check EVERY file):**
 
 **CRITICAL REQUIREMENT:** When looking through a Git repo, you **MUST** look at:
-- **Every `**/*.md` file** - All markdown files in the repository, regardless of location
+
+- **Every `**/\*.md` file\*\* - All markdown files in the repository, regardless of location
 - **EVERY file covering the public API** - All files that define or document the public API
 - **All exported plugins and libraries** - All files that export plugins, libraries, or modules that are part of the public API
 

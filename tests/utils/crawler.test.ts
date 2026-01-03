@@ -26,9 +26,7 @@ describe('searchSalesforceHelp', () => {
 
   it('should accept query and limit parameters', () => {
     // Function exists and accepts parameters
-    expect(searchSalesforceHelp.length).toBeGreaterThanOrEqual(
-      MIN_PARAM_COUNT
-    );
+    expect(searchSalesforceHelp.length).toBeGreaterThanOrEqual(MIN_PARAM_COUNT);
   });
 
   it('should normalize query by removing leading @ symbols', () => {
