@@ -1,0 +1,61 @@
+{
+  "name": "@starch-uk/agent-docs",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A tool for generating reusable, low-token AI agent instruction documents",
+  "bin": {
+    "sf-docs-helper": "./src/cli/index.ts"
+  },
+  "scripts": {
+    "sf-docs-helper": "node src/cli/index.ts",
+    "repo-todos": "node src/cli/repo-todos.ts",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"test:ci": "vitest run --coverage",
+		"lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" \"*.config.ts\" --config eslint.config.js && pnpm run typecheck",
+		"lint:fix": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" \"*.config.ts\" --config eslint.config.js --fix",
+		"typecheck": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,md,json,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,md,json,yml,yaml}\"",
+    "prepare": "husky install"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "documentation",
+    "docs",
+    "ide",
+    "cursor"
+  ],
+  "author": "starch-uk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/starch-uk/agent-docs.git"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "commander": "^11.1.0",
+    "crawlee": "^3.15.3",
+    "playwright": "^1.57.0",
+    "simple-git": "^3.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.27",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsdoc": "^61.5.0",
+    "eslint-plugin-sort-class-members": "^1.21.0",
+    "eslint-plugin-sort-keys": "^2.3.5",
+    "husky": "^8.0.3",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "vitest": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,12 +1,14 @@
 # GraphML Format Specification
 
+**Version:** 1.0.0
+
 XML-based format for graph serialization defined by GraphML specification (DTD
 and XSD).
 
 **Related Docs:** [GRAPHENGINE.md](GRAPHENGINE.md),
 [TINKERPOP.md](TINKERPOP.md), [GRAPHSON.md](GRAPHSON.md), [GRYO.md](GRYO.md),
 [GRAPHBINARY.md](GRAPHBINARY.md),
-[CODE_ANALYZER_CONFIG.md](CODE_ANALYZER_CONFIG.md)
+[CODEANALYZER.md](CODEANALYZER.md)
 
 ## Overview
 

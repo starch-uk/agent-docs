@@ -1,5 +1,7 @@
 # VS Code Extension for Code Analyzer
 
+**Version:** 1.0.0
+
 ## Overview
 
 The Salesforce Code Analyzer Visual Studio Code Extension integrates Code
@@ -141,21 +143,21 @@ Available settings:
 
 The extension respects `code-analyzer.yml` configuration in your project root.
 For detailed configuration options, see
-[Code Analyzer Configuration](CODE_ANALYZER_CONFIG.md).
+[Code Analyzer Configuration](CODEANALYZER.md).
 
 Example `code-analyzer.yml`:
 
 ```yaml
 engines:
-    pmd:
-        custom_rulesets:
-            - rulesets/design/InnerClassesCannotBeStatic.xml
+  pmd:
+    custom_rulesets:
+      - rulesets/design/InnerClassesCannotBeStatic.xml
 
 rules:
-    pmd:
-        NoSingleLetterVariableNames:
-            severity: 'High'
-            tags: ['Recommended']
+  pmd:
+    NoSingleLetterVariableNames:
+      severity: 'High'
+      tags: ['Recommended']
 ```
 
 ## Keyboard Shortcuts
@@ -221,8 +223,8 @@ If extension reports CLI plugin not found:
 
 ## Related Documentation
 
-- **[Salesforce CLI Commands](SFCLI.md)** - Command-line usage of Code Analyzer
-- **[Code Analyzer Configuration](CODE_ANALYZER_CONFIG.md)** - Complete
+- **[CLI Commands](CODEANALYZER.md#cli-commands)** - Command-line usage of Code Analyzer
+- **[Code Analyzer Configuration](CODEANALYZER.md)** - Complete
   configuration reference
 - **[PMD Engine](PMD.md)** - PMD rules and configuration
 - **[ESLint Engine](ESLINT.md)** - ESLint rules for JavaScript/TypeScript/LWC

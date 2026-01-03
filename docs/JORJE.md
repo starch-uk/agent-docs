@@ -1,5 +1,7 @@
 # Jorje AST Reference
 
+**Version:** 1.0.0
+
 > **Quick Info**: Salesforce's Java-based Apex parser. Consumed via
 > `prettier-plugin-apex`. All nodes have `@class` property as type identifier.
 
@@ -9,8 +11,8 @@
 
 ```typescript
 interface ApexNode {
-	'@class': string; // Required: node type (e.g., "apex.jorje.data.ast.Identifier")
-	[key: string]: unknown; // Additional properties vary by type
+  '@class': string; // Required: node type (e.g., "apex.jorje.data.ast.Identifier")
+  [key: string]: unknown; // Additional properties vary by type
 }
 
 // Access patterns
@@ -122,34 +124,33 @@ const BLOCK_COMMENT = 'apex.jorje.parser.impl.HiddenTokens$BlockComment';
 // Safe class access
 const getNodeClass = (node: ApexNode): string => node['@class'];
 const getNodeClassOptional = (node: unknown): string | undefined =>
-	node && typeof node === 'object' && '@class' in node
-		? (node as ApexNode)['@class']
-		: undefined;
+  node && typeof node === 'object' && '@class' in node
+    ? (node as ApexNode)['@class']
+    : undefined;
 
 // Type guards
 const isIdentifier = (node: ApexNode): node is ApexIdentifier =>
-	node['@class'] === IDENTIFIER_CLASS ||
-	node['@class']?.includes('Identifier');
+  node['@class'] === IDENTIFIER_CLASS || node['@class']?.includes('Identifier');
 
 const isListOrSet = (node: ApexNode): boolean =>
-	node['@class'] === LIST_CLASS || node['@class'] === SET_CLASS;
+  node['@class'] === LIST_CLASS || node['@class'] === SET_CLASS;
 
 const isCollection = (node: ApexNode): boolean =>
-	node['@class'] === LIST_CLASS ||
-	node['@class'] === SET_CLASS ||
-	node['@class'] === MAP_CLASS;
+  node['@class'] === LIST_CLASS ||
+  node['@class'] === SET_CLASS ||
+  node['@class'] === MAP_CLASS;
 
 const isCommentNode = (node: unknown): boolean => {
-	const cls = getNodeClassOptional(node);
-	return (
-		cls === BLOCK_COMMENT ||
-		cls?.includes('BlockComment') ||
-		cls?.includes('InlineComment')
-	);
+  const cls = getNodeClassOptional(node);
+  return (
+    cls === BLOCK_COMMENT ||
+    cls?.includes('BlockComment') ||
+    cls?.includes('InlineComment')
+  );
 };
 
 const isTypeRef = (node: ApexNode): boolean =>
-	node['@class'] === TYPEREF_CLASS || node['@class']?.includes('TypeRef');
+  node['@class'] === TYPEREF_CLASS || node['@class']?.includes('TypeRef');
 ```
 
 ### Pattern Matching Rules
@@ -170,38 +171,37 @@ const isTypeRef = (node: ApexNode): boolean =>
 
 ```typescript
 const isInTypeContext = (path: AstPath<ApexNode>): boolean => {
-	const { key, stack } = path;
+  const { key, stack } = path;
 
-	// Direct type context keys
-	if (
-		key === 'types' ||
-		key === 'type' ||
-		key === 'typeref' ||
-		key === 'returntype' ||
-		key === 'names'
-	) {
-		return true;
-	}
+  // Direct type context keys
+  if (
+    key === 'types' ||
+    key === 'type' ||
+    key === 'typeref' ||
+    key === 'returntype' ||
+    key === 'names'
+  ) {
+    return true;
+  }
 
-	// Check parent in stack (offset -2)
-	if (Array.isArray(stack) && stack.length >= 2) {
-		const parent = stack[stack.length - 2] as ApexNode;
-		const parentClass = getNodeClassOptional(parent);
+  // Check parent in stack (offset -2)
+  if (Array.isArray(stack) && stack.length >= 2) {
+    const parent = stack[stack.length - 2] as ApexNode;
+    const parentClass = getNodeClassOptional(parent);
 
-		if (
-			parentClass?.includes('TypeRef') ||
-			(parentClass?.includes('Type') &&
-				!parentClass?.includes('Variable')) ||
-			parentClass?.includes('FromExpr')
-		) {
-			return true;
-		}
+    if (
+      parentClass?.includes('TypeRef') ||
+      (parentClass?.includes('Type') && !parentClass?.includes('Variable')) ||
+      parentClass?.includes('FromExpr')
+    ) {
+      return true;
+    }
 
-		if ('types' in parent && Array.isArray(parent.types)) {
-			return true;
-		}
-	}
-	return false;
+    if ('types' in parent && Array.isArray(parent.types)) {
+      return true;
+    }
+  }
+  return false;
 };
 ```
 
@@ -225,12 +225,12 @@ const printedValues = path.map(print, 'values' as never);
 
 // Map map pairs
 const printedPairs = path.map(
-	(pairPath) => [
-		pairPath.call(print, 'key' as never),
-		' => ',
-		pairPath.call(print, 'value' as never),
-	],
-	'pairs' as never,
+  (pairPath) => [
+    pairPath.call(print, 'key' as never),
+    ' => ',
+    pairPath.call(print, 'value' as never),
+  ],
+  'pairs' as never
 );
 
 // Access parent
@@ -248,21 +248,21 @@ path.map(print, 'values' as never); // Use 'as never' when prop not in type def
 
 ```typescript
 function normalizeIdentifier(
-	node: ApexIdentifier,
-	print: PrintFn,
-	path: AstPath,
+  node: ApexIdentifier,
+  print: PrintFn,
+  path: AstPath
 ): Doc {
-	const original = node.value;
-	const normalized = normalizeTypeName(original);
+  const original = node.value;
+  const normalized = normalizeTypeName(original);
 
-	if (normalized === original) return print(path);
+  if (normalized === original) return print(path);
 
-	try {
-		(node as { value: string }).value = normalized; // Mutate
-		return print(path);
-	} finally {
-		(node as { value: string }).value = original; // Always restore
-	}
+  try {
+    (node as { value: string }).value = normalized; // Mutate
+    return print(path);
+  } finally {
+    (node as { value: string }).value = original; // Always restore
+  }
 }
 ```
 
@@ -274,13 +274,13 @@ function normalizeIdentifier(
 
 ```typescript
 if (node['@class'] === LIST_CLASS || node['@class'] === SET_CLASS) {
-	const values = (node as ApexListInitNode).values;
-	// values is array of nodes
+  const values = (node as ApexListInitNode).values;
+  // values is array of nodes
 }
 
 if (node['@class'] === MAP_CLASS) {
-	const pairs = (node as ApexMapInitNode).pairs;
-	// pairs is array of MapLiteralKeyValue nodes
+  const pairs = (node as ApexMapInitNode).pairs;
+  // pairs is array of MapLiteralKeyValue nodes
 }
 ```
 
@@ -288,19 +288,19 @@ if (node['@class'] === MAP_CLASS) {
 
 ```typescript
 if (node['@class'] === ANNOTATION_CLASS) {
-	const ann = node as ApexAnnotationNode;
-	const name = ann.name.value; // Identifier.value
-	const params = ann.parameters; // Array
+  const ann = node as ApexAnnotationNode;
+  const name = ann.name.value; // Identifier.value
+  const params = ann.parameters; // Array
 
-	params.forEach((param) => {
-		if (
-			param['@class'] ===
-			'apex.jorje.data.ast.AnnotationParameter$AnnotationKeyValue'
-		) {
-			const key = (param as ApexAnnotationKeyValue).key.value;
-			const value = (param as ApexAnnotationKeyValue).value;
-		}
-	});
+  params.forEach((param) => {
+    if (
+      param['@class'] ===
+      'apex.jorje.data.ast.AnnotationParameter$AnnotationKeyValue'
+    ) {
+      const key = (param as ApexAnnotationKeyValue).key.value;
+      const value = (param as ApexAnnotationKeyValue).value;
+    }
+  });
 }
 ```
 
@@ -308,15 +308,15 @@ if (node['@class'] === ANNOTATION_CLASS) {
 
 ```typescript
 if (isTypeRef(node)) {
-	// TypeRef has EITHER 'types' OR 'names', not both
-	if ('types' in node && Array.isArray(node.types)) {
-		// Generic types: List<String>, Map<K,V>
-		const types = path.map(print, 'types' as never);
-	}
-	if ('names' in node && Array.isArray(node.names)) {
-		// Interface implementations: implements I1, I2
-		const names = path.map(print, 'names' as never);
-	}
+  // TypeRef has EITHER 'types' OR 'names', not both
+  if ('types' in node && Array.isArray(node.types)) {
+    // Generic types: List<String>, Map<K,V>
+    const types = path.map(print, 'types' as never);
+  }
+  if ('names' in node && Array.isArray(node.names)) {
+    // Interface implementations: implements I1, I2
+    const names = path.map(print, 'names' as never);
+  }
 }
 ```
 
@@ -324,22 +324,22 @@ if (isTypeRef(node)) {
 
 ```typescript
 if (isCommentNode(node)) {
-	const comment = node as { value?: string };
-	const text = comment.value; // Full text including /** and */
+  const comment = node as { value?: string };
+  const text = comment.value; // Full text including /** and */
 
-	// ApexDoc detection (multi-line with * prefix)
-	const isApexDoc = (text: string): boolean => {
-		const lines = text.split('\n');
-		return (
-			lines.length > 1 &&
-			lines.slice(1, -1).every((line) => line.trim()[0] === '*')
-		);
-	};
+  // ApexDoc detection (multi-line with * prefix)
+  const isApexDoc = (text: string): boolean => {
+    const lines = text.split('\n');
+    return (
+      lines.length > 1 &&
+      lines.slice(1, -1).every((line) => line.trim()[0] === '*')
+    );
+  };
 
-	// Code block detection for embed
-	if (text?.includes('{@code')) {
-		// Extract and format code blocks
-	}
+  // Code block detection for embed
+  if (text?.includes('{@code')) {
+    // Extract and format code blocks
+  }
 }
 ```
 
@@ -357,14 +357,14 @@ const isPublic = modifiers?.some((m) => m['@class']?.includes('Public'));
 
 ```typescript
 const isNestedInCollection = (path: AstPath<ApexNode>): boolean => {
-	for (const parent of path.stack) {
-		if (typeof parent === 'object' && parent && '@class' in parent) {
-			const cls = (parent as ApexNode)['@class'];
-			if (cls === LIST_CLASS || cls === SET_CLASS || cls === MAP_CLASS)
-				return true;
-		}
-	}
-	return false;
+  for (const parent of path.stack) {
+    if (typeof parent === 'object' && parent && '@class' in parent) {
+      const cls = (parent as ApexNode)['@class'];
+      if (cls === LIST_CLASS || cls === SET_CLASS || cls === MAP_CLASS)
+        return true;
+    }
+  }
+  return false;
 };
 ```
 
@@ -376,22 +376,22 @@ For async formatting (e.g., code blocks in comments):
 
 ```typescript
 const customEmbed = (path: AstPath<ApexNode>, options: ParserOptions) => {
-	const node = path.getNode() as ApexNode;
+  const node = path.getNode() as ApexNode;
 
-	if (
-		isCommentNode(node) &&
-		'value' in node &&
-		typeof node.value === 'string'
-	) {
-		if (node.value.includes('{@code')) {
-			return async (textToDoc, print, path, options) => {
-				// Extract code from comment.value
-				// Format with textToDoc (recursive Prettier)
-				// Store in Map for printComment to retrieve
-			};
-		}
-	}
-	return null; // No embedding
+  if (
+    isCommentNode(node) &&
+    'value' in node &&
+    typeof node.value === 'string'
+  ) {
+    if (node.value.includes('{@code')) {
+      return async (textToDoc, print, path, options) => {
+        // Extract code from comment.value
+        // Format with textToDoc (recursive Prettier)
+        // Store in Map for printComment to retrieve
+      };
+    }
+  }
+  return null; // No embedding
 };
 ```
 
@@ -415,29 +415,29 @@ const customEmbed = (path: AstPath<ApexNode>, options: ParserOptions) => {
 1. **Playground**: https://apex.dangmai.net → Enable "Show AST"
 2. **Debug log**: `console.log(node['@class'], Object.keys(node))`
 3. **Parse directly**:
-    ```typescript
-    import * as apexPlugin from 'prettier-plugin-apex';
-    const ast = await apexPlugin.parsers.apex.parse(code, {});
-    console.log(JSON.stringify(ast, null, 2));
-    ```
+   ```typescript
+   import * as apexPlugin from 'prettier-plugin-apex';
+   const ast = await apexPlugin.parsers.apex.parse(code, {});
+   console.log(JSON.stringify(ast, null, 2));
+   ```
 
 ### Recursive Type Collection
 
 ```typescript
 function collectNodeTypes(node: ApexNode, types: Set<string>): void {
-	if (node && typeof node === 'object' && '@class' in node) {
-		types.add(node['@class']);
-		for (const value of Object.values(node)) {
-			if (Array.isArray(value)) {
-				value.forEach((child) => {
-					if (child && typeof child === 'object')
-						collectNodeTypes(child as ApexNode, types);
-				});
-			} else if (value && typeof value === 'object') {
-				collectNodeTypes(value as ApexNode, types);
-			}
-		}
-	}
+  if (node && typeof node === 'object' && '@class' in node) {
+    types.add(node['@class']);
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) {
+        value.forEach((child) => {
+          if (child && typeof child === 'object')
+            collectNodeTypes(child as ApexNode, types);
+        });
+      } else if (value && typeof value === 'object') {
+        collectNodeTypes(value as ApexNode, types);
+      }
+    }
+  }
 }
 ```
 

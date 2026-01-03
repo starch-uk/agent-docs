@@ -1,11 +1,13 @@
 # GraphBinary Format Specification
 
+**Version:** 1.0.0
+
 Compact binary format for graph serialization optimized for network transfer.
 
 **Related Docs:** [GRAPHENGINE.md](GRAPHENGINE.md),
 [TINKERPOP.md](TINKERPOP.md), [GRAPHML.md](GRAPHML.md),
 [GRAPHSON.md](GRAPHSON.md), [GRYO.md](GRYO.md),
-[CODE_ANALYZER_CONFIG.md](CODE_ANALYZER_CONFIG.md)
+[CODEANALYZER.md](CODEANALYZER.md)
 
 ## Overview
 

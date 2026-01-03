@@ -1,6 +1,8 @@
 ````markdown
 # XPath 3.1 Reference
 
+**Version:** 1.0.0
+
 ## Core
 
 - **Model:** Sequences of items (nodes, atomics, maps, arrays, functions). `()`

@@ -1,5 +1,7 @@
 # ApexDoc Quick Reference for AI Agents
 
+**Version:** 1.0.0
+
 ## Overview
 
 ApexDoc is Salesforce's standardized documentation format for Apex code. Uses
@@ -184,7 +186,7 @@ validation, use Regex engine or custom Java rules.
 
 - **[PMD Quick Reference](PMD.md)** - PMD essentials (PMD typically ignores
   comments; use Regex for ApexDoc validation)
-- **[PMD Apex AST Reference](APEX_PMD_AST.md)** - PMD AST structure (ApexDoc
+- **[PMD Apex AST Reference](PMD.md#apex-ast-reference)** - PMD AST structure (ApexDoc
   appears as FormalComment nodes)
 - **[Salesforce ApexDoc Introduction](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_doc_intro.htm)** -
   Official ApexDoc overview

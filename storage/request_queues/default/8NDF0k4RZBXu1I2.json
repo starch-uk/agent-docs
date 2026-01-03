@@ -1,0 +1,9 @@
+{
+  "id": "8NDF0k4RZBXu1I2",
+  "json": "{\"id\":\"8NDF0k4RZBXu1I2\",\"url\":\"https://developer.salesforce.com/docs/platform/lwc/guide/apex-continuations-auraenabled.html\",\"loadedUrl\":\"https://developer.salesforce.com/docs/platform/lwc/guide/apex-continuations-auraenabled.html\",\"uniqueKey\":\"https://developer.salesforce.com/docs/platform/lwc/guide/apex-continuations-auraenabled.html\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-03T12:42:33.680Z\"}",
+  "method": "GET",
+  "orderNo": null,
+  "retryCount": 0,
+  "uniqueKey": "https://developer.salesforce.com/docs/platform/lwc/guide/apex-continuations-auraenabled.html",
+  "url": "https://developer.salesforce.com/docs/platform/lwc/guide/apex-continuations-auraenabled.html"
+}

@@ -1,5 +1,7 @@
 # pnpm Reference
 
+**Version:** 1.0.0
+
 ## Core Concepts
 
 - **Content-addressable store**: Single copy per package version, hard-linked to
@@ -213,16 +215,16 @@ git-branch-lockfile=true
 
 ```yaml
 packages:
-    - 'packages/*'
-    - 'apps/*'
-    - '!**/test/**'
+  - 'packages/*'
+  - 'apps/*'
+  - '!**/test/**'
 
 catalog:
-    react: ^18.3.1
-    typescript: ^5.0.0
+  react: ^18.3.1
+  typescript: ^5.0.0
 
 configDependencies:
-    my-configs: '1.0.0+sha512-<checksum>'
+  my-configs: '1.0.0+sha512-<checksum>'
 
 onlyBuiltDependencies: [pkg-name]
 ignoredBuiltDependencies: [pkg-name]
@@ -237,12 +239,12 @@ public-hoist-pattern: ['*eslint*']
 
 ```json
 {
-	"dependencies": {
-		"pkg": "workspace:*", // Any version
-		"pkg": "workspace:^1.0.0", // Matching range
-		"alias": "workspace:pkg@*", // Alias
-		"pkg": "workspace:../pkg" // Relative path
-	}
+  "dependencies": {
+    "pkg": "workspace:*", // Any version
+    "pkg": "workspace:^1.0.0", // Matching range
+    "alias": "workspace:pkg@*", // Alias
+    "pkg": "workspace:../pkg" // Relative path
+  }
 }
 ```
 
@@ -267,23 +269,22 @@ pnpm --filter <a> --filter <b> <cmd>   # Multiple
 
 ```javascript
 module.exports = {
-	hooks: {
-		readPackage(pkg, ctx) {
-			if (pkg.name === 'some-pkg') {
-				pkg.dependencies['missing'] = '^1.0.0';
-			}
-			return pkg;
-		},
-		afterAllResolved(lockfile, ctx) {
-			return lockfile;
-		},
-	},
-	finders: {
-		// v10.16+
-		react17: (ctx) =>
-			ctx.readManifest().peerDependencies?.react === '^17.0.0',
-		mitLicense: (ctx) => ctx.readManifest().license === 'MIT',
-	},
+  hooks: {
+    readPackage(pkg, ctx) {
+      if (pkg.name === 'some-pkg') {
+        pkg.dependencies['missing'] = '^1.0.0';
+      }
+      return pkg;
+    },
+    afterAllResolved(lockfile, ctx) {
+      return lockfile;
+    },
+  },
+  finders: {
+    // v10.16+
+    react17: (ctx) => ctx.readManifest().peerDependencies?.react === '^17.0.0',
+    mitLicense: (ctx) => ctx.readManifest().license === 'MIT',
+  },
 };
 ```
 
@@ -293,22 +294,22 @@ Usage: `pnpm why --find-by=react17`
 
 ```json
 {
-	"engines": { "node": ">=18.12", "pnpm": ">=9" },
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24.4.0",
-			"onFail": "download"
-		}
-	},
-	"packageManager": "pnpm@9.0.0",
-	"pnpm": {
-		"overrides": { "lodash": "^4.17.21" },
-		"peerDependencyRules": {
-			"allowedVersions": { "react": "17 || 18" },
-			"ignoreMissing": ["@types/*"]
-		}
-	}
+  "engines": { "node": ">=18.12", "pnpm": ">=9" },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.4.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@9.0.0",
+  "pnpm": {
+    "overrides": { "lodash": "^4.17.21" },
+    "peerDependencyRules": {
+      "allowedVersions": { "react": "17 || 18" },
+      "ignoreMissing": ["@types/*"]
+    }
+  }
 }
 ```
 

@@ -1,5 +1,7 @@
 # Prettier Reference
 
+**Version:** 1.0.0
+
 > **Architecture**: Parse → AST → Doc → Format. Plugins extend via
 > parsers/printers. **Philosophy**: Opinionated, correctness over
 > configurability, consistency across codebase.
@@ -102,11 +104,11 @@ prettier [options] [file/dir/glob ...]
 
 ```typescript
 interface Plugin<T = any> {
-	languages?: SupportLanguage[];
-	parsers?: { [name: string]: Parser<T> };
-	printers?: { [astFormat: string]: Printer<T> };
-	options?: SupportOptions;
-	defaultOptions?: Partial<RequiredOptions>;
+  languages?: SupportLanguage[];
+  parsers?: { [name: string]: Parser<T> };
+  printers?: { [astFormat: string]: Printer<T> };
+  options?: SupportOptions;
+  defaultOptions?: Partial<RequiredOptions>;
 }
 ```
 
@@ -114,13 +116,13 @@ interface Plugin<T = any> {
 
 ```typescript
 interface Parser<T = any> {
-	parse: (text: string, options: ParserOptions<T>) => T | Promise<T>;
-	astFormat: string; // Must match printer key
-	locStart: (node: T) => number; // Required
-	locEnd: (node: T) => number; // Required
-	hasPragma?: (text: string) => boolean; // Detect @format/@prettier
-	hasIgnorePragma?: (text: string) => boolean; // Detect @prettier-ignore
-	preprocess?: (text: string, options) => string | Promise<string>;
+  parse: (text: string, options: ParserOptions<T>) => T | Promise<T>;
+  astFormat: string; // Must match printer key
+  locStart: (node: T) => number; // Required
+  locEnd: (node: T) => number; // Required
+  hasPragma?: (text: string) => boolean; // Detect @format/@prettier
+  hasIgnorePragma?: (text: string) => boolean; // Detect @prettier-ignore
+  preprocess?: (text: string, options) => string | Promise<string>;
 }
 ```
 
@@ -128,45 +130,45 @@ interface Parser<T = any> {
 
 ```typescript
 interface Printer<T = any> {
-	// Required
-	print: (
-		path: AstPath<T>,
-		options: ParserOptions<T>,
-		print: (path) => Doc,
-		args?,
-	) => Doc;
+  // Required
+  print: (
+    path: AstPath<T>,
+    options: ParserOptions<T>,
+    print: (path) => Doc,
+    args?
+  ) => Doc;
 
-	// Optional
-	embed?: (
-		path,
-		options,
-	) => ((textToDoc, print, path, options) => Doc | Promise<Doc>) | Doc | null;
-	preprocess?: (ast: T, options) => T | Promise<T>;
-	massageAstNode?: (original, cloned, parent) => any;
-	hasPrettierIgnore?: (path: AstPath<T>) => boolean;
-	printPrettierIgnored?: (path, options, print, args?) => Doc;
-	insertPragma?: (text: string) => string;
+  // Optional
+  embed?: (
+    path,
+    options
+  ) => ((textToDoc, print, path, options) => Doc | Promise<Doc>) | Doc | null;
+  preprocess?: (ast: T, options) => T | Promise<T>;
+  massageAstNode?: (original, cloned, parent) => any;
+  hasPrettierIgnore?: (path: AstPath<T>) => boolean;
+  printPrettierIgnored?: (path, options, print, args?) => Doc;
+  insertPragma?: (text: string) => string;
 
-	// Comment handling
-	canAttachComment?: (node: T, ancestors: T[]) => boolean;
-	isBlockComment?: (node: T) => boolean;
-	printComment?: (commentPath: AstPath<T>, options) => Doc;
-	willPrintOwnComments?: (path: AstPath<T>) => boolean;
-	getCommentChildNodes?: (node: T, options) => T[] | undefined;
-	handleComments?: {
-		ownLine?: (comment, text, options, ast, isLast) => boolean;
-		endOfLine?: (comment, text, options, ast, isLast) => boolean;
-		remaining?: (comment, text, options, ast, isLast) => boolean;
-	};
+  // Comment handling
+  canAttachComment?: (node: T, ancestors: T[]) => boolean;
+  isBlockComment?: (node: T) => boolean;
+  printComment?: (commentPath: AstPath<T>, options) => Doc;
+  willPrintOwnComments?: (path: AstPath<T>) => boolean;
+  getCommentChildNodes?: (node: T, options) => T[] | undefined;
+  handleComments?: {
+    ownLine?: (comment, text, options, ast, isLast) => boolean;
+    endOfLine?: (comment, text, options, ast, isLast) => boolean;
+    remaining?: (comment, text, options, ast, isLast) => boolean;
+  };
 
-	// Traversal
-	getVisitorKeys?: (node: T, nonTraversableKeys: Set<string>) => string[];
+  // Traversal
+  getVisitorKeys?: (node: T, nonTraversableKeys: Set<string>) => string[];
 
-	// Features
-	features?: {
-		experimental_avoidAstMutation?: boolean;
-		experimental_frontMatterSupport?: { massageAstNode?; embed?; print? };
-	};
+  // Features
+  features?: {
+    experimental_avoidAstMutation?: boolean;
+    experimental_frontMatterSupport?: { massageAstNode?; embed?; print? };
+  };
 }
 ```
 
@@ -174,20 +176,20 @@ interface Printer<T = any> {
 
 ```typescript
 interface SupportLanguage {
-	name: string; // Required
-	parsers: string[]; // Required
-	extensions?: string[]; // e.g., [".cls", ".trigger"]
-	filenames?: string[]; // e.g., ["Dockerfile"]
-	aliases?: string[];
-	interpreters?: string[]; // Shebang detection
-	group?: string;
-	tmScope?: string;
-	aceMode?: string;
-	codemirrorMode?: string;
-	codemirrorMimeType?: string;
-	linguistLanguageId?: number;
-	vscodeLanguageIds?: string[];
-	isSupported?: (options: { filepath: string }) => boolean;
+  name: string; // Required
+  parsers: string[]; // Required
+  extensions?: string[]; // e.g., [".cls", ".trigger"]
+  filenames?: string[]; // e.g., ["Dockerfile"]
+  aliases?: string[];
+  interpreters?: string[]; // Shebang detection
+  group?: string;
+  tmScope?: string;
+  aceMode?: string;
+  codemirrorMode?: string;
+  codemirrorMimeType?: string;
+  linguistLanguageId?: number;
+  vscodeLanguageIds?: string[];
+  isSupported?: (options: { filepath: string }) => boolean;
 }
 ```
 
@@ -197,30 +199,30 @@ interface SupportLanguage {
 
 ```typescript
 class AstPath<T = any> {
-	// Properties
-	get key(): string | null; // Property key in parent
-	get index(): number | null; // Array index if in array
-	get node(): T; // Current node
-	get parent(): T | null; // Direct parent
-	get grandparent(): T | null;
-	get isInArray(): boolean;
-	get siblings(): T[] | null;
-	get next(): T | null;
-	get previous(): T | null;
-	get isFirst(): boolean;
-	get isLast(): boolean;
-	get isRoot(): boolean;
-	get root(): T;
-	get ancestors(): T[];
+  // Properties
+  get key(): string | null; // Property key in parent
+  get index(): number | null; // Array index if in array
+  get node(): T; // Current node
+  get parent(): T | null; // Direct parent
+  get grandparent(): T | null;
+  get isInArray(): boolean;
+  get siblings(): T[] | null;
+  get next(): T | null;
+  get previous(): T | null;
+  get isFirst(): boolean;
+  get isLast(): boolean;
+  get isRoot(): boolean;
+  get root(): T;
+  get ancestors(): T[];
 
-	// Methods
-	call<U>(callback: (path) => U, ...props: PropertyKey[]): U;
-	each(callback: (path) => void, ...props: PropertyKey[]): void;
-	map<U>(callback: (path) => U, ...props: PropertyKey[]): U[];
-	callParent<U>(callback: (path) => U, count?: number): U;
-	getNode(count?: number): T | null;
-	getParentNode(count?: number): T | null;
-	match(...predicates: ((node, key, index) => boolean)[]): boolean;
+  // Methods
+  call<U>(callback: (path) => U, ...props: PropertyKey[]): U;
+  each(callback: (path) => void, ...props: PropertyKey[]): void;
+  map<U>(callback: (path) => U, ...props: PropertyKey[]): U[];
+  callParent<U>(callback: (path) => U, count?: number): U;
+  getNode(count?: number): T | null;
+  getParentNode(count?: number): T | null;
+  match(...predicates: ((node, key, index) => boolean)[]): boolean;
 }
 ```
 
@@ -293,9 +295,9 @@ Via `prettier.doc.builders`:
 
 ```typescript
 interface GroupOptions {
-	id?: symbol; // For ifBreak/indentIfBreak reference
-	shouldBreak?: boolean; // Force break
-	expandedStates?: Doc[]; // Alternative states
+  id?: symbol; // For ifBreak/indentIfBreak reference
+  shouldBreak?: boolean; // Force break
+  expandedStates?: Doc[]; // Alternative states
 }
 ```
 
@@ -379,15 +381,15 @@ printDocToString(doc: Doc, options: {
 
 ```typescript
 interface SupportOption {
-	type: 'int' | 'string' | 'boolean' | 'choice' | 'path';
-	category: string;
-	default?: Value | Array<{ value: Value }>;
-	description?: string;
-	deprecated?: true | string;
-	range?: { start: number; end: number };
-	choices?: Array<{ value: Value; description: string }>;
-	array?: boolean;
-	oppositeDescription?: string;
+  type: 'int' | 'string' | 'boolean' | 'choice' | 'path';
+  category: string;
+  default?: Value | Array<{ value: Value }>;
+  description?: string;
+  deprecated?: true | string;
+  range?: { start: number; end: number };
+  choices?: Array<{ value: Value; description: string }>;
+  array?: boolean;
+  oppositeDescription?: string;
 }
 ```
 
@@ -399,11 +401,11 @@ interface SupportOption {
 
 ```typescript
 interface Config extends Options {
-	overrides?: Array<{
-		files: string | string[]; // Glob patterns
-		excludeFiles?: string | string[];
-		options?: Options;
-	}>;
+  overrides?: Array<{
+    files: string | string[]; // Glob patterns
+    excludeFiles?: string | string[];
+    options?: Options;
+  }>;
 }
 ```
 
@@ -592,21 +594,21 @@ Each handler receives:
 
 ```typescript
 (
-	comment: {
-		value: string;
-		location: { startIndex: number; endIndex: number };
-		trailing?: boolean;
-		leading?: boolean;
-		printed?: boolean;
-		enclosingNode?: any;
-		followingNode?: any;
-		precedingNode?: any;
-		placement: 'ownLine' | 'endOfLine' | 'remaining';
-	},
-	text: string,
-	options: ParserOptions,
-	ast: any,
-	isLastComment: boolean,
+  comment: {
+    value: string;
+    location: { startIndex: number; endIndex: number };
+    trailing?: boolean;
+    leading?: boolean;
+    printed?: boolean;
+    enclosingNode?: any;
+    followingNode?: any;
+    precedingNode?: any;
+    placement: 'ownLine' | 'endOfLine' | 'remaining';
+  },
+  text: string,
+  options: ParserOptions,
+  ast: any,
+  isLastComment: boolean
 ) => boolean; // true = handled, false = let Prettier handle
 ```
 
@@ -629,8 +631,8 @@ import * as prettier from 'prettier/standalone';
 import * as apexPlugin from 'prettier-plugin-apex';
 
 await prettier.format(code, {
-	parser: 'apex',
-	plugins: [apexPlugin], // REQUIRED in standalone
+  parser: 'apex',
+  plugins: [apexPlugin], // REQUIRED in standalone
 });
 ```
 
@@ -644,35 +646,33 @@ Plugins: `https://unpkg.com/prettier@VERSION/plugins/PLUGIN.mjs`
 
 ```typescript
 const plugin: Plugin = {
-	languages: [
-		{ name: 'MyLang', parsers: ['my-parser'], extensions: ['.ext'] },
-	],
-	parsers: {
-		'my-parser': {
-			parse: (text, options) => parseToAST(text),
-			astFormat: 'my-ast',
-			locStart: (node) => node.start,
-			locEnd: (node) => node.end,
-		},
-	},
-	printers: {
-		'my-ast': {
-			print: (path, options, print) => {
-				const node = path.node;
-				return doc.builders.group([
-					/* ... */
-				]);
-			},
-		},
-	},
-	options: {
-		myOption: {
-			type: 'boolean',
-			category: 'Format',
-			default: false,
-			description: 'My option',
-		},
-	},
+  languages: [{ name: 'MyLang', parsers: ['my-parser'], extensions: ['.ext'] }],
+  parsers: {
+    'my-parser': {
+      parse: (text, options) => parseToAST(text),
+      astFormat: 'my-ast',
+      locStart: (node) => node.start,
+      locEnd: (node) => node.end,
+    },
+  },
+  printers: {
+    'my-ast': {
+      print: (path, options, print) => {
+        const node = path.node;
+        return doc.builders.group([
+          /* ... */
+        ]);
+      },
+    },
+  },
+  options: {
+    myOption: {
+      type: 'boolean',
+      category: 'Format',
+      default: false,
+      description: 'My option',
+    },
+  },
 };
 ```
 
@@ -680,9 +680,9 @@ const plugin: Plugin = {
 
 ```typescript
 print: (path, options, print) => {
-	const node = path.node;
-	if (node.type === 'TypeA') return printTypeA(path, options, print);
-	return print('children');
+  const node = path.node;
+  if (node.type === 'TypeA') return printTypeA(path, options, print);
+  return print('children');
 };
 ```
 
@@ -690,13 +690,13 @@ print: (path, options, print) => {
 
 ```typescript
 embed: (path, options) => {
-	const node = path.node;
-	if (isEmbeddedCode(node)) {
-		return async (textToDoc, print, path, options) => {
-			return await textToDoc(extractCode(node), { parser: 'javascript' });
-		};
-	}
-	return null;
+  const node = path.node;
+  if (isEmbeddedCode(node)) {
+    return async (textToDoc, print, path, options) => {
+      return await textToDoc(extractCode(node), { parser: 'javascript' });
+    };
+  }
+  return null;
 };
 ```
 

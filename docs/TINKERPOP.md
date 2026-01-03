@@ -1,5 +1,7 @@
 # Apache TinkerPop Reference
 
+**Version:** 1.0.0
+
 Graph computing framework for OLTP (real-time) and OLAP (batch) operations.
 Vendor-agnostic, language-agnostic, extensible.
 
