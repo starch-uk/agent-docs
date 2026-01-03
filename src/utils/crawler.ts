@@ -2,6 +2,13 @@
  * @file Utilities for crawling and extracting content from Salesforce Help pages.
  */
 
+/* eslint-disable @typescript-eslint/prefer-readonly-parameter-types -- DOM API types and Playwright types cannot be made readonly */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
+/* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for timeouts, lengths, and DOM operations */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- page.evaluate returns any type from browser context */
+ 
+ 
+
 import { PlaywrightCrawler } from 'crawlee';
 
 /**
@@ -28,18 +35,14 @@ function normalizeQuery(query: Readonly<string>): string {
  */
 const defaultLimit = 20;
 
-/* eslint-disable jsdoc/check-tag-names -- @rejects is required by jsdoc/require-rejects but not recognized by jsdoc/check-tag-names */
-
 /**
  * Search Salesforce Help using Playwright.
  * @param query - The search query string.
  * @param limit - Maximum number of results to return (default: 20).
  * @returns Array of search results with URL and title.
  * @throws {Error} When search fails or times out.
- * @rejects {Error} When search fails or times out.
  */
-/* eslint-enable jsdoc/check-tag-names */
-async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc -- JSDoc is above the eslint-disable/enable block
+async function searchSalesforceHelp(
 	query: Readonly<string>,
 	limit: Readonly<number> = defaultLimit,
 ): Promise<{ url: string; title: string }[]> {
@@ -58,7 +61,7 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
 	const crawler = new PlaywrightCrawler({
 		headless: true,
 		navigationTimeoutSecs: 90,
-		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- page object from PlaywrightCrawler cannot be made readonly
+
 		async requestHandler({
 			page,
 		}: {
@@ -174,7 +177,6 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
 					];
 
 					for (const selector of selectors) {
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- doc can be undefined
 						if (doc === null || doc === undefined) continue;
 						const links = doc.querySelectorAll(selector);
 
@@ -268,7 +270,7 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
 	const fallbackCrawler = new PlaywrightCrawler({
 		headless: true,
 		navigationTimeoutSecs: 90,
-		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- page object from PlaywrightCrawler cannot be made readonly
+
 		async requestHandler({
 			page,
 		}: {
@@ -366,7 +368,6 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
 					];
 
 					for (const selector of selectors) {
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- doc can be undefined
 						if (doc === null || doc === undefined) continue;
 						const links = doc.querySelectorAll(selector);
 
@@ -460,18 +461,13 @@ async function searchSalesforceHelp( // eslint-disable-line jsdoc/require-jsdoc 
 	throw new Error(`No search results found for: ${normalizedQuery}`);
 }
 
-/* eslint-disable jsdoc/check-tag-names -- @rejects is required by jsdoc/require-rejects but not recognized by jsdoc/check-tag-names */
-
 /**
  * Crawl a Salesforce Help page using Playwright to handle JavaScript-rendered content.
  * @param url - Salesforce Help page URL.
  * @returns Page content.
  * @throws {Error} When page crawl fails or times out.
- * @rejects {Error} When page crawl fails or times out.
  */
-/* eslint-enable jsdoc/check-tag-names */
 async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
-	// eslint-disable-line jsdoc/require-jsdoc -- JSDoc is above the eslint-disable/enable block
 	let content = '';
 
 	// Timeout constants
@@ -495,7 +491,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 		headless: true,
 		navigationTimeoutSecs: 60,
 
-		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- type definition parameters cannot be readonly
 		async requestHandler({
 			page,
 		}: Readonly<{
@@ -536,7 +531,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 				) => Promise<unknown>;
 			};
 		}>): Promise<void> {
-			// eslint-disable-line @typescript-eslint/prefer-readonly-parameter-types -- fn parameter in type definition cannot be readonly
 			// Navigate to page - use domcontentloaded to avoid hanging
 			await page.goto(url, {
 				timeout: navigationTimeoutMs,
@@ -585,7 +579,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 								}, acceptButtonTimeoutMs),
 							),
 						]).catch(() => null);
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- acceptButton can be null, but linter thinks types have no overlap
+
 						if (
 							acceptButton !== null &&
 							acceptButton !== undefined
@@ -932,14 +926,14 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 												clone.querySelectorAll(
 													'script, style, noscript',
 												);
-											// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
+
 											scripts.forEach((el: Element) => {
 												el.remove();
 											});
 											const {
 												textContent: textContentValue,
 											} = clone;
-											// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
+
 											const text = (
 												textContentValue ?? ''
 											).trim();
@@ -964,7 +958,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 												clone.querySelectorAll(
 													'script, style, noscript',
 												);
-											// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
+
 											scripts.forEach((el: Element) => {
 												el.remove();
 											});
@@ -972,7 +966,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 												textContent:
 													textContentMainValue,
 											} = clone;
-											// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
+
 											const text = (
 												textContentMainValue ?? ''
 											).trim();
@@ -1074,7 +1068,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						 * @param selector - CSS selector to find.
 						 * @returns Found element or null.
 						 */
-						// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element is DOM API type that cannot be made readonly
+
 						const findInShadowDOM = (
 							element: Element | null,
 							selector: Readonly<string>,
@@ -1087,12 +1081,11 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							 * @param depth - Current depth (default: 0).
 							 * @returns Found element or null.
 							 */
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element is DOM API type that cannot be made readonly
+
 							const traverse = (
 								el: Element | null,
 								depth: Readonly<number> = 0,
 							): Element | null => {
-								// eslint-disable-line @typescript-eslint/no-magic-numbers -- depth default of 0 is standard for recursion
 								const maxDepth = 10;
 								if (el === null || depth > maxDepth)
 									return null; // Safety limit
@@ -1154,7 +1147,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							shadowDOMFound: boolean;
 							textElements?: unknown[];
 						} = {
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- doc.body can be null, 0 is default for length
 							bodyTextLength:
 								doc.body?.textContent?.trim()?.length ?? 0,
 							divCount: doc.querySelectorAll('div').length,
@@ -1180,13 +1172,13 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							doc.querySelector('main');
 						if (mainEl !== null) {
 							const mainElTextLengthDefault = 0;
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent.trim() can return empty string
+
 							const mainElTextLength =
 								mainEl.textContent?.trim()?.length ??
 								mainElTextLengthDefault;
 							debugInfo.mainElements.push({
 								children: mainEl.children.length,
-								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- className can be empty string
+
 								className: mainEl.className ?? '',
 								tag: mainEl.tagName,
 								textLength: mainElTextLength,
@@ -1211,7 +1203,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							i++
 						) {
 							const el = allElements[i];
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
+
 							const text = el.textContent?.trim() ?? '';
 							const minTextLengthForElement = 200;
 							if (
@@ -1230,7 +1222,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									tag: el.tagName,
 									text,
 									textLength: text.length,
-									// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard substring start
+
 									textPreview: text.substring(
 										0,
 										textPreviewLength,
@@ -1251,14 +1243,14 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						 * @param element - Document or Element to remove from.
 						 * @param selectors - CSS selectors for elements to remove.
 						 */
-						// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Document and Element are DOM API types
+
 						const removeElements = (
 							element: Document | Element,
 							selectors: Readonly<string>,
 						): void => {
 							const unwanted =
 								element.querySelectorAll(selectors);
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
+
 							unwanted.forEach((el: Element) => {
 								el.remove();
 							});
@@ -1312,12 +1304,11 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 										contentContainer.querySelectorAll(
 											'p, div, span, li, h1, h2, h3, h4, h5, h6',
 										);
-									// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 									if (allTextElements.length > 0) {
 										// Use the container itself if it has substantial text
 
 										const containerText =
-											// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
 											contentContainer.textContent?.trim() ??
 											'';
 										const minContainerTextLength = 500;
@@ -1360,15 +1351,13 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						debugInfo.contentContainerFound = !!contentContainer;
 
 						debugInfo.contentContainerClasses = contentContainer
-							? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-								(contentContainer.className ?? '')
+							? (contentContainer.className ?? '')
 							: null;
 
 						const contentContainerTextLengthDefault = 0;
 
 						const contentContainerTextLength = contentContainer
-							? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-								(contentContainer.textContent?.trim()?.length ??
+							? (contentContainer.textContent?.trim()?.length ??
 								contentContainerTextLengthDefault)
 							: contentContainerTextLengthDefault;
 						debugInfo.contentContainerTextLength =
@@ -1377,15 +1366,13 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						debugInfo.bodyContentFound = !!bodyContent;
 
 						debugInfo.bodyContentClasses = bodyContent
-							? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-								(bodyContent.className ?? '')
+							? (bodyContent.className ?? '')
 							: null;
 
 						const bodyContentTextLengthDefault = 0;
 
 						const bodyContentTextLength = bodyContent
-							? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-								(bodyContent.textContent?.trim()?.length ??
+							? (bodyContent.textContent?.trim()?.length ??
 								bodyContentTextLengthDefault)
 							: bodyContentTextLengthDefault;
 						debugInfo.bodyContentTextLength = bodyContentTextLength;
@@ -1440,8 +1427,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							: null;
 
 						debugInfo.mainElementClasses = mainElement
-							? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- optional chain needed for runtime safety
-								(mainElement.className ?? '')
+							? (mainElement.className ?? '')
 							: null;
 
 						// First, try to get comprehensive content from main area
@@ -1477,10 +1463,10 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							// Also remove any elements with inline scripts or event handlers
 							const allElementsClone =
 								clone.querySelectorAll('*');
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
+
 							allElementsClone.forEach((el: Element) => {
 								// Remove elements with event handlers or script-like content
-								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- className can be empty string
+
 								const className = el.className ?? '';
 								const classStr =
 									typeof className === 'string'
@@ -1514,14 +1500,14 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							const linksWithTitles =
 								clone.querySelectorAll('a[title]');
 							const titleTexts: string[] = [];
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- querySelectorAll returns NodeListOf<Element>, not Readonly
+
 							linksWithTitles.forEach(
 								(link: Readonly<Element>) => {
 									const title = link
 										.getAttribute('title')
 										?.trim();
 									const minTitleLength = 10;
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- title can be null/undefined/empty
+
 									if (
 										title !== null &&
 										title !== undefined &&
@@ -1534,11 +1520,11 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							);
 
 							// Get text content
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
+
 							let mainText = clone.textContent?.trim() ?? '';
 
 							// Append title attributes to the text (they contain important documentation)
-							// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 							if (titleTexts.length > 0) {
 								mainText =
 									mainText + '\n\n' + titleTexts.join('\n');
@@ -1546,7 +1532,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 							debugInfo.mainTextLength = mainText.length;
 							const textPreviewLength = 300;
-							// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard substring start
+
 							debugInfo.mainTextPreview = mainText.substring(
 								0,
 								textPreviewLength,
@@ -1579,9 +1565,8 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									'p, div, span, li, td, th, dd, dt, h1, h2, h3, h4, h5, h6',
 								);
 								const docTexts: string[] = [];
-								// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- querySelectorAll returns NodeListOf<Element>, not Readonly
+
 								paragraphs.forEach((p: Readonly<Element>) => {
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
 									const text = p.textContent?.trim() ?? '';
 									// Only include text that doesn't look like JavaScript
 									const minTextLengthForDoc = 30;
@@ -1606,7 +1591,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 								});
 								// Also include title texts (they're documentation, not code)
 								docTexts.push(...titleTexts);
-								// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 								if (docTexts.length > 0) {
 									const filteredText = docTexts.join('\n\n');
 									const minFilteredTextLength = 200;
@@ -1618,7 +1603,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 										bestLength = filteredText.length;
 									}
 								}
-								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- mainText can be empty string, 200 is minimum length threshold
 							} else if (
 								mainText !== null &&
 								mainText !== undefined &&
@@ -1676,7 +1660,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							i++
 						) {
 							const p = allParagraphs[i];
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
+
 							const text = p.textContent?.trim() ?? '';
 							const minParagraphTextLength = 100;
 							if (
@@ -1688,7 +1672,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							}
 						}
 						debugInfo.paragraphTextsCount = paragraphTexts.length;
-						// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 						if (paragraphTexts.length > 0) {
 							const combinedParagraphText =
 								paragraphTexts.join('\n\n');
@@ -1716,7 +1700,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							i++
 						) {
 							const el = allTextElements[i];
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 							const text = el.textContent?.trim() ?? '';
 							// Only collect substantial text that's not cookie-related and not already in bestText
 							const minTextElementLength = 50;
@@ -1739,7 +1723,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						}
 
 						// Combine collected texts
-						// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 						if (collectedTexts.length > 0) {
 							const combinedText = collectedTexts.join('\n\n');
 							if (combinedText.length > bestLength) {
@@ -1764,11 +1748,10 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									'iframe, noscript, [role="dialog"], [aria-label*="cookie"], [aria-label*="Cookie"], [class*="modal"], [class*="overlay"]',
 								);
 
-								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
 								const text =
 									element.textContent?.trim() ?? null;
 								const minSelectorTextLength = 200;
-								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- text can be null/undefined/empty, but linter thinks it can't
+
 								if (
 									text !== null &&
 									text !== undefined &&
@@ -1827,14 +1810,14 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							const linksWithTitles =
 								clone.querySelectorAll('a[title]');
 							const titleTexts: string[] = [];
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- querySelectorAll returns NodeListOf<Element>, not Readonly
+
 							linksWithTitles.forEach(
 								(link: Readonly<Element>) => {
 									const title = link
 										.getAttribute('title')
 										?.trim();
 									const minTitleLengthForCollection = 10;
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- title can be null/undefined/empty, but linter thinks types have no overlap
+
 									if (
 										title !== null &&
 										title !== undefined &&
@@ -1846,9 +1829,9 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									}
 								},
 							);
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 							let shadowContent = clone.textContent?.trim() ?? '';
-							// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 							if (titleTexts.length > 0) {
 								shadowContent =
 									shadowContent +
@@ -1882,14 +1865,14 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							const linksWithTitles =
 								clone.querySelectorAll('a[title]');
 							const titleTexts: string[] = [];
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- querySelectorAll returns NodeListOf<Element>, not Readonly
+
 							linksWithTitles.forEach(
 								(link: Readonly<Element>) => {
 									const title = link
 										.getAttribute('title')
 										?.trim();
 									const minTitleLengthForCollection = 10;
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- title can be null/undefined/empty, but linter thinks types have no overlap
+
 									if (
 										title !== null &&
 										title !== undefined &&
@@ -1901,9 +1884,9 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									}
 								},
 							);
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 							let shadowContent = clone.textContent?.trim() ?? '';
-							// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 							if (titleTexts.length > 0) {
 								shadowContent =
 									shadowContent +
@@ -1929,7 +1912,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						const allElementsFallback = doc.querySelectorAll('*');
 						const minFallbackTextLength = 500;
 						for (const el of allElementsFallback) {
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
 							const text = el.textContent?.trim() ?? '';
 							if (text.length > minFallbackTextLength) {
 								// Check if it has actual content (not just cookie text)
@@ -1957,7 +1939,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 										el,
 										'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"]',
 									);
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 									const cleanText =
 										el.textContent?.trim() ?? '';
 									const minCleanTextLength = 500;
@@ -1973,7 +1955,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 						// Last resort: get body text but filter cookie content more aggressively
 						const { body } = doc;
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- body can be null, but linter thinks it's always truthy
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- body can be null, but linter thinks it's always truthy
 						if (body) {
 							// Remove all unwanted elements more aggressively
 							removeElements(
@@ -2001,7 +1983,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 										mainElBody,
 										'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"]',
 									);
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 									const mainText =
 										mainElBody.textContent?.trim() ?? '';
 									const minMainElBodyTextLength = 1000;
@@ -2058,7 +2040,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							// Also manually remove any remaining script-like elements by checking their content
 							const allBodyElements =
 								bodyClone.querySelectorAll('*');
-							// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
+
 							allBodyElements.forEach((el: Element) => {
 								// Remove elements that look like scripts or contain JavaScript
 								// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Element can be cast to HTMLElement for event handler checks
@@ -2089,7 +2071,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									el.remove();
 								}
 							});
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 							const bodyText =
 								bodyClone.textContent?.trim() ?? '';
 
@@ -2116,9 +2098,8 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									'p, div, span, li, td, th, dd, dt',
 								);
 								const docTexts: string[] = [];
-								// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- querySelectorAll returns NodeListOf<Element>, not Readonly
+
 								paragraphs.forEach((p: Readonly<Element>) => {
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null
 									const text = p.textContent?.trim() ?? '';
 									// Only include text that doesn't look like JavaScript
 									const minParagraphTextLengthForDoc = 50;
@@ -2140,7 +2121,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 										docTexts.push(text);
 									}
 								});
-								// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard array length check
+
 								if (docTexts.length > 0) {
 									return {
 										content: docTexts.join('\n\n'),
@@ -2183,7 +2164,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 						// Last resort: return whatever body text we have
 						// Clone body and remove scripts/styles, then get text
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- doc.body can be null, but linter thinks it's always truthy
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- doc.body can be null, but linter thinks it's always truthy
 						if (doc.body) {
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- cloneNode returns Node, but we know it's an Element
 							const bodyClone = doc.body.cloneNode(
@@ -2202,7 +2183,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 								bodyClone,
 								'[role="dialog"], [class*="modal"], [class*="overlay"], [class*="dialog"]',
 							);
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 							const lastResortText =
 								bodyClone.textContent?.trim() ?? '';
 							// Return if we have any substantial text
@@ -2215,10 +2196,10 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						}
 
 						// Absolute last resort: return body text as-is (might include scripts but better than nothing)
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- doc.body can be null, but linter thinks it's always truthy
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- doc.body can be null, but linter thinks it's always truthy
 						if (doc.body) {
 							// Try to get text from body, but filter out obvious script content
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 							const rawBodyText =
 								doc.body.textContent?.trim() ?? '';
 							// Check if it looks like mostly code/scripts (high ratio of special chars)
@@ -2228,7 +2209,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							const totalChars = rawBodyText.length;
 
 							const codeRatioDefault = 0;
-							// eslint-disable-next-line @typescript-eslint/no-magic-numbers -- 0 is standard comparison value
+
 							const codeRatio =
 								totalChars > 0
 									? codeCharCount / totalChars
@@ -2265,12 +2246,12 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 					typeof evalResult === 'object' &&
 					'content' in evalResult
 				) {
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access -- evalResult is any from page.evaluate, content can be null/undefined
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- evalResult is any from page.evaluate, content can be null/undefined
 					content = evalResult.content ?? '';
 					// Log debug info to see what happened with shadow DOM
 				} else {
 					// Fallback: treat as string (old format for compatibility)
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion, @typescript-eslint/no-unnecessary-condition -- evalResult is any from page.evaluate
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- evalResult is any from page.evaluate
 					content = (evalResult as string) ?? '';
 				}
 			} catch {
@@ -2279,7 +2260,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 			// If content is empty or too short, try fallback extraction
 			const minContentLength = 100;
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- content can be null/undefined/empty, but linter thinks types have no overlap
+
 			if (
 				content === null ||
 				content === undefined ||
@@ -2292,7 +2273,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						const fallbackContent = await Promise.race([
 							page.evaluate(() => {
 								const { body } = document;
-								// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- body can be null, but linter thinks it's always truthy
+								// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- body can be null, but linter thinks it's always truthy
 								if (body) {
 									// Clone body to avoid modifying original
 									// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- cloneNode returns Node, but we know it's an Element
@@ -2303,11 +2284,11 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 									const unwanted = clone.querySelectorAll(
 										'script, style, noscript, iframe, svg, canvas, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"], [class*="banner"], [id*="banner"], [role="dialog"], [class*="modal"], [class*="overlay"]',
 									);
-									// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types -- Element.remove() mutates the element
+
 									unwanted.forEach((el: Element) => {
 										el.remove();
 									});
-									// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- textContent can be null, but linter thinks it can't
+
 									return clone.textContent?.trim() ?? '';
 								}
 								return '';
@@ -2328,7 +2309,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 							fallbackContent !== null &&
 							fallbackContent !== undefined &&
 							fallbackContent !== '' &&
-							// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- fallbackContent is any from page.evaluate, content can be null, 0 is default
 							fallbackContent.length > (content?.length ?? 0)
 						) {
 							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- fallbackContent is any from page.evaluate
@@ -2340,7 +2320,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 			// Debug: Log content length for troubleshooting
 			const minContentLengthForRetry = 50;
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- content can be null/undefined/empty, but linter thinks types have no overlap
+
 			if (
 				content === null ||
 				content === undefined ||
@@ -2354,7 +2334,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- page.evaluate returns any due to overloaded signatures
 				const retryContent = await page.evaluate(() => {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-type-assertion, @typescript-eslint/no-unsafe-member-access -- DOM API in browser context
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-type-assertion -- DOM API in browser context
 					const doc = (globalThis as any).document;
 
 					// Try to get all text content, filtering out cookie content
@@ -2363,17 +2343,17 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 					// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- body can be null
 					if (body) {
 						// Remove all unwanted elements
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- DOM API
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- DOM API
 						const unwanted = body.querySelectorAll(
 							'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"], [class*="banner"], [id*="banner"], iframe, noscript, [role="dialog"]',
 						);
-						// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- Element.remove() mutates the element, DOM API
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-call -- Element.remove() mutates the element, DOM API
 						unwanted.forEach((el: Element) => {
 							el.remove();
 						});
 
 						// Get all text nodes
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- DOM API
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- DOM API
 						const walker = doc.createTreeWalker(
 							body,
 							NodeFilter.SHOW_TEXT,
@@ -2382,11 +2362,11 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 						let node: Node | null = null;
 
-						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- DOM API
+						// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- DOM API
 						while ((node = walker.nextNode())) {
 							const text = node.textContent?.trim();
 							const minTextNodeLength = 10;
-							// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- text can be null/undefined, but linter thinks it can't
+
 							if (
 								text !== null &&
 								text !== undefined &&
@@ -2417,7 +2397,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 				});
 
 				const minRetryContentLength = 200;
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- retryContent is any from page.evaluate, can be null/undefined/empty
+
 				if (
 					retryContent !== null &&
 					retryContent !== undefined &&
@@ -2428,16 +2408,15 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 					content = retryContent;
 				} else {
 					const minContentLengthForError = 50;
-					// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- content can be null/undefined/empty, but linter thinks types have no overlap
+
 					if (
 						content === null ||
 						content === undefined ||
 						content === '' ||
 						content.length < minContentLengthForError
 					) {
-						// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/no-magic-numbers -- content can be null, 0 is default, optional chain needed
 						const contentLength = content?.length ?? 0;
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-magic-numbers -- retryContent is any from page.evaluate, can be null, 0 is default
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- retryContent is any from page.evaluate, can be null, 0 is default
 						const retryLength = retryContent?.length ?? 0;
 						const contentLengthStr = String(contentLength);
 						const retryLengthStr = String(retryLength);

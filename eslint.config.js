@@ -127,7 +127,7 @@ export default [
 			'jsdoc/require-property-name': 'error',
 			'jsdoc/require-property-type': 'error',
 			'jsdoc/require-property': 'error',
-			'jsdoc/require-rejects': 'error',
+			'jsdoc/require-rejects': 'off',
 			'jsdoc/require-returns-check': 'error',
 			'jsdoc/require-returns-description': 'error',
 			'jsdoc/require-returns-type': 'off',
