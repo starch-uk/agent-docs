@@ -1,6 +1,9 @@
 # Optimizing Docs for AI Agents
 
-This plan documents the process for converting high token count documentation files into AI Agent-friendly low token versions without losing any essential details. This plan is used by AI-powered IDEs (like Cursor) to optimize docs, not by the CLI tool itself.
+This plan documents the process for converting high token count documentation
+files into AI Agent-friendly low token versions without losing any essential
+details. This plan is used by AI-powered IDEs (like Cursor) to optimize docs,
+not by the CLI tool itself.
 
 ## Core Principles
 
@@ -16,21 +19,21 @@ This plan documents the process for converting high token count documentation fi
 ### Text Reduction Strategies
 
 1. **Remove redundancy:**
-   - Eliminate repeated information
-   - Remove unnecessary explanations
-   - Cut verbose descriptions
-   - Remove filler words and phrases
+    - Eliminate repeated information
+    - Remove unnecessary explanations
+    - Cut verbose descriptions
+    - Remove filler words and phrases
 
 2. **Use abbreviations:**
-   - Use standard abbreviations where clear
-   - Abbreviate common terms (e.g., "config" for "configuration")
-   - Use symbols where appropriate (e.g., `&` for "and" in tables)
+    - Use standard abbreviations where clear
+    - Abbreviate common terms (e.g., "config" for "configuration")
+    - Use symbols where appropriate (e.g., `&` for "and" in tables)
 
 3. **Condense explanations:**
-   - Convert paragraphs to bullet points
-   - Use concise phrasing
-   - Remove examples that don't add value
-   - Focus on actionable information
+    - Convert paragraphs to bullet points
+    - Use concise phrasing
+    - Remove examples that don't add value
+    - Focus on actionable information
 
 ### Structural Optimizations
 
@@ -41,7 +44,9 @@ Convert verbose descriptions to tables:
 **Before:**
 
 ```markdown
-The `enabled` property controls whether the feature is active. It accepts a boolean value. The default is `true`. When set to `false`, the feature is disabled.
+The `enabled` property controls whether the feature is active. It accepts a
+boolean value. The default is `true`. When set to `false`, the feature is
+disabled.
 ```
 
 **After:**
@@ -85,7 +90,8 @@ Convert API documentation to tables:
 
 ### `getData(id: string): Promise<Data>`
 
-Retrieves data for the given ID. Returns a Promise that resolves to a Data object.
+Retrieves data for the given ID. Returns a Promise that resolves to a Data
+object.
 
 ### `setData(id: string, data: Data): Promise<void>`
 
@@ -132,19 +138,19 @@ Convert configuration property lists to tables:
 ### Content Organization Patterns
 
 1. **Group related information:**
-   - Organize by topic, not by source
-   - Group similar APIs together
-   - Cluster configuration options by category
+    - Organize by topic, not by source
+    - Group similar APIs together
+    - Cluster configuration options by category
 
 2. **Use consistent structure:**
-   - Follow standard doc format (Overview, Configuration, API Reference, etc.)
-   - Maintain consistent section ordering
-   - Use consistent formatting within sections
+    - Follow standard doc format (Overview, Configuration, API Reference, etc.)
+    - Maintain consistent section ordering
+    - Use consistent formatting within sections
 
 3. **Prioritize essential information:**
-   - Put most important information first
-   - Move detailed explanations to end
-   - Highlight critical gotchas early
+    - Put most important information first
+    - Move detailed explanations to end
+    - Highlight critical gotchas early
 
 ## Step-by-Step Conversion Process
 
@@ -152,73 +158,73 @@ Convert configuration property lists to tables:
 
 1. **Read the entire doc** to understand structure and content
 2. **Identify optimization opportunities:**
-   - Long paragraphs that can be condensed
-   - Lists that can become tables
-   - API documentation that can be tabularized
-   - Redundant explanations
-   - Verbose examples
+    - Long paragraphs that can be condensed
+    - Lists that can become tables
+    - API documentation that can be tabularized
+    - Redundant explanations
+    - Verbose examples
 
 3. **Categorize content:**
-   - Essential information (must keep)
-   - Important information (should keep)
-   - Nice-to-have information (can condense)
-   - Redundant information (can remove)
+    - Essential information (must keep)
+    - Important information (should keep)
+    - Nice-to-have information (can condense)
+    - Redundant information (can remove)
 
 ### 2. Structure Planning
 
 1. **Plan section organization:**
-   - Determine optimal section order
-   - Identify sections that can be merged
-   - Plan table structures for each section
+    - Determine optimal section order
+    - Identify sections that can be merged
+    - Plan table structures for each section
 
 2. **Design table schemas:**
-   - Determine columns for each table
-   - Plan property/API documentation tables
-   - Design configuration option tables
+    - Determine columns for each table
+    - Plan property/API documentation tables
+    - Design configuration option tables
 
 3. **Plan content reduction:**
-   - Identify text to condense
-   - Plan bullet point conversions
-   - Design code example reductions
+    - Identify text to condense
+    - Plan bullet point conversions
+    - Design code example reductions
 
 ### 3. Content Transformation
 
 1. **Convert prose to tables:**
-   - Transform property descriptions
-   - Convert API documentation
-   - Tabularize configuration options
+    - Transform property descriptions
+    - Convert API documentation
+    - Tabularize configuration options
 
 2. **Condense text:**
-   - Reduce verbose explanations
-   - Convert paragraphs to bullet points
-   - Remove redundant information
+    - Reduce verbose explanations
+    - Convert paragraphs to bullet points
+    - Remove redundant information
 
 3. **Optimize code examples:**
-   - Keep only essential examples
-   - Remove verbose comments
-   - Use minimal, clear examples
+    - Keep only essential examples
+    - Remove verbose comments
+    - Use minimal, clear examples
 
 4. **Restructure sections:**
-   - Reorganize for better flow
-   - Merge related sections
-   - Remove unnecessary sections
+    - Reorganize for better flow
+    - Merge related sections
+    - Remove unnecessary sections
 
 ### 4. Validation
 
 1. **Verify completeness:**
-   - Ensure all essential information retained
-   - Check no critical details lost
-   - Verify all APIs/configs documented
+    - Ensure all essential information retained
+    - Check no critical details lost
+    - Verify all APIs/configs documented
 
 2. **Check accuracy:**
-   - Verify table data is correct
-   - Check code examples work
-   - Confirm no information corrupted
+    - Verify table data is correct
+    - Check code examples work
+    - Confirm no information corrupted
 
 3. **Validate format:**
-   - Check table formatting
-   - Verify markdown syntax
-   - Ensure consistent style
+    - Check table formatting
+    - Verify markdown syntax
+    - Ensure consistent style
 
 ## Formatting Standards
 
@@ -267,30 +273,31 @@ After optimization, verify:
 ## Common Pitfalls to Avoid
 
 1. **Over-condensation:**
-   - Don't remove essential context
-   - Don't make information unclear
-   - Don't sacrifice clarity for brevity
+    - Don't remove essential context
+    - Don't make information unclear
+    - Don't sacrifice clarity for brevity
 
 2. **Inconsistent formatting:**
-   - Maintain consistent table structures
-   - Use consistent terminology
-   - Keep formatting uniform
+    - Maintain consistent table structures
+    - Use consistent terminology
+    - Keep formatting uniform
 
 3. **Lost information:**
-   - Verify all details preserved
-   - Check no APIs/configs missing
-   - Ensure examples still accurate
+    - Verify all details preserved
+    - Check no APIs/configs missing
+    - Ensure examples still accurate
 
 4. **Poor organization:**
-   - Maintain logical flow
-   - Keep related information together
-   - Don't fragment related content
+    - Maintain logical flow
+    - Keep related information together
+    - Don't fragment related content
 
 ## Success Metrics
 
 A successfully optimized doc should:
 
-1. **Reduce token count** by 50% or more while retaining all essential information
+1. **Reduce token count** by 50% or more while retaining all essential
+   information
 2. **Maintain readability** - Still clear and understandable
 3. **Preserve completeness** - All essential details retained
 4. **Improve scannability** - Easier to find specific information
@@ -307,7 +314,10 @@ A successfully optimized doc should:
 
 ### getData(id: string): Promise<Data>
 
-This method retrieves data for the given ID. It takes a string parameter called `id` that represents the unique identifier of the data you want to retrieve. The method returns a Promise that resolves to a Data object containing the requested data. If the data is not found, the Promise will reject with an error.
+This method retrieves data for the given ID. It takes a string parameter called
+`id` that represents the unique identifier of the data you want to retrieve. The
+method returns a Promise that resolves to a Data object containing the requested
+data. If the data is not found, the Promise will reject with an error.
 
 Example usage:
 
@@ -360,7 +370,8 @@ The `verbose` option enables verbose logging. When set to `true`, the tool will 
 
 ## Best Practices
 
-1. **Optimize after comprehensive** - Only optimize when doc is complete and comprehensive
+1. **Optimize after comprehensive** - Only optimize when doc is complete and
+   comprehensive
 2. **Preserve essential details** - Never remove critical information
 3. **Maintain accuracy** - Verify all information remains correct
 4. **Test examples** - Ensure code examples still work

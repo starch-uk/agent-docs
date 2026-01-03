@@ -31,10 +31,10 @@ import { describe, expect, test } from '@jest/globals';
 
 ```javascript
 test.each([
-  [1, 2, 3],
-  [2, 3, 5],
+	[1, 2, 3],
+	[2, 3, 5],
 ])('adds %i + %i = %i', (a, b, expected) => {
-  expect(a + b).toBe(expected);
+	expect(a + b).toBe(expected);
 });
 ```
 
@@ -199,12 +199,12 @@ await expect(promise).rejects.toThrow();
 
 ```javascript
 module.exports = {
-  testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.js'],
-  collectCoverageFrom: ['src/**/*.js'],
-  coverageDirectory: 'coverage',
-  verbose: true,
-  testTimeout: 10000,
+	testEnvironment: 'node',
+	testMatch: ['**/tests/**/*.test.js'],
+	collectCoverageFrom: ['src/**/*.js'],
+	coverageDirectory: 'coverage',
+	verbose: true,
+	testTimeout: 10000,
 };
 ```
 
@@ -255,11 +255,11 @@ jest --testPathPattern="code-style"
 
 ```javascript
 module.exports = {
-  transform: {
-    '^.+\\.js$': 'babel-jest',
-    '^.+\\.ts$': 'ts-jest',
-  },
-  transformIgnorePatterns: ['node_modules/(?!(module-to-transform)/)'],
+	transform: {
+		'^.+\\.js$': 'babel-jest',
+		'^.+\\.ts$': 'ts-jest',
+	},
+	transformIgnorePatterns: ['node_modules/(?!(module-to-transform)/)'],
 };
 ```
 
@@ -267,11 +267,11 @@ module.exports = {
 
 ```javascript
 module.exports = {
-  transform: {
-    '^.+\\.custom$': (src, filename, config, options) => {
-      return transformedCode;
-    },
-  },
+	transform: {
+		'^.+\\.custom$': (src, filename, config, options) => {
+			return transformedCode;
+		},
+	},
 };
 ```
 
@@ -294,8 +294,8 @@ module.exports = {
 
 ```javascript
 test('async operation', async () => {
-  const result = await asyncFunction();
-  expect(result).toBe(expected);
+	const result = await asyncFunction();
+	expect(result).toBe(expected);
 });
 ```
 
@@ -303,7 +303,7 @@ test('async operation', async () => {
 
 ```javascript
 jest.mock('./module', () => ({
-  functionName: jest.fn(),
+	functionName: jest.fn(),
 }));
 ```
 
@@ -319,7 +319,7 @@ spy.mockRestore();
 
 ```javascript
 expect(() => {
-  throwError();
+	throwError();
 }).toThrow('Error message');
 ```
 
@@ -350,11 +350,11 @@ Node.js's webstorage API during test teardown. Node.js 25 requires the
 
 ```json
 {
-  "scripts": {
-    "test": "NODE_OPTIONS='--localstorage-file=.jest-localstorage' jest",
-    "test:watch": "NODE_OPTIONS='--localstorage-file=.jest-localstorage' jest --watch",
-    "test:coverage": "NODE_OPTIONS='--localstorage-file=.jest-localstorage' jest --coverage"
-  }
+	"scripts": {
+		"test": "NODE_OPTIONS='--localstorage-file=.jest-localstorage' jest",
+		"test:watch": "NODE_OPTIONS='--localstorage-file=.jest-localstorage' jest --watch",
+		"test:coverage": "NODE_OPTIONS='--localstorage-file=.jest-localstorage' jest --coverage"
+	}
 }
 ```
 
@@ -363,9 +363,9 @@ Node.js's webstorage API during test teardown. Node.js 25 requires the
 1. Add `.jest-localstorage` to your `.gitignore` file to prevent committing the
    temporary file:
 
-   ```
-   .jest-localstorage
-   ```
+    ```
+    .jest-localstorage
+    ```
 
 2. The file will be automatically created by Node.js when Jest accesses the
    webstorage API.

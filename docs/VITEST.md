@@ -52,9 +52,9 @@ File: `vitest.config.ts` or `test` in `vite.config.ts`
 ```ts
 import { defineConfig } from 'vitest/config';
 export default defineConfig({
-  test: {
-    /* opts */
-  },
+	test: {
+		/* opts */
+	},
 });
 ```
 
@@ -110,11 +110,11 @@ export default defineConfig({
 
 - `pool: 'threads'|'forks'|'vmThreads'|'vmForks'` [forks] CLI: `--pool`
 - `poolOptions.{threads|forks|vmThreads|vmForks}: object`
-  - `minThreads/maxThreads: number`
-  - `isolate: boolean` [true]
-  - `singleThread/singleFork: boolean` [false]
-  - `useAtomics: boolean` [false]
-  - `execArgv: string[]`
+    - `minThreads/maxThreads: number`
+    - `isolate: boolean` [true]
+    - `singleThread/singleFork: boolean` [false]
+    - `useAtomics: boolean` [false]
+    - `execArgv: string[]`
 
 **Isolation & Parallelism**
 
@@ -261,15 +261,15 @@ export `Environment` object with `{name, viteEnvironment, setup()}`
 
 ```ts
 import {
-  describe,
-  test,
-  it,
-  expect,
-  vi,
-  beforeAll,
-  beforeEach,
-  afterAll,
-  afterEach,
+	describe,
+	test,
+	it,
+	expect,
+	vi,
+	beforeAll,
+	beforeEach,
+	afterAll,
+	afterEach,
 } from 'vitest';
 ```
 
@@ -445,8 +445,8 @@ vi.mock('./mod', { spy: true }); // automock
 
 ```ts
 vi.mock('./mod', async (importOriginal) => ({
-  ...(await importOriginal()),
-  fn: vi.fn(),
+	...(await importOriginal()),
+	fn: vi.fn(),
 }));
 ```
 
@@ -462,11 +462,11 @@ vi.spyOn(mod, 'value', 'get').mockReturnValue('x');
 
 ```ts
 vi.mock('./mod', () => ({
-  MyClass: vi.fn(
-    class {
-      method = vi.fn();
-    }
-  ),
+	MyClass: vi.fn(
+		class {
+			method = vi.fn();
+		},
+	),
 }));
 ```
 
@@ -584,13 +584,13 @@ cdp().on(event, handler)
 
 ```ts
 export default defineConfig({
-  test: {
-    projects: [
-      'packages/*', // glob
-      { test: { name: 'unit' } }, // inline
-      './e2e/vitest.config.ts', // file
-    ],
-  },
+	test: {
+		projects: [
+			'packages/*', // glob
+			{ test: { name: 'unit' } }, // inline
+			'./e2e/vitest.config.ts', // file
+		],
+	},
 });
 ```
 
@@ -627,8 +627,8 @@ export default defineConfig({
 export const add = (a, b) => a + b;
 
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest;
-  it('adds', () => expect(add(1, 2)).toBe(3));
+	const { it, expect } = import.meta.vitest;
+	it('adds', () => expect(add(1, 2)).toBe(3));
 }
 ```
 
@@ -651,11 +651,11 @@ Update: `vitest -u` or press `u` in watch mode
 
 ```ts
 test('name', async ({ annotate }) => {
-  await annotate('message', 'notice'); // notice|warning|error
-  await annotate('msg', 'info', {
-    path: './file.txt',
-    contentType: 'text/plain',
-  });
+	await annotate('message', 'notice'); // notice|warning|error
+	await annotate('msg', 'info', {
+		path: './file.txt',
+		contentType: 'text/plain',
+	});
 });
 ```
 

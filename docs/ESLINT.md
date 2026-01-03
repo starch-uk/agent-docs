@@ -28,8 +28,8 @@ npm init @eslint/config@latest  # OR: npm i -D eslint @eslint/js && npx eslint .
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 export default tseslint.config(
-  eslint.configs.recommended,
-  tseslint.configs.recommended
+	eslint.configs.recommended,
+	tseslint.configs.recommended,
 );
 ```
 
@@ -43,11 +43,11 @@ ESLint can be configured using flat config (v9) or legacy config (v8) formats.
 
 ```javascript
 export default [
-  {
-    files: ['**/*.js'],
-    languageOptions: { ecmaVersion: 2022, sourceType: 'module' },
-    rules: { 'no-console': 'error' },
-  },
+	{
+		files: ['**/*.js'],
+		languageOptions: { ecmaVersion: 2022, sourceType: 'module' },
+		rules: { 'no-console': 'error' },
+	},
 ];
 ```
 
@@ -60,12 +60,12 @@ no cascading.
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 export default tseslint.config(
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    files: ['**/*.ts'],
-    rules: { '@typescript-eslint/no-explicit-any': 'warn' },
-  }
+	eslint.configs.recommended,
+	...tseslint.configs.recommended,
+	{
+		files: ['**/*.ts'],
+		rules: { '@typescript-eslint/no-explicit-any': 'warn' },
+	},
 );
 ```
 
@@ -73,10 +73,10 @@ export default tseslint.config(
 
 ```json
 {
-  "env": { "browser": true },
-  "extends": ["eslint:recommended"],
-  "parserOptions": { "ecmaVersion": 2021 },
-  "rules": { "no-console": "error" }
+	"env": { "browser": true },
+	"extends": ["eslint:recommended"],
+	"parserOptions": { "ecmaVersion": 2021 },
+	"rules": { "no-console": "error" }
 }
 ```
 
@@ -86,10 +86,10 @@ Cascading, `extends`, `env`, `.eslintignore`.
 
 ```json
 {
-  "parser": "@typescript-eslint/parser",
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  "parserOptions": { "project": "./tsconfig.json" },
-  "plugins": ["@typescript-eslint"]
+	"parser": "@typescript-eslint/parser",
+	"extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+	"parserOptions": { "project": "./tsconfig.json" },
+	"plugins": ["@typescript-eslint"]
 }
 ```
 
@@ -150,13 +150,13 @@ Package: `eslint-plugin-{name}` → ref: `{name}` | Rule: `{plugin}/{rule}`
 ```javascript
 import tsParser from '@typescript-eslint/parser';
 export default [
-  {
-    files: ['**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: { project: './tsconfig.json' },
-    },
-  },
+	{
+		files: ['**/*.ts'],
+		languageOptions: {
+			parser: tsParser,
+			parserOptions: { project: './tsconfig.json' },
+		},
+	},
 ];
 ```
 
@@ -242,16 +242,16 @@ rules:{'no-unused-vars':'off','@typescript-eslint/no-unused-vars':'error'}
 
 ```javascript
 export default tseslint.config(
-  {
-    files: ['**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-  ...tseslint.configs.recommendedTypeChecked
+	{
+		files: ['**/*.ts'],
+		languageOptions: {
+			parserOptions: {
+				project: ['./tsconfig.json'],
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
+	},
+	...tseslint.configs.recommendedTypeChecked,
 );
 ```
 
@@ -682,20 +682,20 @@ pnpm ls eslint-plugin-name      # verify install
 
 ```javascript
 module.exports = {
-  meta: {
-    type: 'problem',
-    docs: { description: '...' },
-    fixable: 'code',
-    schema: [],
-    messages: { msg: '{{p}} err' },
-  },
-  create(ctx) {
-    return {
-      'CallExpr[callee.name="x"]'(n) {
-        ctx.report({ node: n, messageId: 'msg', data: { p: 'v' } });
-      },
-    };
-  },
+	meta: {
+		type: 'problem',
+		docs: { description: '...' },
+		fixable: 'code',
+		schema: [],
+		messages: { msg: '{{p}} err' },
+	},
+	create(ctx) {
+		return {
+			'CallExpr[callee.name="x"]'(n) {
+				ctx.report({ node: n, messageId: 'msg', data: { p: 'v' } });
+			},
+		};
+	},
 };
 ```
 
@@ -705,19 +705,19 @@ module.exports = {
 import { ESLintUtils } from '@typescript-eslint/utils';
 const createRule = ESLintUtils.RuleCreator((n) => `url/${n}`);
 export default createRule({
-  name: 'rule',
-  meta: {
-    type: 'problem',
-    docs: { description: '...', requiresTypeChecking: true },
-    messages: { e: 'err' },
-    schema: [],
-  },
-  defaultOptions: [],
-  create(ctx) {
-    const svc = ESLintUtils.getParserServices(ctx);
-    const chk = svc.program.getTypeChecker();
-    return {};
-  },
+	name: 'rule',
+	meta: {
+		type: 'problem',
+		docs: { description: '...', requiresTypeChecking: true },
+		messages: { e: 'err' },
+		schema: [],
+	},
+	defaultOptions: [],
+	create(ctx) {
+		const svc = ESLintUtils.getParserServices(ctx);
+		const chk = svc.program.getTypeChecker();
+		return {};
+	},
 });
 ```
 
@@ -726,10 +726,10 @@ export default createRule({
 ```javascript
 import { RuleTester } from '@typescript-eslint/rule-tester';
 new RuleTester({
-  languageOptions: {
-    parser: '@typescript-eslint/parser',
-    parserOptions: { project: './tsconfig.json' },
-  },
+	languageOptions: {
+		parser: '@typescript-eslint/parser',
+		parserOptions: { project: './tsconfig.json' },
+	},
 }).run('rule', rule, { valid: [], invalid: [] });
 ```
 
@@ -737,17 +737,17 @@ new RuleTester({
 
 ```javascript
 module.exports = {
-  processors: {
-    '.md': {
-      preprocess(t, f) {
-        return [];
-      },
-      postprocess(m, f) {
-        return m[0];
-      },
-      supportsAutofix: true,
-    },
-  },
+	processors: {
+		'.md': {
+			preprocess(t, f) {
+				return [];
+			},
+			postprocess(m, f) {
+				return m[0];
+			},
+			supportsAutofix: true,
+		},
+	},
 };
 ```
 

@@ -2,8 +2,8 @@
 
 **Version:** 1.0.0
 
-> **Purpose**: API documentation generator for JavaScript. Extracts `/** ... */` comments → HTML docs.
-> **Node**: ^20.19.0 | ^22.12.0 | >=23.0.0 (JSDoc 5.x)
+> **Purpose**: API documentation generator for JavaScript. Extracts `/** ... */`
+> comments → HTML docs. **Node**: ^20.19.0 | ^22.12.0 | >=23.0.0 (JSDoc 5.x)
 
 ---
 
@@ -55,29 +55,29 @@ jsdoc -d docs/ file.js        # Custom output dir
 
 ```json
 {
-  "source": {
-    "include": ["src/"],
-    "exclude": ["src/tests/"],
-    "includePattern": ".+\\.js(doc|x)?$",
-    "excludePattern": "(^|\\/|\\\\)_"
-  },
-  "sourceType": "module",
-  "plugins": ["plugins/markdown"],
-  "recurseDepth": 10,
-  "tags": {
-    "allowUnknownTags": true,
-    "dictionaries": ["jsdoc", "closure"]
-  },
-  "templates": {
-    "cleverLinks": false,
-    "monospaceLinks": false,
-    "default": { "outputSourceFiles": true }
-  },
-  "opts": {
-    "destination": "./out/",
-    "recurse": true,
-    "tutorials": "tutorials/"
-  }
+	"source": {
+		"include": ["src/"],
+		"exclude": ["src/tests/"],
+		"includePattern": ".+\\.js(doc|x)?$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"sourceType": "module",
+	"plugins": ["plugins/markdown"],
+	"recurseDepth": 10,
+	"tags": {
+		"allowUnknownTags": true,
+		"dictionaries": ["jsdoc", "closure"]
+	},
+	"templates": {
+		"cleverLinks": false,
+		"monospaceLinks": false,
+		"default": { "outputSourceFiles": true }
+	},
+	"opts": {
+		"destination": "./out/",
+		"recurse": true,
+		"tutorials": "tutorials/"
+	}
 }
 ```
 
@@ -85,7 +85,7 @@ jsdoc -d docs/ file.js        # Custom output dir
 
 ```javascript
 module.exports = {
-  /* same structure */
+	/* same structure */
 };
 ```
 
@@ -305,42 +305,42 @@ function greet(name, age) {}
  * const p = new Point(10, 20);
  */
 class Point {
-  /**
-   * @param {number} x - X coordinate
-   * @param {number} y - Y coordinate
-   */
-  constructor(x, y) {
-    /** @type {number} */
-    this.x = x;
-    /** @type {number} */
-    this.y = y;
-  }
+	/**
+	 * @param {number} x - X coordinate
+	 * @param {number} y - Y coordinate
+	 */
+	constructor(x, y) {
+		/** @type {number} */
+		this.x = x;
+		/** @type {number} */
+		this.y = y;
+	}
 
-  /**
-   * Get distance to another point.
-   * @param {Point} other
-   * @returns {number}
-   */
-  distanceTo(other) {}
+	/**
+	 * Get distance to another point.
+	 * @param {Point} other
+	 * @returns {number}
+	 */
+	distanceTo(other) {}
 
-  /**
-   * Create from string.
-   * @param {string} str - Format: "x,y"
-   * @returns {Point}
-   * @static
-   */
-  static fromString(str) {}
+	/**
+	 * Create from string.
+	 * @param {string} str - Format: "x,y"
+	 * @returns {Point}
+	 * @static
+	 */
+	static fromString(str) {}
 }
 
 /**
  * @augments Point
  */
 class Dot extends Point {
-  constructor(x, y, width) {
-    super(x, y);
-    /** @type {number} */
-    this.width = width;
-  }
+	constructor(x, y, width) {
+		super(x, y);
+		/** @type {number} */
+		this.width = width;
+	}
 }
 ```
 
@@ -385,12 +385,12 @@ exports.formatDate = function (date) {};
 
 // Or module.exports
 module.exports = {
-  /**
-   * Parse input.
-   * @param {string} input
-   * @returns {Object}
-   */
-  parse: function (input) {},
+	/**
+	 * Parse input.
+	 * @param {string} input
+	 * @returns {Object}
+	 */
+	parse: function (input) {},
 };
 ```
 
@@ -401,16 +401,16 @@ module.exports = {
  * @module my/shirt
  */
 define('my/shirt', function () {
-  /**
-   * @exports my/shirt
-   */
-  return {
-    /** @type {string} */
-    color: 'black',
+	/**
+	 * @exports my/shirt
+	 */
+	return {
+		/** @type {string} */
+		color: 'black',
 
-    /** Button the shirt. */
-    button: function () {},
-  };
+		/** Button the shirt. */
+		button: function () {},
+	};
 });
 ```
 
@@ -432,17 +432,18 @@ define('my/shirt', function () {
 
 ```json
 {
-  "plugins": ["plugins/markdown"],
-  "markdown": {
-    "tags": ["@description", "@param", "@returns", "@throws", "@example"],
-    "excludeTags": ["@see"],
-    "hardwrap": false,
-    "idInHeadings": true
-  }
+	"plugins": ["plugins/markdown"],
+	"markdown": {
+		"tags": ["@description", "@param", "@returns", "@throws", "@example"],
+		"excludeTags": ["@see"],
+		"hardwrap": false,
+		"idInHeadings": true
+	}
 }
 ```
 
-**Default processed tags**: `@author`, `@classdesc`, `@description`, `@param`, `@property`, `@returns`, `@see`, `@throws`
+**Default processed tags**: `@author`, `@classdesc`, `@description`, `@param`,
+`@property`, `@returns`, `@see`, `@throws`
 
 ### Tutorials
 
@@ -450,7 +451,7 @@ define('my/shirt', function () {
 
 ```json
 {
-  "opts": { "tutorials": "tutorials/" }
+	"opts": { "tutorials": "tutorials/" }
 }
 ```
 
@@ -458,13 +459,13 @@ define('my/shirt', function () {
 
 ```json
 {
-  "getting-started": {
-    "title": "Getting Started",
-    "children": {
-      "installation": { "title": "Installation" },
-      "quick-start": { "title": "Quick Start" }
-    }
-  }
+	"getting-started": {
+		"title": "Getting Started",
+		"children": {
+			"installation": { "title": "Installation" },
+			"quick-start": { "title": "Quick Start" }
+		}
+	}
 }
 ```
 
@@ -487,18 +488,18 @@ define('my/shirt', function () {
 
 ```javascript
 exports.handlers = {
-  parseBegin: function (e) {}, // e.sourcefiles
-  fileBegin: function (e) {}, // e.filename
-  beforeParse: function (e) {}, // e.filename, e.source (modifiable)
-  jsdocCommentFound: function (e) {}, // e.comment, e.filename
-  symbolFound: function (e) {}, // e.code, e.filename
-  newDoclet: function (e) {}, // e.doclet
-  fileComplete: function (e) {}, // e.filename, e.source
-  parseComplete: function (e) {}, // e.doclets (array)
+	parseBegin: function (e) {}, // e.sourcefiles
+	fileBegin: function (e) {}, // e.filename
+	beforeParse: function (e) {}, // e.filename, e.source (modifiable)
+	jsdocCommentFound: function (e) {}, // e.comment, e.filename
+	symbolFound: function (e) {}, // e.code, e.filename
+	newDoclet: function (e) {}, // e.doclet
+	fileComplete: function (e) {}, // e.filename, e.source
+	parseComplete: function (e) {}, // e.doclets (array)
 };
 
 exports.astNodeVisitor = {
-  visitNode: function (node, e, parser, currentSourceName) {},
+	visitNode: function (node, e, parser, currentSourceName) {},
 };
 ```
 
@@ -521,20 +522,20 @@ exports.astNodeVisitor = {
 var env = require('jsdoc/env');
 
 exports.handlers = {
-  parseBegin: function (e) {
-    var config = env.conf.myplugin || {};
-    this.startTime = Date.now();
-  },
+	parseBegin: function (e) {
+		var config = env.conf.myplugin || {};
+		this.startTime = Date.now();
+	},
 
-  newDoclet: function (e) {
-    if (e.doclet.kind === 'function') {
-      e.doclet.customProp = 'processed';
-    }
-  },
+	newDoclet: function (e) {
+		if (e.doclet.kind === 'function') {
+			e.doclet.customProp = 'processed';
+		}
+	},
 
-  parseComplete: function (e) {
-    console.log('Done in ' + (Date.now() - this.startTime) + 'ms');
-  },
+	parseComplete: function (e) {
+		console.log('Done in ' + (Date.now() - this.startTime) + 'ms');
+	},
 };
 ```
 
@@ -546,18 +547,18 @@ exports.handlers = {
 
 ```json
 {
-  "templates": {
-    "cleverLinks": true,
-    "monospaceLinks": false,
-    "useShortNamesInLinks": false,
-    "default": {
-      "outputSourceFiles": true,
-      "staticFiles": {
-        "include": [],
-        "exclude": []
-      }
-    }
-  }
+	"templates": {
+		"cleverLinks": true,
+		"monospaceLinks": false,
+		"useShortNamesInLinks": false,
+		"default": {
+			"outputSourceFiles": true,
+			"staticFiles": {
+				"include": [],
+				"exclude": []
+			}
+		}
+	}
 }
 ```
 

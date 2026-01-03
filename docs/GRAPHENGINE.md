@@ -4,8 +4,8 @@
 
 Condensed guide for Salesforce Graph Engine (SFGE) data-flow analysis and rules.
 
-**Related Docs:** [CODEANALYZER.md](CODEANALYZER.md),
-[PMD.md](PMD.md), [GREMLIN.md](GREMLIN.md), [TINKERPOP.md](TINKERPOP.md),
+**Related Docs:** [CODEANALYZER.md](CODEANALYZER.md), [PMD.md](PMD.md),
+[GREMLIN.md](GREMLIN.md), [TINKERPOP.md](TINKERPOP.md),
 [GRAPHML.md](GRAPHML.md), [GRAPHSON.md](GRAPHSON.md), [GRYO.md](GRYO.md),
 [GRAPHBINARY.md](GRAPHBINARY.md)
 
@@ -64,13 +64,13 @@ Configure SFGE in `code-analyzer.yml`:
 
 ```yaml
 engines:
-  sfge:
-    disable_engine: false
-    disable_limit_reached_violations: false
-    java_command: null
-    java_max_heap_size: null
-    java_thread_count: 4
-    java_thread_timeout: 900000
+    sfge:
+        disable_engine: false
+        disable_limit_reached_violations: false
+        java_command: null
+        java_max_heap_size: null
+        java_thread_count: 4
+        java_thread_timeout: 900000
 ```
 
 ### Configuration Properties

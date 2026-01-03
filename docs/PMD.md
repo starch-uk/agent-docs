@@ -13,8 +13,7 @@ Condensed PMD guide for Salesforce Code Analyzer integration.
 
 ## Related Docs
 
-- [Code Analyzer Config](CODEANALYZER.md) - `code-analyzer.yml`
-  reference
+- [Code Analyzer Config](CODEANALYZER.md) - `code-analyzer.yml` reference
 - [XPath 3.1](XPATH31.md) - XPath syntax for rules
 - [Apex AST](#apex-ast-reference) - AST node types/patterns
 
@@ -30,9 +29,9 @@ XML files defining rules to execute. Reference in `code-analyzer.yml`:
 
 ```yaml
 engines:
-  pmd:
-    rulesets:
-      - rulesets/design/InnerClassesCannotBeStatic.xml
+    pmd:
+        rulesets:
+            - rulesets/design/InnerClassesCannotBeStatic.xml
 ```
 ````
 
@@ -116,10 +115,10 @@ multiple)
 
 ```yaml
 rules:
-  pmd:
-    NPathComplexity:
-      severity: 'High'
-      tags: ['Recommended']
+    pmd:
+        NPathComplexity:
+            severity: 'High'
+            tags: ['Recommended']
 ```
 
 **Complete Override Example:**
@@ -158,11 +157,11 @@ rules:
 
 ```yaml
 engines:
-  pmd:
-    custom_rulesets:
-      - rulesets/design/EnumMinimumValues.xml # Original first
-      - rulesets/design/PreferSwitchOverIfElseChains.xml
-      - rulesets/custom-overrides.xml # Override after
+    pmd:
+        custom_rulesets:
+            - rulesets/design/EnumMinimumValues.xml # Original first
+            - rulesets/design/PreferSwitchOverIfElseChains.xml
+            - rulesets/custom-overrides.xml # Override after
 ```
 
 **Ref format:** `{ruleset-path}/{rule-name}`
@@ -387,12 +386,12 @@ Then reference in `code-analyzer.yml`:
 
 ```yaml
 engines:
-  pmd:
-    custom_rulesets:
-      - rulesets/design/SomeRule.xml
-      - rulesets/design/AnotherRule.xml
-      - rulesets/design/YetAnotherRule.xml
-      - rulesets/suppression-rules.xml # Custom suppression ruleset
+    pmd:
+        custom_rulesets:
+            - rulesets/design/SomeRule.xml
+            - rulesets/design/AnotherRule.xml
+            - rulesets/design/YetAnotherRule.xml
+            - rulesets/suppression-rules.xml # Custom suppression ruleset
 ```
 
 **XPath Notes:**
@@ -477,14 +476,14 @@ Code Analyzer handles automatically.
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
-  - uses: actions/setup-java@v4
-    with:
-      distribution: 'temurin'
-      java-version: '11'
-  - uses: pmd/pmd-github-action@v2
-    with:
-      rulesets: 'rulesets/design/InnerClassesCannotBeStatic.xml'
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+          distribution: 'temurin'
+          java-version: '11'
+    - uses: pmd/pmd-github-action@v2
+      with:
+          rulesets: 'rulesets/design/InnerClassesCannotBeStatic.xml'
 ```
 
 **Inputs:** `rulesets` (required), `version` (default: "latest"), `sourcePath`
@@ -498,7 +497,7 @@ steps:
 - uses: pmd/pmd-github-action@v2
   id: pmd
   with:
-    rulesets: 'rulesets/all.xml'
+      rulesets: 'rulesets/all.xml'
 - name: Fail on violations
   if: steps.pmd.outputs.violations != 0
   run: exit 1
@@ -565,13 +564,13 @@ PMD 7.0.0 switched from Jorje to Summit AST parser. Key changes:
 When migrating XPath rules from PMD 6 to PMD 7:
 
 1. **Remove references to removed attributes:**
-   - Remove `@Synthetic` checks on `Method` nodes
-   - Remove `@Namespace` checks on any nodes
-   - Remove `@Context` checks on `ReferenceExpression` nodes
+    - Remove `@Synthetic` checks on `Method` nodes
+    - Remove `@Namespace` checks on any nodes
+    - Remove `@Context` checks on `ReferenceExpression` nodes
 
 2. **Remove references to removed nodes:**
-   - Remove XPath expressions matching `BridgeMethodCreator` nodes
-   - Remove checks for method names `<clinit>` or `<init>`
+    - Remove XPath expressions matching `BridgeMethodCreator` nodes
+    - Remove checks for method names `<clinit>` or `<init>`
 
 3. **Test thoroughly:** The AST structure is mostly compatible, but some edge
    cases may differ.
@@ -749,7 +748,8 @@ ApexDoc comments (`/** */`) in the AST as `FormalComment` nodes. Single-line
 comments (`//`) are **not** included in the AST and cannot be detected using
 XPath expressions. For rules that need to detect single-line comments (e.g.,
 `// prettier-ignore`, `// NOPMD`), use regex-based rules instead of PMD XPath
-rules. See [Regex Engine](CODEANALYZER.md#regex-engine) for creating regex-based rules.
+rules. See [Regex Engine](CODEANALYZER.md#regex-engine) for creating regex-based
+rules.
 
 **UserEnum** - Enum declaration
 

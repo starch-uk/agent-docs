@@ -1,31 +1,32 @@
 # Contributing to agent-docs
 
-Thank you for considering contributing to agent-docs! We welcome contributions from the community.
+Thank you for considering contributing to agent-docs! We welcome contributions
+from the community.
 
 ## How to Contribute
 
 1. **Fork the repository** and clone it to your local machine
 2. **Create a new branch** for your feature or bug fix:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+    ```bash
+    git checkout -b feature/your-feature-name
+    ```
 3. **Make your changes** following the project's code style and conventions
 4. **Run tests** to ensure everything passes:
-   ```bash
-   pnpm test
-   ```
+    ```bash
+    pnpm test
+    ```
 5. **Format your code**:
-   ```bash
-   pnpm format
-   ```
+    ```bash
+    pnpm format
+    ```
 6. **Commit your changes** with a descriptive commit message:
-   ```bash
-   git commit -m "Add feature: your feature description"
-   ```
+    ```bash
+    git commit -m "Add feature: your feature description"
+    ```
 7. **Push your changes** to your forked repository:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+    ```bash
+    git push origin feature/your-feature-name
+    ```
 8. **Open a pull request** to the main repository's `main` branch
 
 ## Code Style
@@ -37,7 +38,8 @@ Thank you for considering contributing to agent-docs! We welcome contributions f
 
 ## Reporting Issues
 
-If you encounter any issues or have suggestions for improvements, please open an issue in the repository with:
+If you encounter any issues or have suggestions for improvements, please open an
+issue in the repository with:
 
 - A clear description of the issue
 - Steps to reproduce (if applicable)
@@ -46,4 +48,5 @@ If you encounter any issues or have suggestions for improvements, please open an
 
 ## License
 
-By contributing to agent-docs, you agree that your contributions will be licensed under the MIT License.
+By contributing to agent-docs, you agree that your contributions will be
+licensed under the MIT License.

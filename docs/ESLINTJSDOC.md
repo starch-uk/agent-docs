@@ -2,8 +2,9 @@
 
 **Version:** 1.0.0
 
-> **Purpose**: JSDoc linting rules for ESLint. Validates syntax, types, params, returns, completeness.
-> **Node**: >=20.11.0 | **ESLint**: ^7.0.0 | ^8.0.0 | ^9.0.0
+> **Purpose**: JSDoc linting rules for ESLint. Validates syntax, types, params,
+> returns, completeness. **Node**: >=20.11.0 | **ESLint**: ^7.0.0 | ^8.0.0 |
+> ^9.0.0
 
 ---
 
@@ -23,25 +24,28 @@ npm install --save-dev eslint-plugin-jsdoc
 import { jsdoc } from 'eslint-plugin-jsdoc';
 
 export default [
-  jsdoc({
-    config: 'flat/recommended',
-    rules: {
-      'jsdoc/require-description': 'warn',
-    },
-    // Uncomment this if you wish your `settings` to overwrite the config's own settings;
-    //   otherwise, the default behavior is to merge recursively
-    // mergeSettings: false,
-    settings: {
-      // No `jsdoc` child object needed here
-      structuredTags: {
-        see: { name: 'namepath-referencing', required: ['name'] },
-      },
-    },
-  }),
+	jsdoc({
+		config: 'flat/recommended',
+		rules: {
+			'jsdoc/require-description': 'warn',
+		},
+		// Uncomment this if you wish your `settings` to overwrite the config's own settings;
+		//   otherwise, the default behavior is to merge recursively
+		// mergeSettings: false,
+		settings: {
+			// No `jsdoc` child object needed here
+			structuredTags: {
+				see: { name: 'namepath-referencing', required: ['name'] },
+			},
+		},
+	}),
 ];
 ```
 
-A `plugins` property can also be supplied to merge with the resulting `jsdoc` plugin. Other config properties such as `files`, `ignores`, etc. are also copied over, though noting that if the specified config produces an array, they will not currently function.
+A `plugins` property can also be supplied to merge with the resulting `jsdoc`
+plugin. Other config properties such as `files`, `ignores`, etc. are also copied
+over, though noting that if the specified config produces an array, they will
+not currently function.
 
 ### Flat Config — Declarative
 
@@ -49,12 +53,12 @@ A `plugins` property can also be supplied to merge with the resulting `jsdoc` pl
 import jsdoc from 'eslint-plugin-jsdoc';
 
 export default [
-  jsdoc.configs['flat/recommended'],
-  {
-    files: ['**/*.js'],
-    plugins: { jsdoc },
-    rules: { 'jsdoc/require-description': 'warn' },
-  },
+	jsdoc.configs['flat/recommended'],
+	{
+		files: ['**/*.js'],
+		plugins: { jsdoc },
+		rules: { 'jsdoc/require-description': 'warn' },
+	},
 ];
 ```
 
@@ -62,9 +66,9 @@ export default [
 
 ```javascript
 module.exports = {
-  plugins: ['jsdoc'],
-  extends: ['plugin:jsdoc/recommended'],
-  rules: { 'jsdoc/require-description': 'error' },
+	plugins: ['jsdoc'],
+	extends: ['plugin:jsdoc/recommended'],
+	rules: { 'jsdoc/require-description': 'error' },
 };
 ```
 
@@ -172,33 +176,33 @@ Lint JavaScript inside `@example` and default value tags.
 import { getJsdocProcessorPlugin } from 'eslint-plugin-jsdoc';
 
 export default [
-  {
-    files: ['**/*.js'],
-    plugins: {
-      examples: getJsdocProcessorPlugin({
-        // checkDefaults: true,
-        // checkParams: true,
-        // checkProperties: true
-      }),
-    },
-    processor: 'examples/examples',
-  },
-  {
-    files: ['**/*.md/*.js'], // Target @example blocks
-    rules: {
-      /* rules for examples */
-    },
-  },
-  {
-    files: [
-      '**/*.jsdoc-defaults',
-      '**/*.jsdoc-params',
-      '**/*.jsdoc-properties',
-    ],
-    rules: {
-      /* rules for defaults */
-    },
-  },
+	{
+		files: ['**/*.js'],
+		plugins: {
+			examples: getJsdocProcessorPlugin({
+				// checkDefaults: true,
+				// checkParams: true,
+				// checkProperties: true
+			}),
+		},
+		processor: 'examples/examples',
+	},
+	{
+		files: ['**/*.md/*.js'], // Target @example blocks
+		rules: {
+			/* rules for examples */
+		},
+	},
+	{
+		files: [
+			'**/*.jsdoc-defaults',
+			'**/*.jsdoc-params',
+			'**/*.jsdoc-properties',
+		],
+		rules: {
+			/* rules for defaults */
+		},
+	},
 ];
 ```
 
@@ -208,9 +212,9 @@ export default [
 import jsdoc from 'eslint-plugin-jsdoc';
 
 export default [
-  ...jsdoc.configs.examples,
-  // ...jsdoc.configs['default-expressions'],
-  // ...jsdoc.configs['examples-and-default-expressions'],
+	...jsdoc.configs.examples,
+	// ...jsdoc.configs['default-expressions'],
+	// ...jsdoc.configs['examples-and-default-expressions'],
 ];
 ```
 
@@ -221,26 +225,26 @@ import { getJsdocProcessorPlugin } from 'eslint-plugin-jsdoc';
 import ts, { parser as typescriptEslintParser } from 'typescript-eslint';
 
 export default [
-  {
-    files: ['**/*.ts'],
-    languageOptions: { parser: typescriptEslintParser },
-    plugins: {
-      examples: getJsdocProcessorPlugin({
-        parser: typescriptEslintParser,
-        matchingFileName: 'dummy.md/*.ts',
-      }),
-    },
-    processor: 'examples/examples',
-  },
-  ...ts.configs.recommended,
-  {
-    files: ['**/*.md/*.ts'],
-    languageOptions: { parser: typescriptEslintParser },
-    rules: {
-      'no-extra-semi': 'error',
-      ...ts.configs.disableTypeChecked.rules, // Required due to issue #1377
-    },
-  },
+	{
+		files: ['**/*.ts'],
+		languageOptions: { parser: typescriptEslintParser },
+		plugins: {
+			examples: getJsdocProcessorPlugin({
+				parser: typescriptEslintParser,
+				matchingFileName: 'dummy.md/*.ts',
+			}),
+		},
+		processor: 'examples/examples',
+	},
+	...ts.configs.recommended,
+	{
+		files: ['**/*.md/*.ts'],
+		languageOptions: { parser: typescriptEslintParser },
+		rules: {
+			'no-extra-semi': 'error',
+			...ts.configs.disableTypeChecked.rules, // Required due to issue #1377
+		},
+	},
 ];
 ```
 
@@ -362,7 +366,9 @@ export default [
 
 ### Contexts (AST Selectors)
 
-Rules with `contexts` option use [ESLint selectors](https://eslint.org/docs/developer-guide/selectors) (esquery expressions).
+Rules with `contexts` option use
+[ESLint selectors](https://eslint.org/docs/developer-guide/selectors) (esquery
+expressions).
 
 ```javascript
 {
@@ -387,8 +393,10 @@ Rules with `contexts` option use [ESLint selectors](https://eslint.org/docs/deve
 **AST tools**:
 
 - [AST Explorer](https://astexplorer.net/) — Visualize JS AST
-- [@es-joy/jsdoccomment demo](https://es-joy.github.io/jsdoccomment/demo/) — JSDoc comment AST
-- [jsdoc-type-pratt-parser demo](https://jsdoc-type-pratt-parser.github.io/jsdoc-type-pratt-parser/) — Type AST
+- [@es-joy/jsdoccomment demo](https://es-joy.github.io/jsdoccomment/demo/) —
+  JSDoc comment AST
+- [jsdoc-type-pratt-parser demo](https://jsdoc-type-pratt-parser.github.io/jsdoc-type-pratt-parser/)
+  — Type AST
 
 ### Custom Forbid Rules
 
@@ -398,27 +406,28 @@ Create individual rules for forbidden structures:
 import { jsdoc } from 'eslint-plugin-jsdoc';
 
 export default [
-  jsdoc({
-    config: 'flat/recommended',
-    extraRuleDefinitions: {
-      forbid: {
-        Any: {
-          contexts: [
-            {
-              comment: 'JsdocBlock:has(JsdocTypeName[value="any"])',
-              context: 'any',
-              message: '`any` not allowed',
-            },
-          ],
-          description: 'Forbids `any` usage',
-          url: 'https://example.com/any-rule',
-        },
-      },
-    },
-    rules: {
-      'jsdoc/forbid-Any': ['error'],
-    },
-  }),
+	jsdoc({
+		config: 'flat/recommended',
+		extraRuleDefinitions: {
+			forbid: {
+				Any: {
+					contexts: [
+						{
+							comment:
+								'JsdocBlock:has(JsdocTypeName[value="any"])',
+							context: 'any',
+							message: '`any` not allowed',
+						},
+					],
+					description: 'Forbids `any` usage',
+					url: 'https://example.com/any-rule',
+				},
+			},
+		},
+		rules: {
+			'jsdoc/forbid-Any': ['error'],
+		},
+	}),
 ];
 ```
 
@@ -430,27 +439,27 @@ Create individual rules for preferred types:
 import { jsdoc } from 'eslint-plugin-jsdoc';
 
 export default [
-  jsdoc({
-    config: 'flat/recommended',
-    extraRuleDefinitions: {
-      preferTypes: {
-        promise: {
-          description: 'Disallows Promise without generic',
-          overrideSettings: {
-            Promise: {
-              message: 'Add generic type for Promise',
-              replacement: false,
-              unifyParentAndChildTypeChecks: false,
-            },
-          },
-          url: 'https://example.com/promise-rule',
-        },
-      },
-    },
-    rules: {
-      'jsdoc/prefer-type-promise': ['error'],
-    },
-  }),
+	jsdoc({
+		config: 'flat/recommended',
+		extraRuleDefinitions: {
+			preferTypes: {
+				promise: {
+					description: 'Disallows Promise without generic',
+					overrideSettings: {
+						Promise: {
+							message: 'Add generic type for Promise',
+							replacement: false,
+							unifyParentAndChildTypeChecks: false,
+						},
+					},
+					url: 'https://example.com/promise-rule',
+				},
+			},
+		},
+		rules: {
+			'jsdoc/prefer-type-promise': ['error'],
+		},
+	}),
 ];
 ```
 
@@ -472,10 +481,10 @@ export default [jsdoc({ config: 'flat/recommended' })];
 import { jsdoc } from 'eslint-plugin-jsdoc';
 
 export default [
-  jsdoc({
-    config: 'flat/recommended-typescript',
-    settings: { mode: 'typescript' },
-  }),
+	jsdoc({
+		config: 'flat/recommended-typescript',
+		settings: { mode: 'typescript' },
+	}),
 ];
 ```
 

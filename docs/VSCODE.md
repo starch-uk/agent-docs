@@ -149,15 +149,15 @@ Example `code-analyzer.yml`:
 
 ```yaml
 engines:
-  pmd:
-    custom_rulesets:
-      - rulesets/design/InnerClassesCannotBeStatic.xml
+    pmd:
+        custom_rulesets:
+            - rulesets/design/InnerClassesCannotBeStatic.xml
 
 rules:
-  pmd:
-    NoSingleLetterVariableNames:
-      severity: 'High'
-      tags: ['Recommended']
+    pmd:
+        NoSingleLetterVariableNames:
+            severity: 'High'
+            tags: ['Recommended']
 ```
 
 ## Keyboard Shortcuts
@@ -223,8 +223,9 @@ If extension reports CLI plugin not found:
 
 ## Related Documentation
 
-- **[CLI Commands](CODEANALYZER.md#cli-commands)** - Command-line usage of Code Analyzer
-- **[Code Analyzer Configuration](CODEANALYZER.md)** - Complete
-  configuration reference
+- **[CLI Commands](CODEANALYZER.md#cli-commands)** - Command-line usage of Code
+  Analyzer
+- **[Code Analyzer Configuration](CODEANALYZER.md)** - Complete configuration
+  reference
 - **[PMD Engine](PMD.md)** - PMD rules and configuration
 - **[ESLint Engine](ESLINT.md)** - ESLint rules for JavaScript/TypeScript/LWC

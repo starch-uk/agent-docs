@@ -22,34 +22,34 @@ import { join, relative } from 'node:path';
  * Options for generating repository todos.
  */
 interface RepoTodoOptions {
-  /** Repository root path. */
-  readonly repoPath: string;
-  /** Paths to exclude (relative to repo root). */
-  readonly excludePaths?: readonly string[];
-  /** Custom prefix for todo IDs (default: 'file-'). */
-  readonly todoIdPrefix?: string;
+	/** Repository root path. */
+	readonly repoPath: string;
+	/** Paths to exclude (relative to repo root). */
+	readonly excludePaths?: readonly string[];
+	/** Custom prefix for todo IDs (default: 'file-'). */
+	readonly todoIdPrefix?: string;
 }
 
 /**
  * Todo item structure matching todo_write tool format.
  */
 interface RepoTodo {
-  readonly id: string;
-  readonly status: 'pending';
-  readonly content: string;
+	readonly id: string;
+	readonly status: 'pending';
+	readonly content: string;
 }
 
 /**
  * Default paths to exclude from file listing.
  */
 const DEFAULT_EXCLUDE_PATHS: readonly string[] = [
-  '.git',
-  'node_modules',
-  'dist',
-  'coverage',
-  '.next',
-  'build',
-  'out',
+	'.git',
+	'node_modules',
+	'dist',
+	'coverage',
+	'.next',
+	'build',
+	'out',
 ] as const;
 
 /**
@@ -59,16 +59,16 @@ const DEFAULT_EXCLUDE_PATHS: readonly string[] = [
  * @returns Valid todo ID.
  */
 function pathToTodoId(filePath: Readonly<string>, prefix = 'file-'): string {
-  // Remove leading ./ if present
-  const cleanPath = filePath.replace(/^\.\//, '');
-  // Replace path separators and special chars with hyphens
-  const id = cleanPath
-    .replace(/\//g, '-')
-    .replace(/\\/g, '-')
-    .replace(/[^a-zA-Z0-9-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-  return `${prefix}${id}`;
+	// Remove leading ./ if present
+	const cleanPath = filePath.replace(/^\.\//, '');
+	// Replace path separators and special chars with hyphens
+	const id = cleanPath
+		.replace(/\//g, '-')
+		.replace(/\\/g, '-')
+		.replace(/[^a-zA-Z0-9-]/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/^-|-$/g, '');
+	return `${prefix}${id}`;
 }
 
 /**
@@ -79,45 +79,45 @@ function pathToTodoId(filePath: Readonly<string>, prefix = 'file-'): string {
  * @returns Array of relative file paths.
  */
 async function listFilesRecursive(
-  dirPath: Readonly<string>,
-  repoRoot: Readonly<string>,
-  excludePaths: Readonly<readonly string[]>
+	dirPath: Readonly<string>,
+	repoRoot: Readonly<string>,
+	excludePaths: Readonly<readonly string[]>,
 ): Promise<string[]> {
-  const files: string[] = [];
-  const entries = await readdir(dirPath, { withFileTypes: true });
+	const files: string[] = [];
+	const entries = await readdir(dirPath, { withFileTypes: true });
 
-  for (const entry of entries) {
-    const fullPath = join(dirPath, entry.name);
-    const relativePath = relative(repoRoot, fullPath);
+	for (const entry of entries) {
+		const fullPath = join(dirPath, entry.name);
+		const relativePath = relative(repoRoot, fullPath);
 
-    // Check if this path should be excluded
-    const shouldExclude = excludePaths.some((exclude) => {
-      // Check if path starts with exclude pattern
-      if (relativePath.startsWith(exclude)) {
-        return true;
-      }
-      // Check if any part of the path matches exclude
-      const pathParts = relativePath.split(/[/\\]/);
-      return pathParts.includes(exclude);
-    });
+		// Check if this path should be excluded
+		const shouldExclude = excludePaths.some((exclude) => {
+			// Check if path starts with exclude pattern
+			if (relativePath.startsWith(exclude)) {
+				return true;
+			}
+			// Check if any part of the path matches exclude
+			const pathParts = relativePath.split(/[/\\]/);
+			return pathParts.includes(exclude);
+		});
 
-    if (shouldExclude) {
-      continue;
-    }
+		if (shouldExclude) {
+			continue;
+		}
 
-    if (entry.isDirectory()) {
-      const subFiles = await listFilesRecursive(
-        fullPath,
-        repoRoot,
-        excludePaths
-      );
-      files.push(...subFiles);
-    } else if (entry.isFile()) {
-      files.push(relativePath);
-    }
-  }
+		if (entry.isDirectory()) {
+			const subFiles = await listFilesRecursive(
+				fullPath,
+				repoRoot,
+				excludePaths,
+			);
+			files.push(...subFiles);
+		} else if (entry.isFile()) {
+			files.push(relativePath);
+		}
+	}
 
-  return files;
+	return files;
 }
 
 /**
@@ -126,38 +126,38 @@ async function listFilesRecursive(
  * @returns Array of todo items for all repository files.
  */
 async function generateRepoTodos(
-  options: RepoTodoOptions
+	options: RepoTodoOptions,
 ): Promise<readonly RepoTodo[]> {
-  const {
-    repoPath,
-    excludePaths = DEFAULT_EXCLUDE_PATHS,
-    todoIdPrefix = 'file-',
-  } = options;
+	const {
+		repoPath,
+		excludePaths = DEFAULT_EXCLUDE_PATHS,
+		todoIdPrefix = 'file-',
+	} = options;
 
-  // Normalize repo path
-  const normalizedRepoPath = repoPath.replace(/\/$/, '');
+	// Normalize repo path
+	const normalizedRepoPath = repoPath.replace(/\/$/, '');
 
-  // List all files
-  const files = await listFilesRecursive(
-    normalizedRepoPath,
-    normalizedRepoPath,
-    excludePaths
-  );
+	// List all files
+	const files = await listFilesRecursive(
+		normalizedRepoPath,
+		normalizedRepoPath,
+		excludePaths,
+	);
 
-  // Sort files for consistent ordering
-  const sortedFiles = files.sort();
+	// Sort files for consistent ordering
+	const sortedFiles = files.sort();
 
-  // Generate todos
-  const todos: RepoTodo[] = sortedFiles.map((filePath) => {
-    const todoId = pathToTodoId(filePath, todoIdPrefix);
-    return {
-      content: `Inspect ${filePath}`,
-      id: todoId,
-      status: 'pending',
-    };
-  });
+	// Generate todos
+	const todos: RepoTodo[] = sortedFiles.map((filePath) => {
+		const todoId = pathToTodoId(filePath, todoIdPrefix);
+		return {
+			content: `Inspect ${filePath}`,
+			id: todoId,
+			status: 'pending',
+		};
+	});
 
-  return todos;
+	return todos;
 }
 
 /**
@@ -167,10 +167,10 @@ async function generateRepoTodos(
  * @returns True if counts match, false otherwise.
  */
 function validateTodoCount(
-  files: Readonly<readonly string[]>,
-  todos: Readonly<readonly RepoTodo[]>
+	files: Readonly<readonly string[]>,
+	todos: Readonly<readonly RepoTodo[]>,
 ): boolean {
-  return files.length === todos.length;
+	return files.length === todos.length;
 }
 
 /**
@@ -179,22 +179,22 @@ function validateTodoCount(
  * @returns Array of duplicate IDs.
  */
 function findDuplicateIds(todos: Readonly<readonly RepoTodo[]>): string[] {
-  const idCounts = new Map<string, number>();
-  const duplicates: string[] = [];
-  const initialCount = 0;
-  const duplicateThreshold = 2;
-  const countIncrement = 1;
+	const idCounts = new Map<string, number>();
+	const duplicates: string[] = [];
+	const initialCount = 0;
+	const duplicateThreshold = 2;
+	const countIncrement = 1;
 
-  for (const todo of todos) {
-    const existingCount = idCounts.get(todo.id);
-    const count = (existingCount ?? initialCount) + countIncrement;
-    idCounts.set(todo.id, count);
-    if (count === duplicateThreshold) {
-      duplicates.push(todo.id);
-    }
-  }
+	for (const todo of todos) {
+		const existingCount = idCounts.get(todo.id);
+		const count = (existingCount ?? initialCount) + countIncrement;
+		idCounts.set(todo.id, count);
+		if (count === duplicateThreshold) {
+			duplicates.push(todo.id);
+		}
+	}
 
-  return duplicates;
+	return duplicates;
 }
 
 export type { RepoTodoOptions, RepoTodo };

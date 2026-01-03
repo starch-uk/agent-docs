@@ -1,12 +1,18 @@
 /** @type {import('prettier').Config} */
 export default {
-  semi: true,
-  trailingComma: 'es5',
-  singleQuote: true,
-  printWidth: 80,
-  tabWidth: 2,
-  useTabs: false,
-  arrowParens: 'always',
-  endOfLine: 'lf',
+	"semi": true,
+	"singleQuote": true,
+	"trailingComma": "all",
+	"printWidth": 80,
+	"proseWrap": "always",
+	"tabWidth": 4,
+	"useTabs": true,
+	"overrides": [
+		{
+			"files": ".github/workflows/**/*.{yml,yaml}",
+			"options": {
+				"proseWrap": "preserve"
+			}
+		}
+	]
 };
-

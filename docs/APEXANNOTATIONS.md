@@ -2,7 +2,8 @@
 
 **Version:** 1.0.0
 
-> **Syntax**: `@AnnotationName` or `@AnnotationName(param='value')` — uses single quotes (not double)
+> **Syntax**: `@AnnotationName` or `@AnnotationName(param='value')` — uses
+> single quotes (not double)
 
 ---
 
@@ -26,7 +27,8 @@ Exposes method/property to Lightning Components (Aura/LWC).
 | `scope`        | String  | —       | `'global'` enables global cache (API 55.0+) |
 | `continuation` | Boolean | `false` | Returns Continuation object                 |
 
-**Requirements**: `public static` | **Restrictions**: `cacheable=true` prohibits DML, `@future`, callouts; API 55.0+ no overloads
+**Requirements**: `public static` | **Restrictions**: `cacheable=true` prohibits
+DML, `@future`, callouts; API 55.0+ no overloads
 
 ```apex
 public class AccountController {
@@ -46,7 +48,8 @@ Exposes method to JavaScript in Visualforce pages.
 public static String processData(String input) { return 'Processed: ' + input; }
 ```
 
-**Requirements**: `public static` or `global static` | **Restrictions**: Incompatible with `@AuraEnabled`; class must be VF controller/extension
+**Requirements**: `public static` or `global static` | **Restrictions**:
+Incompatible with `@AuraEnabled`; class must be VF controller/extension
 
 ---
 
@@ -86,7 +89,8 @@ global class AccountRestService {
 | ------------ | ------ | -------- | --------------------------------------------- |
 | `urlMapping` | String | Yes      | URL path (must start with `/`, max 255 chars) |
 
-**Requirements**: Class must be `global` | **URL rules**: Wildcards `*` allowed; case-sensitive matching
+**Requirements**: Class must be `global` | **URL rules**: Wildcards `*` allowed;
+case-sensitive matching
 
 ### HTTP Method Annotations
 
@@ -124,8 +128,9 @@ Executes method asynchronously in separate thread.
 | --------- | ------- | ------- | ------------------------- |
 | `callout` | Boolean | `false` | Enables external callouts |
 
-**Requirements**: `public static void` | **Param types**: Primitives, arrays/collections of primitives/IDs only (no sObjects)
-**Restrictions**: `callout=true` prohibits DML
+**Requirements**: `public static void` | **Param types**: Primitives,
+arrays/collections of primitives/IDs only (no sObjects) **Restrictions**:
+`callout=true` prohibits DML
 
 ```apex
 public class AsyncProcessor {
@@ -170,10 +175,10 @@ public static List<ReturnType> methodName(List<InputType> inputs) { }
 | `capabilityType`      | String  | Capability integration (`Name://Name`)         |
 | `iconName`            | String  | Custom icon (SVG from static resource or SLDS) |
 
-**Requirements**: `public static` or `global static`; outer class only; one per class
-**Params**: Single `List` (primitives, sObjects, or `@InvocableVariable` classes)
-**Returns**: `void` or `List`
-**Restrictions**: Incompatible with `@AuraEnabled`
+**Requirements**: `public static` or `global static`; outer class only; one per
+class **Params**: Single `List` (primitives, sObjects, or `@InvocableVariable`
+classes) **Returns**: `void` or `List` **Restrictions**: Incompatible with
+`@AuraEnabled`
 
 ```apex
 public class FlowUtilities {
@@ -251,7 +256,10 @@ Marks test class/method. Test code doesn't count against org limits.
 | `IsParallel` | Boolean | `false` | Allow parallel execution                  |
 
 **Requirements**: Class should be `private`; methods must be `static void`
-**Restrictions**: `SeeAllData=true` + `IsParallel=true` incompatible; `IsParallel=true` prohibits `Test.getStandardPricebookId()`, `System.schedule()`, `System.enqueueJob()`, `ContentNote` insert, `User`/`GroupMember` creation
+**Restrictions**: `SeeAllData=true` + `IsParallel=true` incompatible;
+`IsParallel=true` prohibits `Test.getStandardPricebookId()`,
+`System.schedule()`, `System.enqueueJob()`, `ContentNote` insert,
+`User`/`GroupMember` creation
 
 ### @TestSetup
 
@@ -264,8 +272,8 @@ static void setup() {
 }
 ```
 
-**Requirements**: `static void`; one per class
-**Restrictions**: Incompatible with `@IsTest(SeeAllData=true)`; API 24.0+
+**Requirements**: `static void`; one per class **Restrictions**: Incompatible
+with `@IsTest(SeeAllData=true)`; API 24.0+
 
 ### @TestVisible
 
@@ -301,7 +309,9 @@ Marks code as deprecated (managed packages only).
 public static void oldMethod() { }
 ```
 
-**Restrictions**: Managed packages only; cannot deprecate `webservice`, individual enum values, interface methods, abstract methods; cannot undeprecate after release
+**Restrictions**: Managed packages only; cannot deprecate `webservice`,
+individual enum values, interface methods, abstract methods; cannot undeprecate
+after release
 
 ### @SuppressWarnings
 
@@ -324,7 +334,8 @@ public static List<Account> generateReport() {
 }
 ```
 
-**Restrictions**: No DML, no `System.schedule()`, no async jobs; top-level must be web service or scheduled execution
+**Restrictions**: No DML, no `System.schedule()`, no async jobs; top-level must
+be web service or scheduled execution
 
 ### @JsonAccess
 
@@ -340,7 +351,8 @@ public class MyClass { }
 | `serializable`   | `'always'`, `'never'`, `'sameNamespace'`, `'samePackage'` | Serialization control   |
 | `deserializable` | `'always'`, `'never'`, `'sameNamespace'`, `'samePackage'` | Deserialization control |
 
-**Defaults**: API 48.0-: `deserializable='always'`, `serializable='sameNamespace'` | API 49.0+: Both `'sameNamespace'`
+**Defaults**: API 48.0-: `deserializable='always'`,
+`serializable='sameNamespace'` | API 49.0+: Both `'sameNamespace'`
 
 ### @NamespaceAccessible
 
@@ -351,8 +363,9 @@ Grants cross-namespace access in 2GP packages.
 public class CrossNamespaceClass { }
 ```
 
-**Usage**: 2GP managed packages only; `global` is always accessible (no annotation needed)
-**Restrictions**: API 47.0+ incompatible with `@AuraEnabled`; API 50.0+ requires outer class also annotated
+**Usage**: 2GP managed packages only; `global` is always accessible (no
+annotation needed) **Restrictions**: API 47.0+ incompatible with `@AuraEnabled`;
+API 50.0+ requires outer class also annotated
 
 ---
 

@@ -37,22 +37,22 @@
 
 ```typescript
 export const parsers = {
-  apex: {
-    astFormat: 'apex',
-    parse,
-    locStart,
-    locEnd,
-    hasPragma,
-    preprocess: (text) => text.trim(),
-  },
-  'apex-anonymous': {
-    astFormat: 'apex',
-    parse,
-    locStart,
-    locEnd,
-    hasPragma,
-    preprocess: (text) => text.trim(),
-  },
+	apex: {
+		astFormat: 'apex',
+		parse,
+		locStart,
+		locEnd,
+		hasPragma,
+		preprocess: (text) => text.trim(),
+	},
+	'apex-anonymous': {
+		astFormat: 'apex',
+		parse,
+		locStart,
+		locEnd,
+		hasPragma,
+		preprocess: (text) => text.trim(),
+	},
 };
 ```
 
@@ -118,9 +118,9 @@ DFS.
 
 ```typescript
 type DfsVisitor<R, C> = {
-  accumulator?: (entry, accumulated) => R;
-  apply: (node, accumulatedResult, context, childrenContext) => R;
-  gatherChildrenContext?: (node, currentContext) => C;
+	accumulator?: (entry, accumulated) => R;
+	apply: (node, accumulatedResult, context, childrenContext) => R;
+	gatherChildrenContext?: (node, currentContext) => C;
 };
 ```
 
@@ -156,17 +156,17 @@ type DfsVisitor<R, C> = {
 
 ```typescript
 export const printers = {
-  apex: {
-    print,
-    massageAstNode,
-    hasPrettierIgnore,
-    insertPragma,
-    isBlockComment,
-    canAttachComment,
-    printComment,
-    willPrintOwnComments,
-    handleComments: { ownLine, endOfLine, remaining },
-  },
+	apex: {
+		print,
+		massageAstNode,
+		hasPrettierIgnore,
+		insertPragma,
+		isBlockComment,
+		canAttachComment,
+		printComment,
+		willPrintOwnComments,
+		handleComments: { ownLine, endOfLine, remaining },
+	},
 };
 ```
 
@@ -200,15 +200,15 @@ export const printers = {
 
 ```typescript
 type SingleNodeHandler = (
-  path: AstPath,
-  print: PrintFn,
-  options: ParserOptions
+	path: AstPath,
+	print: PrintFn,
+	options: ParserOptions,
 ) => Doc;
 type ChildNodeHandler = (
-  childClass: string,
-  path: AstPath,
-  print: PrintFn,
-  options: ParserOptions
+	childClass: string,
+	path: AstPath,
+	print: PrintFn,
+	options: ParserOptions,
 ) => Doc;
 ```
 
@@ -394,21 +394,21 @@ From Prettier: `group`, `indent`, `hardline`, `softline`, `line`, `join`,
 
 ```typescript
 const MODIFIER = {
-  PUBLIC: 'public',
-  PRIVATE: 'private',
-  PROTECTED: 'protected',
-  ABSTRACT: 'abstract',
-  FINAL: 'final',
-  GLOBAL: 'global',
-  INHERITED_SHARING: 'inherited sharing',
-  OVERRIDE: 'override',
-  STATIC: 'static',
-  TEST_METHOD: 'testMethod',
-  TRANSIENT: 'transient',
-  VIRTUAL: 'virtual',
-  WEB_SERVICE: 'webService',
-  WITH_SHARING: 'with sharing',
-  WITHOUT_SHARING: 'without sharing',
+	PUBLIC: 'public',
+	PRIVATE: 'private',
+	PROTECTED: 'protected',
+	ABSTRACT: 'abstract',
+	FINAL: 'final',
+	GLOBAL: 'global',
+	INHERITED_SHARING: 'inherited sharing',
+	OVERRIDE: 'override',
+	STATIC: 'static',
+	TEST_METHOD: 'testMethod',
+	TRANSIENT: 'transient',
+	VIRTUAL: 'virtual',
+	WEB_SERVICE: 'webService',
+	WITH_SHARING: 'with sharing',
+	WITHOUT_SHARING: 'without sharing',
 };
 ```
 
@@ -461,32 +461,32 @@ const MODIFIER = {
 
 ```typescript
 const QUERY = {
-  AND: 'AND',
-  OR: 'OR',
-  NOT: 'NOT',
-  INCLUDES: 'INCLUDES',
-  EXCLUDES: 'EXCLUDES',
-  LIKE: 'LIKE',
-  IN: 'IN',
-  NOT_IN: 'NOT IN',
-  '=': '=',
-  '!=': '!=',
-  '<>': '<>',
-  '<': '<',
-  '>': '>',
-  '<=': '<=',
-  '>=': '>=',
-  ASC: 'ASC',
-  DESC: 'DESC',
-  NULLS_FIRST: 'NULLS FIRST',
-  NULLS_LAST: 'NULLS LAST',
+	AND: 'AND',
+	OR: 'OR',
+	NOT: 'NOT',
+	INCLUDES: 'INCLUDES',
+	EXCLUDES: 'EXCLUDES',
+	LIKE: 'LIKE',
+	IN: 'IN',
+	NOT_IN: 'NOT IN',
+	'=': '=',
+	'!=': '!=',
+	'<>': '<>',
+	'<': '<',
+	'>': '>',
+	'<=': '<=',
+	'>=': '>=',
+	ASC: 'ASC',
+	DESC: 'DESC',
+	NULLS_FIRST: 'NULLS FIRST',
+	NULLS_LAST: 'NULLS LAST',
 };
 
 const DATA_CATEGORY_OPERATORS = {
-  AT: 'AT',
-  ABOVE: 'ABOVE',
-  BELOW: 'BELOW',
-  ABOVE_OR_BELOW: 'ABOVE_OR_BELOW',
+	AT: 'AT',
+	ABOVE: 'ABOVE',
+	BELOW: 'BELOW',
+	ABOVE_OR_BELOW: 'ABOVE_OR_BELOW',
 };
 ```
 
@@ -531,16 +531,16 @@ handleComments: {
 
 ```typescript
 interface AnnotatedComment {
-  value: string; // Comment text
-  location: { startIndex; endIndex };
-  trailing?: boolean; // After code
-  leading?: boolean; // Before code
-  printed?: boolean; // Already printed
-  enclosingNode?: any; // Containing node
-  followingNode?: any; // Next node
-  precedingNode?: any; // Previous node
-  placement?: string; // "ownLine" | "endOfLine" | "remaining"
-  trailingEmptyLine?: boolean; // Preserve empty line after
+	value: string; // Comment text
+	location: { startIndex; endIndex };
+	trailing?: boolean; // After code
+	leading?: boolean; // Before code
+	printed?: boolean; // Already printed
+	enclosingNode?: any; // Containing node
+	followingNode?: any; // Next node
+	precedingNode?: any; // Previous node
+	placement?: string; // "ownLine" | "endOfLine" | "remaining"
+	trailingEmptyLine?: boolean; // Preserve empty line after
 }
 ```
 
@@ -550,8 +550,8 @@ interface AnnotatedComment {
 // Detection: exact match "prettier-ignore"
 // Formats: // prettier-ignore  OR  /* prettier-ignore */
 hasPrettierIgnore: (path) => {
-  const comment = path.getValue()?.comments?.find((c) => isPrettierIgnore(c));
-  return !!comment;
+	const comment = path.getValue()?.comments?.find((c) => isPrettierIgnore(c));
+	return !!comment;
 };
 ```
 
@@ -599,18 +599,18 @@ const ALLOW_DANGLING_COMMENTS = [BLOCK_STATEMENT, CLASS_DECLARATION, INTERFACE_D
 
 ```typescript
 export const options: SupportOptions = {
-  apexStandaloneParser: {
-    type: 'choice',
-    category: 'apex',
-    default: 'native',
-    choices: [
-      { value: 'none', description: 'Java CLI' },
-      { value: 'native', description: 'Native executables' },
-      { value: 'built-in', description: 'HTTP server' },
-    ],
-    description: 'Parser mode',
-  },
-  // ...
+	apexStandaloneParser: {
+		type: 'choice',
+		category: 'apex',
+		default: 'native',
+		choices: [
+			{ value: 'none', description: 'Java CLI' },
+			{ value: 'native', description: 'Native executables' },
+			{ value: 'built-in', description: 'HTTP server' },
+		],
+		description: 'Parser mode',
+	},
+	// ...
 };
 ```
 
@@ -715,28 +715,28 @@ export default {
 import originalPlugin from 'prettier-plugin-apex';
 
 export default {
-  ...originalPlugin,
-  parsers: {
-    ...originalPlugin.parsers,
-    apex: {
-      ...originalPlugin.parsers.apex,
-      parse: async (text, options) => {
-        /* custom */
-      },
-      preprocess: (text, options) => {
-        /* custom */
-      },
-    },
-  },
-  printers: {
-    ...originalPlugin.printers,
-    apex: {
-      ...originalPlugin.printers.apex,
-      print: (path, options, print) => {
-        /* custom */
-      },
-    },
-  },
+	...originalPlugin,
+	parsers: {
+		...originalPlugin.parsers,
+		apex: {
+			...originalPlugin.parsers.apex,
+			parse: async (text, options) => {
+				/* custom */
+			},
+			preprocess: (text, options) => {
+				/* custom */
+			},
+		},
+	},
+	printers: {
+		...originalPlugin.printers,
+		apex: {
+			...originalPlugin.printers.apex,
+			print: (path, options, print) => {
+				/* custom */
+			},
+		},
+	},
 };
 ```
 
@@ -783,9 +783,9 @@ export default {
 
 ```typescript
 function shouldFlatten(parent, node) {
-  const parentOp = parent.op?.['@class'];
-  const nodeOp = node.op?.['@class'];
-  return getPrecedence(parentOp) === getPrecedence(nodeOp);
+	const parentOp = parent.op?.['@class'];
+	const nodeOp = node.op?.['@class'];
+	return getPrecedence(parentOp) === getPrecedence(nodeOp);
 }
 ```
 
@@ -828,11 +828,11 @@ npx start-apex-server --host localhost --port 2117
 
 ```json
 {
-  "plugins": ["prettier-plugin-apex"],
-  "apexStandaloneParser": "native",
-  "apexInsertFinalNewline": true,
-  "printWidth": 120,
-  "tabWidth": 4
+	"plugins": ["prettier-plugin-apex"],
+	"apexStandaloneParser": "native",
+	"apexInsertFinalNewline": true,
+	"printWidth": 120,
+	"tabWidth": 4
 }
 ```
 

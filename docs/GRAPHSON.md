@@ -6,8 +6,7 @@ JSON-based format for graph serialization used by Apache TinkerPop.
 
 **Related Docs:** [GRAPHENGINE.md](GRAPHENGINE.md),
 [TINKERPOP.md](TINKERPOP.md), [GRAPHML.md](GRAPHML.md), [GRYO.md](GRYO.md),
-[GRAPHBINARY.md](GRAPHBINARY.md),
-[CODEANALYZER.md](CODEANALYZER.md)
+[GRAPHBINARY.md](GRAPHBINARY.md), [CODEANALYZER.md](CODEANALYZER.md)
 
 ## Overview
 
@@ -108,12 +107,12 @@ GraphSON represents graph elements as JSON objects.
 
 ```json
 {
-  "id": 1,
-  "label": "person",
-  "properties": {
-    "name": ["John"],
-    "age": [30]
-  }
+	"id": 1,
+	"label": "person",
+	"properties": {
+		"name": ["John"],
+		"age": [30]
+	}
 }
 ```
 
@@ -121,12 +120,12 @@ GraphSON represents graph elements as JSON objects.
 
 ```json
 {
-  "id": { "@type": "g:Int32", "@value": 1 },
-  "label": "person",
-  "properties": {
-    "name": [{ "@type": "g:String", "@value": "John" }],
-    "age": [{ "@type": "g:Int32", "@value": 30 }]
-  }
+	"id": { "@type": "g:Int32", "@value": 1 },
+	"label": "person",
+	"properties": {
+		"name": [{ "@type": "g:String", "@value": "John" }],
+		"age": [{ "@type": "g:Int32", "@value": 30 }]
+	}
 }
 ```
 
@@ -136,13 +135,13 @@ GraphSON represents graph elements as JSON objects.
 
 ```json
 {
-  "id": 7,
-  "label": "knows",
-  "inV": 2,
-  "outV": 1,
-  "properties": {
-    "weight": 0.5
-  }
+	"id": 7,
+	"label": "knows",
+	"inV": 2,
+	"outV": 1,
+	"properties": {
+		"weight": 0.5
+	}
 }
 ```
 
@@ -150,13 +149,13 @@ GraphSON represents graph elements as JSON objects.
 
 ```json
 {
-  "id": { "@type": "g:Int64", "@value": 7 },
-  "label": "knows",
-  "inV": { "@type": "g:Int32", "@value": 2 },
-  "outV": { "@type": "g:Int32", "@value": 1 },
-  "properties": {
-    "weight": { "@type": "g:Double", "@value": 0.5 }
-  }
+	"id": { "@type": "g:Int64", "@value": 7 },
+	"label": "knows",
+	"inV": { "@type": "g:Int32", "@value": 2 },
+	"outV": { "@type": "g:Int32", "@value": 1 },
+	"properties": {
+		"weight": { "@type": "g:Double", "@value": 0.5 }
+	}
 }
 ```
 
@@ -176,20 +175,20 @@ nested property structures:
 
 ```json
 {
-  "properties": {
-    "name": [
-      {
-        "@type": "g:VertexProperty",
-        "@value": {
-          "id": { "@type": "g:Int64", "@value": 0 },
-          "value": { "@type": "g:String", "@value": "John" },
-          "properties": {
-            "created": { "@type": "g:Date", "@value": 1234567890 }
-          }
-        }
-      }
-    ]
-  }
+	"properties": {
+		"name": [
+			{
+				"@type": "g:VertexProperty",
+				"@value": {
+					"id": { "@type": "g:Int64", "@value": 0 },
+					"value": { "@type": "g:String", "@value": "John" },
+					"properties": {
+						"created": { "@type": "g:Date", "@value": 1234567890 }
+					}
+				}
+			}
+		]
+	}
 }
 ```
 
@@ -257,27 +256,27 @@ comparison and general optimization tips.
 
 ```json
 {
-  "vertices": [
-    {
-      "id": { "@type": "g:Int32", "@value": 1 },
-      "label": "person",
-      "properties": {
-        "name": [{ "@type": "g:String", "@value": "Alice" }],
-        "age": [{ "@type": "g:Int32", "@value": 30 }]
-      }
-    }
-  ],
-  "edges": [
-    {
-      "id": { "@type": "g:Int64", "@value": 7 },
-      "label": "knows",
-      "inV": { "@type": "g:Int32", "@value": 2 },
-      "outV": { "@type": "g:Int32", "@value": 1 },
-      "properties": {
-        "weight": { "@type": "g:Double", "@value": 0.5 }
-      }
-    }
-  ]
+	"vertices": [
+		{
+			"id": { "@type": "g:Int32", "@value": 1 },
+			"label": "person",
+			"properties": {
+				"name": [{ "@type": "g:String", "@value": "Alice" }],
+				"age": [{ "@type": "g:Int32", "@value": 30 }]
+			}
+		}
+	],
+	"edges": [
+		{
+			"id": { "@type": "g:Int64", "@value": 7 },
+			"label": "knows",
+			"inV": { "@type": "g:Int32", "@value": 2 },
+			"outV": { "@type": "g:Int32", "@value": 1 },
+			"properties": {
+				"weight": { "@type": "g:Double", "@value": 0.5 }
+			}
+		}
+	]
 }
 ```
 

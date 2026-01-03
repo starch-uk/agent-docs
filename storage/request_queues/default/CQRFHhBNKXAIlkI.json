@@ -1,9 +1,9 @@
 {
-  "id": "CQRFHhBNKXAIlkI",
-  "json": "{\"id\":\"CQRFHhBNKXAIlkI\",\"url\":\"https://help.salesforce.com/s/search-result?language=en_US#q=AuraEnabled&t=allResultsTab&sort=relevancy&f:@objecttype=[HTDeveloperDocumentsC,HelpDocs]&f:@sflanguage=[en_US]\",\"loadedUrl\":\"https://help.salesforce.com/s/search-result?language=en_US#q=AuraEnabled&t=allResultsTab&sort=relevancy&f:@objecttype=[HTDeveloperDocumentsC,HelpDocs]&f:@sflanguage=[en_US]\",\"uniqueKey\":\"https://help.salesforce.com/s/search-result?language=en_US\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-03T12:41:43.370Z\"}",
-  "method": "GET",
-  "orderNo": null,
-  "retryCount": 0,
-  "uniqueKey": "https://help.salesforce.com/s/search-result?language=en_US",
-  "url": "https://help.salesforce.com/s/search-result?language=en_US#q=AuraEnabled&t=allResultsTab&sort=relevancy&f:@objecttype=[HTDeveloperDocumentsC,HelpDocs]&f:@sflanguage=[en_US]"
+	"id": "CQRFHhBNKXAIlkI",
+	"json": "{\"id\":\"CQRFHhBNKXAIlkI\",\"url\":\"https://help.salesforce.com/s/search-result?language=en_US#q=AuraEnabled&t=allResultsTab&sort=relevancy&f:@objecttype=[HTDeveloperDocumentsC,HelpDocs]&f:@sflanguage=[en_US]\",\"loadedUrl\":\"https://help.salesforce.com/s/search-result?language=en_US#q=AuraEnabled&t=allResultsTab&sort=relevancy&f:@objecttype=[HTDeveloperDocumentsC,HelpDocs]&f:@sflanguage=[en_US]\",\"uniqueKey\":\"https://help.salesforce.com/s/search-result?language=en_US\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2026-01-03T12:41:43.370Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://help.salesforce.com/s/search-result?language=en_US",
+	"url": "https://help.salesforce.com/s/search-result?language=en_US#q=AuraEnabled&t=allResultsTab&sort=relevancy&f:@objecttype=[HTDeveloperDocumentsC,HelpDocs]&f:@sflanguage=[en_US]"
 }
