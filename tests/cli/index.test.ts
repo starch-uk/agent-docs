@@ -42,19 +42,18 @@ describe('CLI command handlers', () => {
 				todoFilePath: '/tmp/test/TODO.md',
 			};
 
-			vi.mocked(salesforce.searchAndDownloadSalesforceHelp).mockResolvedValue(
-				mockResult,
-			);
+			vi.mocked(
+				salesforce.searchAndDownloadSalesforceHelp,
+			).mockResolvedValue(mockResult);
 
 			await handleSearchCommand('test query', {
 				limit: 10,
 				verbose: false,
 			});
 
-			expect(salesforce.searchAndDownloadSalesforceHelp).toHaveBeenCalledWith(
-				'test query',
-				{ limit: 10, verbose: false },
-			);
+			expect(
+				salesforce.searchAndDownloadSalesforceHelp,
+			).toHaveBeenCalledWith('test query', { limit: 10, verbose: false });
 			expect(console.log).toHaveBeenCalledWith(
 				expect.stringContaining('Downloaded'),
 			);
@@ -70,9 +69,9 @@ describe('CLI command handlers', () => {
 				todoFilePath: '/tmp/test/TODO.md',
 			};
 
-			vi.mocked(salesforce.searchAndDownloadSalesforceHelp).mockResolvedValue(
-				mockResult,
-			);
+			vi.mocked(
+				salesforce.searchAndDownloadSalesforceHelp,
+			).mockResolvedValue(mockResult);
 
 			await handleSearchCommand('test', {
 				concurrency: 3,
@@ -80,16 +79,19 @@ describe('CLI command handlers', () => {
 				verbose: true,
 			});
 
-			expect(salesforce.searchAndDownloadSalesforceHelp).toHaveBeenCalledWith(
-				'test',
-				{ concurrency: 3, limit: 5, verbose: true },
-			);
+			expect(
+				salesforce.searchAndDownloadSalesforceHelp,
+			).toHaveBeenCalledWith('test', {
+				concurrency: 3,
+				limit: 5,
+				verbose: true,
+			});
 		});
 
 		it('should handle search errors', async () => {
-			vi.mocked(salesforce.searchAndDownloadSalesforceHelp).mockRejectedValue(
-				new Error('Search failed'),
-			);
+			vi.mocked(
+				salesforce.searchAndDownloadSalesforceHelp,
+			).mockRejectedValue(new Error('Search failed'));
 
 			await handleSearchCommand('test', {});
 
@@ -109,7 +111,9 @@ describe('CLI command handlers', () => {
 				todoFilePath: '/tmp/test/TODO.md',
 			};
 
-			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(mockResult);
+			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(
+				mockResult,
+			);
 
 			await handleGetCommand('https://help.salesforce.com/test', {
 				verbose: false,
@@ -131,7 +135,9 @@ describe('CLI command handlers', () => {
 				todoFilePath: '/tmp/test/TODO.md',
 			};
 
-			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(mockResult);
+			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(
+				mockResult,
+			);
 
 			await handleGetCommand('https://help.salesforce.com/test', {
 				verbose: true,
@@ -160,21 +166,28 @@ describe('CLI command handlers', () => {
 
 	describe('handleDumpCommand', () => {
 		it('should handle successful dump', async () => {
-			vi.mocked(salesforce.dumpSalesforceHelp).mockResolvedValue(undefined);
+			vi.mocked(salesforce.dumpSalesforceHelp).mockResolvedValue(
+				undefined,
+			);
 
 			await handleDumpCommand('test query', {
 				limit: 20,
 				verbose: false,
 			});
 
-			expect(salesforce.dumpSalesforceHelp).toHaveBeenCalledWith('test query', {
-				limit: 20,
-				verbose: false,
-			});
+			expect(salesforce.dumpSalesforceHelp).toHaveBeenCalledWith(
+				'test query',
+				{
+					limit: 20,
+					verbose: false,
+				},
+			);
 		});
 
 		it('should handle dump with all options', async () => {
-			vi.mocked(salesforce.dumpSalesforceHelp).mockResolvedValue(undefined);
+			vi.mocked(salesforce.dumpSalesforceHelp).mockResolvedValue(
+				undefined,
+			);
 
 			await handleDumpCommand('test', {
 				concurrency: 5,
@@ -216,7 +229,7 @@ describe('CLI command handlers', () => {
 		// Mock process.argv to simulate running as main module
 		const originalArgv = process.argv;
 		const originalImportMeta = import.meta.url;
-		
+
 		// Create a mock program that tracks if parse was called
 		let parseCalled = false;
 		const mockProgram = {
@@ -227,12 +240,12 @@ describe('CLI command handlers', () => {
 
 		// Mock process.argv to include 'index.ts' or 'sf-docs-helper'
 		process.argv = ['node', '/path/to/index.ts'];
-		
+
 		// Dynamically import the module to trigger the entry point code
 		// Note: This test verifies the entry point logic works
 		// The actual program.parse() call is tested via the mock
 		expect(parseCalled || true).toBe(true); // Entry point logic exists
-		
+
 		// Restore
 		process.argv = originalArgv;
 	});

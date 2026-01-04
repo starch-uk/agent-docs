@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { isMainEntryPoint, executeIfMainEntryPoint } from '../../src/cli/repo-todos.js';
+import {
+	isMainEntryPoint,
+	executeIfMainEntryPoint,
+} from '../../src/cli/repo-todos.js';
 import * as repoTodosModule from '../../src/cli/repo-todos.js';
 import * as repoTodosUtils from '../../src/utils/repo-todos.js';
 import { readdir } from 'fs/promises';
@@ -38,19 +41,18 @@ describe('repo-todos CLI entry point', () => {
 		const originalExit = process.exit;
 		const exitSpy = vi.fn() as typeof process.exit;
 		process.exit = exitSpy;
-		
+
 		// Mock file system operations to avoid actual file access
 		vi.mocked(readdir).mockResolvedValue([] as any);
 		vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue([]);
-		
+
 		// Test that the function can be called (entry point execution happens at module load)
 		// The actual execution is tested via the isMainEntryPoint() tests
 		expect(() => executeIfMainEntryPoint()).not.toThrow();
-		
+
 		// Give async operations time to complete
 		await new Promise((resolve) => setTimeout(resolve, 10));
-		
+
 		process.exit = originalExit;
 	});
 });
-

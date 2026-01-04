@@ -20,7 +20,9 @@ describe('pathToTodoId', () => {
 	it('should convert file path to valid todo ID', () => {
 		expect(pathToTodoId('src/index.ts')).toBe('file-src-index-ts');
 		expect(pathToTodoId('./src/index.ts')).toBe('file-src-index-ts');
-		expect(pathToTodoId('src/utils/helper.ts')).toBe('file-src-utils-helper-ts');
+		expect(pathToTodoId('src/utils/helper.ts')).toBe(
+			'file-src-utils-helper-ts',
+		);
 	});
 
 	it('should handle special characters in path', () => {
@@ -31,11 +33,15 @@ describe('pathToTodoId', () => {
 	});
 
 	it('should use custom prefix', () => {
-		expect(pathToTodoId('src/index.ts', 'custom-')).toBe('custom-src-index-ts');
+		expect(pathToTodoId('src/index.ts', 'custom-')).toBe(
+			'custom-src-index-ts',
+		);
 	});
 
 	it('should handle paths with multiple separators', () => {
-		expect(pathToTodoId('src/utils/helper.ts')).toBe('file-src-utils-helper-ts');
+		expect(pathToTodoId('src/utils/helper.ts')).toBe(
+			'file-src-utils-helper-ts',
+		);
 	});
 
 	it('should remove leading and trailing hyphens', () => {
@@ -55,7 +61,9 @@ describe('validateTodoCount', () => {
 
 	it('should return false when counts do not match', () => {
 		const files = ['file1.ts', 'file2.ts'];
-		const todos = [{ id: '1', status: 'pending' as const, content: 'test' }];
+		const todos = [
+			{ id: '1', status: 'pending' as const, content: 'test' },
+		];
 		expect(validateTodoCount(files, todos)).toBe(false);
 	});
 
@@ -112,39 +120,55 @@ describe('generateRepoTodos', () => {
 			{ name: 'index.ts', isFile: () => true, isDirectory: () => false },
 		];
 
-		vi.mocked(readdir).mockImplementation(async (dirPath: string, options?: { withFileTypes?: boolean }) => {
-			const pathStr = String(dirPath);
-			// Normalize paths for comparison - handle both forward and backslashes
-			const normalize = (p: string) => p.replace(/\/$/, '').replace(/\\/g, '/').toLowerCase();
-			const normalizedPath = normalize(pathStr);
-			const normalizedRepoPath = normalize(mockRepoPath);
-			const normalizedSrcPath = normalize(join(mockRepoPath, 'src'));
-			
-			// Match root directory - be flexible with path separators
-			if (normalizedPath === normalizedRepoPath || pathStr === mockRepoPath || pathStr.replace(/\\/g, '/') === mockRepoPath.replace(/\\/g, '/')) {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
-			}
-			// Match src subdirectory - check multiple ways
-			const srcPathVariants = [
-				normalizedSrcPath,
-				join(mockRepoPath, 'src'),
-				`${mockRepoPath}/src`,
-				`${mockRepoPath}\\src`,
-			].map(normalize);
-			if (srcPathVariants.includes(normalizedPath) || normalizedPath.endsWith('/src') || normalizedPath.endsWith('\\src')) {
-				return mockSrcEntries as unknown as Awaited<ReturnType<typeof readdir>>;
-			}
-			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
-		});
+		vi.mocked(readdir).mockImplementation(
+			async (dirPath: string, options?: { withFileTypes?: boolean }) => {
+				const pathStr = String(dirPath);
+				// Normalize paths for comparison - handle both forward and backslashes
+				const normalize = (p: string) =>
+					p.replace(/\/$/, '').replace(/\\/g, '/').toLowerCase();
+				const normalizedPath = normalize(pathStr);
+				const normalizedRepoPath = normalize(mockRepoPath);
+				const normalizedSrcPath = normalize(join(mockRepoPath, 'src'));
 
-		const todos = await generateRepoTodos({ 
+				// Match root directory - be flexible with path separators
+				if (
+					normalizedPath === normalizedRepoPath ||
+					pathStr === mockRepoPath ||
+					pathStr.replace(/\\/g, '/') ===
+						mockRepoPath.replace(/\\/g, '/')
+				) {
+					return mockEntries as unknown as Awaited<
+						ReturnType<typeof readdir>
+					>;
+				}
+				// Match src subdirectory - check multiple ways
+				const srcPathVariants = [
+					normalizedSrcPath,
+					join(mockRepoPath, 'src'),
+					`${mockRepoPath}/src`,
+					`${mockRepoPath}\\src`,
+				].map(normalize);
+				if (
+					srcPathVariants.includes(normalizedPath) ||
+					normalizedPath.endsWith('/src') ||
+					normalizedPath.endsWith('\\src')
+				) {
+					return mockSrcEntries as unknown as Awaited<
+						ReturnType<typeof readdir>
+					>;
+				}
+				return [] as unknown as Awaited<ReturnType<typeof readdir>>;
+			},
+		);
+
+		const todos = await generateRepoTodos({
 			repoPath: mockRepoPath,
-			excludePaths: [] // Don't exclude anything for this test
+			excludePaths: [], // Don't exclude anything for this test
 		});
 
 		// Should find file1.ts, file2.ts, and src/index.ts
 		// The relative paths should be: file1.ts, file2.ts, src/index.ts
-		const filePaths = todos.map(t => t.content.replace('Inspect ', ''));
+		const filePaths = todos.map((t) => t.content.replace('Inspect ', ''));
 		expect(filePaths.length).toBe(3);
 		expect(filePaths).toContain('file1.ts');
 		expect(filePaths).toContain('file2.ts');
@@ -159,13 +183,19 @@ describe('generateRepoTodos', () => {
 		const mockRepoPath = '/tmp/test-repo';
 		const mockEntries = [
 			{ name: 'file1.ts', isFile: () => true, isDirectory: () => false },
-			{ name: 'node_modules', isFile: () => false, isDirectory: () => true },
+			{
+				name: 'node_modules',
+				isFile: () => false,
+				isDirectory: () => true,
+			},
 			{ name: '.git', isFile: () => false, isDirectory: () => true },
 		];
 
 		vi.mocked(readdir).mockImplementation(async (dirPath: string) => {
 			if (dirPath === mockRepoPath) {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
 		});
@@ -181,12 +211,18 @@ describe('generateRepoTodos', () => {
 		const mockRepoPath = '/tmp/test-repo';
 		const mockEntries = [
 			{ name: 'file1.ts', isFile: () => true, isDirectory: () => false },
-			{ name: 'custom-exclude', isFile: () => false, isDirectory: () => true },
+			{
+				name: 'custom-exclude',
+				isFile: () => false,
+				isDirectory: () => true,
+			},
 		];
 
 		vi.mocked(readdir).mockImplementation(async (dirPath: string) => {
 			if (dirPath === mockRepoPath) {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
 		});
@@ -208,7 +244,9 @@ describe('generateRepoTodos', () => {
 
 		vi.mocked(readdir).mockImplementation(async (dirPath: string) => {
 			if (dirPath === mockRepoPath) {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
 		});
@@ -243,7 +281,9 @@ describe('generateRepoTodos', () => {
 
 		vi.mocked(readdir).mockImplementation(async (dirPath: string) => {
 			if (dirPath === mockRepoPath) {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
 		});
@@ -265,7 +305,9 @@ describe('generateRepoTodos', () => {
 
 		vi.mocked(readdir).mockImplementation(async (dirPath: string) => {
 			if (dirPath === '/tmp/test-repo') {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
 		});
@@ -279,7 +321,11 @@ describe('generateRepoTodos', () => {
 		const mockRepoPath = '/tmp/test-repo';
 		const mockEntries = [
 			{ name: 'file1.ts', isFile: () => true, isDirectory: () => false },
-			{ name: 'node_modules', isFile: () => false, isDirectory: () => true },
+			{
+				name: 'node_modules',
+				isFile: () => false,
+				isDirectory: () => true,
+			},
 		];
 		const mockNodeModulesEntries = [
 			{ name: 'package', isFile: () => false, isDirectory: () => true },
@@ -287,10 +333,14 @@ describe('generateRepoTodos', () => {
 
 		vi.mocked(readdir).mockImplementation(async (dirPath: string) => {
 			if (dirPath === mockRepoPath) {
-				return mockEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			if (dirPath === join(mockRepoPath, 'node_modules')) {
-				return mockNodeModulesEntries as unknown as Awaited<ReturnType<typeof readdir>>;
+				return mockNodeModulesEntries as unknown as Awaited<
+					ReturnType<typeof readdir>
+				>;
 			}
 			return [] as unknown as Awaited<ReturnType<typeof readdir>>;
 		});
@@ -302,4 +352,3 @@ describe('generateRepoTodos', () => {
 		expect(todos[0].content).toContain('file1.ts');
 	});
 });
-

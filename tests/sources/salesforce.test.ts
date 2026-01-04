@@ -362,7 +362,8 @@ describe('getSalesforceUrl', () => {
 		// This tests line 68: searchParamId ?? pathnameLast ?? null
 		// where searchParamId is null, so pathnameLast is used
 		// The branch coverage needs to see: searchParamId (null) -> pathnameLast (not null) -> use pathnameLast
-		const url = 'https://help.salesforce.com/s/articleView/apex-annotations';
+		const url =
+			'https://help.salesforce.com/s/articleView/apex-annotations';
 		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
 		const articleContent = await loadFixture('article-auraenabled.txt');
 
@@ -584,7 +585,9 @@ describe('dumpSalesforceHelp', () => {
 		vi.mocked(crawler.crawlSalesforcePage)
 			.mockRejectedValueOnce(new Error('Fetch failed'))
 			.mockResolvedValueOnce(await loadFixture('article-annotations.txt'))
-			.mockResolvedValueOnce(await loadFixture('article-auraenabled.txt'));
+			.mockResolvedValueOnce(
+				await loadFixture('article-auraenabled.txt'),
+			);
 
 		await dumpSalesforceHelp('test', { verbose: true });
 
@@ -610,7 +613,9 @@ describe('dumpSalesforceHelp', () => {
 		vi.mocked(crawler.crawlSalesforcePage)
 			.mockRejectedValueOnce(new Error('Fetch failed'))
 			.mockResolvedValueOnce(await loadFixture('article-annotations.txt'))
-			.mockResolvedValueOnce(await loadFixture('article-auraenabled.txt'));
+			.mockResolvedValueOnce(
+				await loadFixture('article-auraenabled.txt'),
+			);
 
 		await dumpSalesforceHelp('test', { verbose: false });
 

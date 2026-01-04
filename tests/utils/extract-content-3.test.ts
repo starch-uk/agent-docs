@@ -34,22 +34,27 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create text elements (p, div, span, li, etc.) with substantial content
 		const p = document.createElement('p');
-		p.textContent = 'Paragraph text with enough content to meet the minimum length requirement of 100 characters for text element collection. '.repeat(2);
+		p.textContent =
+			'Paragraph text with enough content to meet the minimum length requirement of 100 characters for text element collection. '.repeat(
+				2,
+			);
 		document.body.appendChild(p);
-		
+
 		const div = document.createElement('div');
 		div.textContent = 'Div text with enough content. '.repeat(5);
 		document.body.appendChild(div);
-		
+
 		const span = document.createElement('span');
 		span.textContent = 'Span text with enough content. '.repeat(5);
 		document.body.appendChild(span);
@@ -60,8 +65,8 @@ describe('extractContent', () => {
 		// Should contain at least one of the text elements
 		expect(
 			result.content.includes('Paragraph text') ||
-			result.content.includes('Div text') ||
-			result.content.includes('Span text')
+				result.content.includes('Div text') ||
+				result.content.includes('Span text'),
 		).toBe(true);
 	});
 
@@ -72,13 +77,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create text element with high code ratio (>= 0.1)
 		const div = document.createElement('div');
 		div.textContent = '{}();=;{}();=;{}();=;'.repeat(20); // High code ratio, > 100 chars
@@ -97,18 +104,20 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create text element with content that's already in bestText
 		const main = document.createElement('main');
 		main.textContent = 'Main content with substantial text. '.repeat(50);
 		document.body.appendChild(main);
-		
+
 		// Create div with same content (duplicate)
 		const div = document.createElement('div');
 		div.textContent = 'Main content with substantial text. '.repeat(50);
@@ -127,20 +136,26 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create multiple text elements that when combined are longer than any single one
 		const p1 = document.createElement('p');
-		p1.textContent = 'First paragraph with substantial content. '.repeat(30);
+		p1.textContent = 'First paragraph with substantial content. '.repeat(
+			30,
+		);
 		document.body.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
-		p2.textContent = 'Second paragraph with substantial content. '.repeat(30);
+		p2.textContent = 'Second paragraph with substantial content. '.repeat(
+			30,
+		);
 		document.body.appendChild(p2);
 
 		const result = extractContent(document);
@@ -157,17 +172,17 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element with substantial text (sets bestText)
 		const main = document.createElement('main');
 		main.textContent = 'Main content with substantial text. '.repeat(100); // ~3500 chars
 		document.body.appendChild(main);
-		
+
 		// Create text elements that when combined are shorter than main
 		const p1 = document.createElement('p');
 		p1.textContent = 'First paragraph. '.repeat(50); // ~900 chars
 		document.body.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
 		p2.textContent = 'Second paragraph. '.repeat(50); // ~1000 chars
 		document.body.appendChild(p2);
@@ -186,17 +201,22 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create more than 50 paragraphs (maxParagraphs)
 		for (let i = 0; i < 60; i++) {
 			const p = document.createElement('p');
-			p.textContent = `Paragraph ${i} with enough content to meet the minimum length requirement of 100 characters. `.repeat(2);
+			p.textContent =
+				`Paragraph ${i} with enough content to meet the minimum length requirement of 100 characters. `.repeat(
+					2,
+				);
 			document.body.appendChild(p);
 		}
 
@@ -212,17 +232,21 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create more than 300 text elements (maxTextElementsCollect)
 		for (let i = 0; i < 350; i++) {
 			const div = document.createElement('div');
-			div.textContent = `Text element ${i} with enough content. `.repeat(3);
+			div.textContent = `Text element ${i} with enough content. `.repeat(
+				3,
+			);
 			document.body.appendChild(div);
 		}
 
@@ -238,21 +262,27 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create text element with substantial content
 		const p1 = document.createElement('p');
-		p1.textContent = 'This is a long text with enough content to meet the minimum length requirement of 50 characters for text element collection. '.repeat(3);
+		p1.textContent =
+			'This is a long text with enough content to meet the minimum length requirement of 50 characters for text element collection. '.repeat(
+				3,
+			);
 		document.body.appendChild(p1);
-		
+
 		// Create another text element with content that's a substring of the first
 		const p2 = document.createElement('p');
-		p2.textContent = 'This is a long text with enough content to meet the minimum length requirement'; // Substring of p1
+		p2.textContent =
+			'This is a long text with enough content to meet the minimum length requirement'; // Substring of p1
 		document.body.appendChild(p2);
 
 		const result = extractContent(document);
@@ -265,17 +295,24 @@ describe('extractContent', () => {
 	it('should return filteredText from processMainElement when docTexts.length > 0 and filteredText.length > minFilteredTextLength', () => {
 		// Create main element with JS patterns and documentation paragraphs
 		const main = document.createElement('main');
-		main.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
-		
+		main.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+
 		// Add paragraphs with valid documentation (no JS patterns)
 		const p1 = document.createElement('p');
-		p1.textContent = 'This is valid documentation content that should be extracted from paragraphs. '.repeat(2);
+		p1.textContent =
+			'This is valid documentation content that should be extracted from paragraphs. '.repeat(
+				2,
+			);
 		main.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
-		p2.textContent = 'More documentation content here that meets the minimum length requirement. '.repeat(2);
+		p2.textContent =
+			'More documentation content here that meets the minimum length requirement. '.repeat(
+				2,
+			);
 		main.appendChild(p2);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -288,13 +325,14 @@ describe('extractContent', () => {
 	it('should not return filteredText from processMainElement when filteredText.length <= minFilteredTextLength', () => {
 		// Create main element with JS patterns but short documentation paragraphs
 		const main = document.createElement('main');
-		main.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
-		
+		main.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+
 		// Add short paragraphs (< 200 chars when combined)
 		const p1 = document.createElement('p');
 		p1.textContent = 'Short doc.';
 		main.appendChild(p1);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -306,7 +344,10 @@ describe('extractContent', () => {
 	it('should return mainText from processMainElement when codeRatio < maxCodeRatio and cookie conditions pass', () => {
 		// Create main element with substantial text, low code ratio, and acceptable cookie ratio
 		const main = document.createElement('main');
-		main.textContent = 'This is substantial main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(5);
+		main.textContent =
+			'This is substantial main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				5,
+			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -322,18 +363,23 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Test different selectors from the selector array
 		// Test .slds-text-longform
 		const sldsDiv = document.createElement('div');
 		sldsDiv.className = 'slds-text-longform';
-		sldsDiv.textContent = 'SLDS text longform content with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
+		sldsDiv.textContent =
+			'SLDS text longform content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
 		document.body.appendChild(sldsDiv);
 
 		const result = extractContent(document);
@@ -349,16 +395,21 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Test article selector
 		const article = document.createElement('article');
-		article.textContent = 'Article content with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
+		article.textContent =
+			'Article content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
@@ -374,17 +425,22 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Test .documentation-content selector
 		const docDiv = document.createElement('div');
 		docDiv.className = 'documentation-content';
-		docDiv.textContent = 'Documentation content with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
+		docDiv.textContent =
+			'Documentation content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
 		document.body.appendChild(docDiv);
 
 		const result = extractContent(document);
@@ -396,19 +452,28 @@ describe('extractContent', () => {
 	it('should append title texts to mainText when titleTexts.length > 0', () => {
 		// Create main element with links that have title attributes
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text to meet the minimum length requirement of 200 characters for extraction. '.repeat(3);
-		
+		main.textContent =
+			'Main content with enough text to meet the minimum length requirement of 200 characters for extraction. '.repeat(
+				3,
+			);
+
 		// Add links with title attributes
 		const link1 = document.createElement('a');
-		link1.setAttribute('title', 'This is a link title with enough length to be collected');
+		link1.setAttribute(
+			'title',
+			'This is a link title with enough length to be collected',
+		);
 		link1.textContent = 'Link 1';
 		main.appendChild(link1);
-		
+
 		const link2 = document.createElement('a');
-		link2.setAttribute('title', 'Another link title with substantial content');
+		link2.setAttribute(
+			'title',
+			'Another link title with substantial content',
+		);
 		link2.textContent = 'Link 2';
 		main.appendChild(link2);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -421,13 +486,16 @@ describe('extractContent', () => {
 	it('should not append title texts when titleTexts.length === 0', () => {
 		// Create main element without links with title attributes
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
-		
+		main.textContent =
+			'Main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
+
 		// Add link without title attribute
 		const link = document.createElement('a');
 		link.textContent = 'Link without title attribute';
 		main.appendChild(link);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -444,20 +512,27 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		// Add JS code first
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		codeDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		main.appendChild(codeDiv);
-		
+
 		// Add link with title attribute (title should be extracted)
 		const link = document.createElement('a');
-		link.setAttribute('title', 'This is a documentation link title that should be included');
+		link.setAttribute(
+			'title',
+			'This is a documentation link title that should be included',
+		);
 		link.textContent = 'Link';
 		main.appendChild(link);
-		
+
 		// Add paragraph with valid documentation (no JS patterns)
 		const p = document.createElement('p');
-		p.textContent = 'This is valid documentation content that should be extracted. '.repeat(5);
+		p.textContent =
+			'This is valid documentation content that should be extracted. '.repeat(
+				5,
+			);
 		main.appendChild(p);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -472,19 +547,23 @@ describe('extractContent', () => {
 		// Create main element with JS patterns to trigger filtering path
 		const main = document.createElement('main');
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		codeDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		main.appendChild(codeDiv);
-		
+
 		// Add short paragraph (< 30 chars) - should be excluded from docTexts
 		const shortP = document.createElement('p');
 		shortP.textContent = 'Short text.';
 		main.appendChild(shortP);
-		
+
 		// Add valid documentation paragraph (> 30 chars, no JS patterns) - should be included
 		const validP = document.createElement('p');
-		validP.textContent = 'This is valid documentation content that should be extracted. '.repeat(5);
+		validP.textContent =
+			'This is valid documentation content that should be extracted. '.repeat(
+				5,
+			);
 		main.appendChild(validP);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -500,54 +579,80 @@ describe('extractContent', () => {
 		// Create main element - start with JS code to trigger JS filtering path
 		const main = document.createElement('main');
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		codeDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		main.appendChild(codeDiv);
-		
+
 		// Add paragraph with 'function' pattern (should be excluded)
 		const p1 = document.createElement('p');
-		p1.textContent = 'This paragraph contains function keyword and should be excluded from extraction. '.repeat(2);
+		p1.textContent =
+			'This paragraph contains function keyword and should be excluded from extraction. '.repeat(
+				2,
+			);
 		main.appendChild(p1);
-		
+
 		// Add paragraph with '=>' pattern (should be excluded)
 		const p2 = document.createElement('p');
-		p2.textContent = 'This paragraph contains => arrow function and should be excluded. '.repeat(2);
+		p2.textContent =
+			'This paragraph contains => arrow function and should be excluded. '.repeat(
+				2,
+			);
 		main.appendChild(p2);
-		
+
 		// Add paragraph with 'document.querySelector' pattern (should be excluded)
 		const p3 = document.createElement('p');
-		p3.textContent = 'This paragraph contains document.querySelector and should be excluded. '.repeat(2);
+		p3.textContent =
+			'This paragraph contains document.querySelector and should be excluded. '.repeat(
+				2,
+			);
 		main.appendChild(p3);
-		
+
 		// Add paragraph with 'addEventListener' pattern (should be excluded)
 		const p4 = document.createElement('p');
-		p4.textContent = 'This paragraph contains addEventListener and should be excluded. '.repeat(2);
+		p4.textContent =
+			'This paragraph contains addEventListener and should be excluded. '.repeat(
+				2,
+			);
 		main.appendChild(p4);
-		
+
 		// Add paragraph with 'fetch(' pattern (should be excluded)
 		const p5 = document.createElement('p');
-		p5.textContent = 'This paragraph contains fetch( and should be excluded. '.repeat(2);
+		p5.textContent =
+			'This paragraph contains fetch( and should be excluded. '.repeat(2);
 		main.appendChild(p5);
-		
+
 		// Add paragraph with 'const ' and '= document' pattern (should be excluded)
 		const p6 = document.createElement('p');
-		p6.textContent = 'This paragraph contains const x = document and should be excluded. '.repeat(2);
+		p6.textContent =
+			'This paragraph contains const x = document and should be excluded. '.repeat(
+				2,
+			);
 		main.appendChild(p6);
-		
+
 		// Add paragraph with 'console.' pattern (should be excluded)
 		const p7 = document.createElement('p');
-		p7.textContent = 'This paragraph contains console.log and should be excluded. '.repeat(2);
+		p7.textContent =
+			'This paragraph contains console.log and should be excluded. '.repeat(
+				2,
+			);
 		main.appendChild(p7);
-		
+
 		// Add paragraph with 'window.' pattern (should be excluded)
 		const p8 = document.createElement('p');
-		p8.textContent = 'This paragraph contains window.location and should be excluded. '.repeat(2);
+		p8.textContent =
+			'This paragraph contains window.location and should be excluded. '.repeat(
+				2,
+			);
 		main.appendChild(p8);
-		
+
 		// Add valid documentation paragraph (no JS patterns, should be included)
 		const validP = document.createElement('p');
-		validP.textContent = 'This is valid documentation content that should be extracted. '.repeat(5);
+		validP.textContent =
+			'This is valid documentation content that should be extracted. '.repeat(
+				5,
+			);
 		main.appendChild(validP);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -563,17 +668,18 @@ describe('extractContent', () => {
 	it('should not return filteredText when docTexts.length === 0', () => {
 		// Create main element with JS patterns but no valid documentation paragraphs
 		const main = document.createElement('main');
-		main.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
-		
+		main.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+
 		// Add only paragraphs with JS patterns or short text
 		const p1 = document.createElement('p');
 		p1.textContent = 'function test() { return x => x; }';
 		main.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
 		p2.textContent = 'Short.';
 		main.appendChild(p2);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -585,17 +691,18 @@ describe('extractContent', () => {
 	it('should not return filteredText when filteredText.length <= minFilteredTextLength', () => {
 		// Create main element with JS patterns and short valid paragraphs
 		const main = document.createElement('main');
-		main.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
-		
+		main.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+
 		// Add valid documentation paragraphs but combined length <= 200
 		const p1 = document.createElement('p');
 		p1.textContent = 'Valid doc. '.repeat(5); // ~50 chars
 		main.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
 		p2.textContent = 'More valid doc. '.repeat(5); // ~75 chars
 		main.appendChild(p2);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -648,7 +755,10 @@ describe('extractContent', () => {
 		// Need cookieRatio > 0.1, so need wordCount < 40
 		// 7 repetitions = ~210 chars, ~35 words, cookieRatio = 4/35 = 0.114 > 0.1 ✓
 		// Use text with all 4 keywords: 'cookie consent accept all do not accept cookie consent'
-		main.textContent = 'cookie consent accept all do not accept cookie consent. '.repeat(4); // ~220 chars (200 < length < 500 ✓), ~36 words, cookieRatio = 4/36 = 0.111 > 0.1 ✓
+		main.textContent =
+			'cookie consent accept all do not accept cookie consent. '.repeat(
+				4,
+			); // ~220 chars (200 < length < 500 ✓), ~36 words, cookieRatio = 4/36 = 0.111 > 0.1 ✓
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -661,7 +771,10 @@ describe('extractContent', () => {
 	it('should return mainText when all conditions pass in else-if path', () => {
 		// Create main element with acceptable code ratio, cookie ratio, and length > 200
 		const main = document.createElement('main');
-		main.textContent = 'This is substantial main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(5);
+		main.textContent =
+			'This is substantial main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				5,
+			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -681,11 +794,14 @@ describe('extractContent', () => {
 		}
 		divWithOnclick.textContent = 'Content with onclick handler';
 		main.appendChild(divWithOnclick);
-		
+
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
+		normalDiv.textContent =
+			'Normal content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -706,11 +822,11 @@ describe('extractContent', () => {
 		}
 		divWithOnload.textContent = 'Content with onload handler';
 		main.appendChild(divWithOnload);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -730,11 +846,11 @@ describe('extractContent', () => {
 		}
 		divWithOnerror.textContent = 'Content with onerror handler';
 		main.appendChild(divWithOnerror);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -749,11 +865,11 @@ describe('extractContent', () => {
 		navDiv.className = 'global-nav-container';
 		navDiv.textContent = 'Navigation content';
 		main.appendChild(navDiv);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -767,11 +883,11 @@ describe('extractContent', () => {
 		cookieDiv.className = 'cookie-banner';
 		cookieDiv.textContent = 'Cookie consent';
 		main.appendChild(cookieDiv);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -785,11 +901,11 @@ describe('extractContent', () => {
 		onetrustDiv.className = 'onetrust-pc-sdk';
 		onetrustDiv.textContent = 'OneTrust content';
 		main.appendChild(onetrustDiv);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -802,11 +918,11 @@ describe('extractContent', () => {
 		const navElement = document.createElement('hgf-c360nav');
 		navElement.textContent = 'Navigation content';
 		main.appendChild(navElement);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -819,11 +935,11 @@ describe('extractContent', () => {
 		const navElement = document.createElement('hgf-c360contextnav');
 		navElement.textContent = 'Context navigation';
 		main.appendChild(navElement);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);

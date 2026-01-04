@@ -21,8 +21,14 @@ const MIN_PARAM_COUNT = 1;
 describe('searchSalesforceHelp', () => {
 	let storedRequestHandler: (context: {
 		page: {
-			waitForSelector: (selector: string, options?: { timeout?: number }) => Promise<unknown>;
-			evaluate: <T>(fn: (maxResults: Readonly<number>) => T, ...args: unknown[]) => Promise<T>;
+			waitForSelector: (
+				selector: string,
+				options?: { timeout?: number },
+			) => Promise<unknown>;
+			evaluate: <T>(
+				fn: (maxResults: Readonly<number>) => T,
+				...args: unknown[]
+			) => Promise<T>;
 		};
 	}) => Promise<void>;
 
@@ -31,10 +37,10 @@ describe('searchSalesforceHelp', () => {
 		vi.resetAllMocks();
 		// Use fake timers to make setTimeout calls instant
 		vi.useFakeTimers();
-		
+
 		// Reset handler for each test
 		storedRequestHandler = undefined as any;
-		
+
 		// Create a default mock run that uses the current handler
 		const defaultMockRun = vi.fn().mockImplementation(async () => {
 			// Capture handler at execution time to avoid race conditions
@@ -328,7 +334,8 @@ describe('searchSalesforceHelp', () => {
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					waitForSelector: vi.fn()
+					waitForSelector: vi
+						.fn()
 						.mockRejectedValueOnce(new Error('Timeout')) // Coveo selector fails
 						.mockResolvedValueOnce(undefined), // Fallback selector succeeds
 					evaluate: vi.fn().mockResolvedValue(mockResults),
@@ -366,7 +373,8 @@ describe('searchSalesforceHelp', () => {
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					waitForSelector: vi.fn()
+					waitForSelector: vi
+						.fn()
 						.mockRejectedValueOnce(new Error('Timeout')) // Coveo fails
 						.mockRejectedValueOnce(new Error('Timeout')), // Fallback fails
 					evaluate: vi.fn().mockResolvedValue(mockResults), // But results exist
@@ -585,4 +593,3 @@ describe('searchSalesforceHelp', () => {
 		expect(result.length).toBe(10);
 	});
 });
-

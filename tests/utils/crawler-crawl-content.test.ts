@@ -27,14 +27,16 @@ describe('crawlSalesforcePage', () => {
 			const dom = createDOM();
 			const { window } = dom;
 			const fnString = fn.toString();
-			const isRetryEvaluate = fnString.includes('createTreeWalker') || fnString.includes('textParts');
+			const isRetryEvaluate =
+				fnString.includes('createTreeWalker') ||
+				fnString.includes('textParts');
 			try {
 				const wrappedFn = new Function(
 					'globalThis',
 					`const window = arguments[0];
 					window.globalThis = window;
 					const document = window.document;
-					return (${fnString}).call(window);`
+					return (${fnString}).call(window);`,
 				);
 				return await wrappedFn(window);
 			} catch {
@@ -77,9 +79,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -110,9 +109,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -124,9 +124,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -151,9 +148,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -166,9 +164,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -202,9 +197,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThanOrEqual(200);
@@ -216,9 +212,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -227,16 +220,21 @@ describe('crawlSalesforcePage', () => {
 					evaluate: vi.fn().mockImplementation(() => {
 						evaluateCallCount++;
 						if (evaluateCallCount === 1) {
-							return Promise.resolve({ content: null, debugInfo: {} });
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}
+							return Promise.resolve({
+								content: null,
+								debugInfo: {},
+							});
+							vi.mocked(PlaywrightCrawler).mockImplementation(
+								(config) => {
+									if (config.requestHandler) {
+										testHandler = config.requestHandler;
+									}
+									return {
+										run: testMockRun,
+									} as unknown as PlaywrightCrawler;
+								},
+							);
+						}
 						if (evaluateCallCount === 2) {
 							return Promise.resolve(fallbackContent);
 						}
@@ -261,7 +259,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -272,9 +272,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -299,9 +296,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -309,16 +307,18 @@ describe('crawlSalesforcePage', () => {
 
 	it('should handle content extraction with JavaScript filtering', async () => {
 		// Mock evaluate to return content with JavaScript patterns that need filtering
-		const jsContent = 'function test() { const x = document.querySelector(); }';
-		const docContent = 'This is documentation content that should be extracted. '.repeat(20);
+		const jsContent =
+			'function test() { const x = document.querySelector(); }';
+		const docContent =
+			'This is documentation content that should be extracted. '.repeat(
+				20,
+			);
 		const combinedContent = jsContent + docContent;
-		
+
 		let evaluateCallCount = 0;
 		let testHandler: (context: { page: any }) => Promise<void>;
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -330,17 +330,21 @@ describe('crawlSalesforcePage', () => {
 						if (evaluateCallCount === 1) {
 							return Promise.resolve({
 								content: combinedContent,
-								debugInfo: { mainTextLength: combinedContent.length },
+								debugInfo: {
+									mainTextLength: combinedContent.length,
+								},
 							});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}
+							vi.mocked(PlaywrightCrawler).mockImplementation(
+								(config) => {
+									if (config.requestHandler) {
+										testHandler = config.requestHandler;
+									}
+									return {
+										run: testMockRun,
+									} as unknown as PlaywrightCrawler;
+								},
+							);
+						}
 						return Promise.resolve(docContent);
 					}),
 					content: vi.fn().mockResolvedValue(combinedContent),
@@ -362,7 +366,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -371,12 +377,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with paragraph collection', async () => {
 		const paragraphContent = 'Paragraph content. '.repeat(30);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -387,17 +390,22 @@ describe('crawlSalesforcePage', () => {
 						// Return object that triggers paragraph collection path
 						return Promise.resolve({
 							content: paragraphContent,
-							debugInfo: { paragraphCount: 10, paragraphTextsCount: 5 },
+							debugInfo: {
+								paragraphCount: 10,
+								paragraphTextsCount: 5,
+							},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(paragraphContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -417,7 +425,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -426,12 +436,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with text element collection', async () => {
 		const textElementContent = 'Text element content. '.repeat(40);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -444,15 +451,17 @@ describe('crawlSalesforcePage', () => {
 							content: textElementContent,
 							debugInfo: {},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(textElementContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -472,7 +481,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -481,12 +492,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with selector-based extraction', async () => {
 		const selectorContent = 'Selector-based content. '.repeat(50);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -499,15 +507,17 @@ describe('crawlSalesforcePage', () => {
 							content: selectorContent,
 							debugInfo: {},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(selectorContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -527,7 +537,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -536,12 +548,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with shadow DOM', async () => {
 		const shadowContent = 'Shadow DOM content. '.repeat(50);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -552,17 +561,22 @@ describe('crawlSalesforcePage', () => {
 						// Return object with shadow DOM content
 						return Promise.resolve({
 							content: shadowContent,
-							debugInfo: { shadowDOMContentUsed: true, shadowDOMContentLength: shadowContent.length },
+							debugInfo: {
+								shadowDOMContentUsed: true,
+								shadowDOMContentLength: shadowContent.length,
+							},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(shadowContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -582,21 +596,22 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
 	});
 
 	it('should handle content extraction with cookie ratio filtering', async () => {
-		const cookieHeavyContent = 'cookie consent accept all '.repeat(5) + 'Real content. '.repeat(100);
+		const cookieHeavyContent =
+			'cookie consent accept all '.repeat(5) +
+			'Real content. '.repeat(100);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -609,15 +624,17 @@ describe('crawlSalesforcePage', () => {
 							content: cookieHeavyContent,
 							debugInfo: {},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(cookieHeavyContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -637,7 +654,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -646,12 +665,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with main element selectors', async () => {
 		const mainContent = 'Main element content. '.repeat(60);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -662,17 +678,22 @@ describe('crawlSalesforcePage', () => {
 						// Return object that triggers main element extraction
 						return Promise.resolve({
 							content: mainContent,
-							debugInfo: { mainElementFound: true, mainElementTag: 'MAIN' },
+							debugInfo: {
+								mainElementFound: true,
+								mainElementTag: 'MAIN',
+							},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(mainContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -692,7 +713,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -701,12 +724,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with body text fallback', async () => {
 		const bodyText = 'Body text content. '.repeat(80);
 		let evaluateCallCount = 0;
-		
+
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-		
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -719,15 +739,17 @@ describe('crawlSalesforcePage', () => {
 							content: bodyText,
 							debugInfo: {},
 						});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}),
+						vi.mocked(PlaywrightCrawler).mockImplementation(
+							(config) => {
+								if (config.requestHandler) {
+									testHandler = config.requestHandler;
+								}
+								return {
+									run: testMockRun,
+								} as unknown as PlaywrightCrawler;
+							},
+						);
+					}),
 					content: vi.fn().mockResolvedValue(bodyText),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -747,7 +769,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -758,9 +782,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -786,9 +807,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -799,9 +821,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -812,7 +831,9 @@ describe('crawlSalesforcePage', () => {
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
-					waitForFunction: vi.fn().mockRejectedValue(new Error('Timeout')),
+					waitForFunction: vi
+						.fn()
+						.mockRejectedValue(new Error('Timeout')),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -827,9 +848,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -841,9 +863,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -853,16 +872,21 @@ describe('crawlSalesforcePage', () => {
 						evaluateCallCount++;
 						// First call: main extractContent (returns object with content)
 						if (evaluateCallCount === 1) {
-							return Promise.resolve({ content: shortContent, debugInfo: {} });
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
-		});
-		}
+							return Promise.resolve({
+								content: shortContent,
+								debugInfo: {},
+							});
+							vi.mocked(PlaywrightCrawler).mockImplementation(
+								(config) => {
+									if (config.requestHandler) {
+										testHandler = config.requestHandler;
+									}
+									return {
+										run: testMockRun,
+									} as unknown as PlaywrightCrawler;
+								},
+							);
+						}
 						// Second call: fallback (returns string)
 						if (evaluateCallCount === 2) {
 							return Promise.resolve(shortContent);
@@ -892,7 +916,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		// Should throw error because both content and retry are insufficient
 		await expect(resultPromise).rejects.toThrow(
@@ -911,9 +937,6 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -923,7 +946,10 @@ describe('crawlSalesforcePage', () => {
 						evaluateCallCount++;
 						// First call: main extractContent (returns object with content)
 						if (evaluateCallCount === 1) {
-							return Promise.resolve({ content: shortContent, debugInfo: {} });
+							return Promise.resolve({
+								content: shortContent,
+								debugInfo: {},
+							});
 						}
 						// Second call: fallback (returns string)
 						if (evaluateCallCount === 2) {
@@ -954,7 +980,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		// Should throw error because both content and retry are insufficient (lines 1261-1278)
 		await expect(resultPromise).rejects.toThrow(
@@ -980,14 +1008,20 @@ describe('crawlSalesforcePage', () => {
 					evaluate: vi.fn().mockImplementation((fn: any) => {
 						evaluateCallCount++;
 						if (evaluateCallCount === 1) {
-							return Promise.resolve({ content: shortContent, debugInfo: {} });
+							return Promise.resolve({
+								content: shortContent,
+								debugInfo: {},
+							});
 						}
 						if (evaluateCallCount === 2) {
 							// Fallback evaluate - execute with jsdom where body is null
 							// This tests lines 1100-1120, specifically line 1120 (return '' when body is null)
-							const dom = new JSDOM('<!DOCTYPE html><html><head></head><body></body></html>', {
-								url: 'https://test.example.com',
-							});
+							const dom = new JSDOM(
+								'<!DOCTYPE html><html><head></head><body></body></html>',
+								{
+									url: 'https://test.example.com',
+								},
+							);
 							const { window } = dom;
 							// Remove body to simulate null body condition
 							if (window.document.body) {
@@ -1000,7 +1034,7 @@ describe('crawlSalesforcePage', () => {
 									`const window = arguments[0];
 									window.globalThis = window;
 									const document = window.document;
-									return (${fnString}).call(window);`
+									return (${fnString}).call(window);`,
 								);
 								const result = wrappedFn(window);
 								return Promise.resolve(result);
@@ -1030,7 +1064,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		// Should throw error because content is insufficient
 		await expect(resultPromise).rejects.toThrow('Insufficient content');
@@ -1041,7 +1077,10 @@ describe('crawlSalesforcePage', () => {
 
 	it('should handle retry content extraction with TreeWalker', async () => {
 		const shortContent = 'x'.repeat(30);
-		const retryContent = 'Documentation content with enough text to meet requirements. '.repeat(50);
+		const retryContent =
+			'Documentation content with enough text to meet requirements. '.repeat(
+				50,
+			);
 		let evaluateCallCount = 0;
 
 		let testHandler: (context: { page: any }) => Promise<void>;
@@ -1054,7 +1093,10 @@ describe('crawlSalesforcePage', () => {
 					evaluate: vi.fn().mockImplementation((fn: any) => {
 						evaluateCallCount++;
 						if (evaluateCallCount === 1) {
-							return Promise.resolve({ content: shortContent, debugInfo: {} });
+							return Promise.resolve({
+								content: shortContent,
+								debugInfo: {},
+							});
 						}
 						if (evaluateCallCount === 2) {
 							return Promise.resolve('');
@@ -1069,7 +1111,7 @@ describe('crawlSalesforcePage', () => {
 								</body></html>`,
 								{
 									url: 'https://test.example.com',
-								}
+								},
 							);
 							const { window } = dom;
 							const fnString = fn.toString();
@@ -1079,7 +1121,7 @@ describe('crawlSalesforcePage', () => {
 									`const window = arguments[0];
 									window.globalThis = window;
 									const document = window.document;
-									return (${fnString}).call(window);`
+									return (${fnString}).call(window);`,
 								);
 								const result = wrappedFn(window);
 								// Ensure result is > 200 chars to pass the check
@@ -1112,7 +1154,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		// Should return retry content from TreeWalker (lines 1161-1220)

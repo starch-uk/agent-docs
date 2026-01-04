@@ -13,4 +13,3 @@ export function delay(ms: Readonly<number>): Promise<void> {
 		setTimeout(resolve, ms);
 	});
 }
-

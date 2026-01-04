@@ -453,4 +453,3 @@ async function searchSalesforceHelp(
 }
 
 export { searchSalesforceHelp, normalizeQuery };
-

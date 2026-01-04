@@ -34,11 +34,11 @@ describe('extractContent', () => {
 		const scrollElement = document.createElement('dx-scroll-manager');
 		scrollElement.textContent = 'Scroll manager';
 		main.appendChild(scrollElement);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -51,11 +51,11 @@ describe('extractContent', () => {
 		const labelerElement = document.createElement('dx-traffic-labeler');
 		labelerElement.textContent = 'Traffic labeler';
 		main.appendChild(labelerElement);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -68,11 +68,11 @@ describe('extractContent', () => {
 		const headerElement = document.createElement('doc-header');
 		headerElement.textContent = 'Document header';
 		main.appendChild(headerElement);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -85,11 +85,11 @@ describe('extractContent', () => {
 		const xmlElement = document.createElement('doc-xml-content');
 		xmlElement.textContent = 'XML content';
 		main.appendChild(xmlElement);
-		
+
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
 		main.appendChild(normalDiv);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -100,13 +100,13 @@ describe('extractContent', () => {
 	it('should not include title when title is null', () => {
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
-		
+
 		// Add link with null title (getAttribute returns null)
 		const link = document.createElement('a');
 		// Don't set title attribute
 		link.textContent = 'Link';
 		main.appendChild(link);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -117,13 +117,13 @@ describe('extractContent', () => {
 	it('should not include title when title is undefined', () => {
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
-		
+
 		// Add link - title attribute not set, so getAttribute returns null
 		// But we test the undefined check in the condition
 		const link = document.createElement('a');
 		link.textContent = 'Link';
 		main.appendChild(link);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -134,13 +134,13 @@ describe('extractContent', () => {
 	it('should not include title when title is empty string', () => {
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
-		
+
 		// Add link with empty title
 		const link = document.createElement('a');
 		link.setAttribute('title', '');
 		link.textContent = 'Link';
 		main.appendChild(link);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -151,13 +151,13 @@ describe('extractContent', () => {
 	it('should not include title when title.length <= minTitleLength', () => {
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
-		
+
 		// Add link with short title (<= 10 chars)
 		const link = document.createElement('a');
 		link.setAttribute('title', 'Short'); // 5 chars, <= 10
 		link.textContent = 'Link';
 		main.appendChild(link);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -172,13 +172,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create minimal content that won't set bestText
 		// But will allow fallback strategies to work
 		const div = document.createElement('div');
@@ -198,10 +200,13 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element that will set bestText
 		const main = document.createElement('main');
-		main.textContent = 'Best text content with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
+		main.textContent =
+			'Best text content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -217,16 +222,21 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create element with substantial text (> 500 chars) that's not cookie text
 		const div = document.createElement('div');
-		div.textContent = 'Fallback element content with enough text to meet the minimum length requirement of 500 characters for fallback extraction. '.repeat(8);
+		div.textContent =
+			'Fallback element content with enough text to meet the minimum length requirement of 500 characters for fallback extraction. '.repeat(
+				8,
+			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -242,21 +252,25 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create element with text <= 500 chars (should be skipped)
 		const shortDiv = document.createElement('div');
 		shortDiv.textContent = 'Short content. '.repeat(20); // ~300 chars, <= 500
 		document.body.appendChild(shortDiv);
-		
+
 		// Create element with text > 500 chars (should be used)
 		const longDiv = document.createElement('div');
-		longDiv.textContent = 'Long fallback content with enough text. '.repeat(20); // > 500 chars
+		longDiv.textContent = 'Long fallback content with enough text. '.repeat(
+			20,
+		); // > 500 chars
 		document.body.appendChild(longDiv);
 
 		const result = extractContent(document);
@@ -273,16 +287,19 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create element with >= 3 cookie keywords and <= 2000 chars
 		const cookieDiv = document.createElement('div');
-		cookieDiv.textContent = 'cookie consent accept all do not accept. '.repeat(40); // >= 3 keywords, <= 2000 chars
+		cookieDiv.textContent =
+			'cookie consent accept all do not accept. '.repeat(40); // >= 3 keywords, <= 2000 chars
 		document.body.appendChild(cookieDiv);
 
 		const result = extractContent(document);
@@ -298,16 +315,19 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create element with >= 3 cookie keywords but > 2000 chars
 		const cookieDiv = document.createElement('div');
-		cookieDiv.textContent = 'cookie consent accept all do not accept. '.repeat(100); // >= 3 keywords, > 2000 chars
+		cookieDiv.textContent =
+			'cookie consent accept all do not accept. '.repeat(100); // >= 3 keywords, > 2000 chars
 		document.body.appendChild(cookieDiv);
 
 		const result = extractContent(document);
@@ -323,13 +343,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create element with substantial text (> 500 chars) but after removing unwanted elements, it's <= 500
 		const div = document.createElement('div');
 		const script = document.createElement('script');
@@ -351,16 +373,21 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create article element (one of the mainSelectors)
 		const article = document.createElement('article');
-		article.textContent = 'Article content with enough text to meet the minimum length requirement of 1000 characters for bestMainText extraction. '.repeat(20);
+		article.textContent =
+			'Article content with enough text to meet the minimum length requirement of 1000 characters for bestMainText extraction. '.repeat(
+				20,
+			);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
@@ -376,13 +403,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create article element with text <= 1000 chars
 		const article = document.createElement('article');
 		article.textContent = 'Article content. '.repeat(50); // ~900 chars, <= 1000
@@ -401,13 +430,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create article element with text > 1000 but <= 5000 chars and cookieRatio >= 0.05
 		const article = document.createElement('article');
 		article.textContent = 'cookie consent accept all. '.repeat(150); // > 1000, <= 5000, high cookie ratio
@@ -426,18 +457,22 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create article element (longer, will be set first)
 		const article = document.createElement('article');
-		article.textContent = 'Article content with substantial text. '.repeat(100); // ~3500 chars
+		article.textContent = 'Article content with substantial text. '.repeat(
+			100,
+		); // ~3500 chars
 		document.body.appendChild(article);
-		
+
 		// Create main element (shorter, won't update bestMainText)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(100); // ~1500 chars, shorter
@@ -457,13 +492,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText is empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create article element with text <= 1000 chars (won't set bestMainText)
 		const article = document.createElement('article');
 		article.textContent = 'Article content. '.repeat(50); // ~900 chars, <= 1000
@@ -482,16 +519,21 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure bestText and bestMainText are empty
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with substantial content
 		const div = document.createElement('div');
-		div.textContent = 'Body text content with enough text to meet the minimum length requirement of 500 characters for body text extraction. '.repeat(8);
+		div.textContent =
+			'Body text content with enough text to meet the minimum length requirement of 500 characters for body text extraction. '.repeat(
+				8,
+			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -507,20 +549,23 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with element containing document.querySelector
 		const div = document.createElement('div');
 		div.textContent = 'const x = document.querySelector("div");';
 		document.body.appendChild(div);
-		
+
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal body text content with enough text. '.repeat(15);
+		normalDiv.textContent =
+			'Normal body text content with enough text. '.repeat(15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
@@ -536,20 +581,23 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with element containing addEventListener
 		const div = document.createElement('div');
 		div.textContent = 'x.addEventListener("click", () => {});';
 		document.body.appendChild(div);
-		
+
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal body text content with enough text. '.repeat(15);
+		normalDiv.textContent =
+			'Normal body text content with enough text. '.repeat(15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
@@ -565,20 +613,23 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with element containing fetch(
 		const div = document.createElement('div');
 		div.textContent = 'fetch("https://example.com");';
 		document.body.appendChild(div);
-		
+
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal body text content with enough text. '.repeat(15);
+		normalDiv.textContent =
+			'Normal body text content with enough text. '.repeat(15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
@@ -594,20 +645,23 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with element containing const and = document
 		const div = document.createElement('div');
 		div.textContent = 'const x = document.getElementById("test");';
 		document.body.appendChild(div);
-		
+
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal body text content with enough text. '.repeat(15);
+		normalDiv.textContent =
+			'Normal body text content with enough text. '.repeat(15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
@@ -623,23 +677,29 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with > 2 JS patterns
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		document.body.appendChild(jsDiv);
-		
+
 		// Add valid documentation paragraphs
 		const p1 = document.createElement('p');
-		p1.textContent = 'This is valid documentation content that should be extracted. '.repeat(5);
+		p1.textContent =
+			'This is valid documentation content that should be extracted. '.repeat(
+				5,
+			);
 		document.body.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
 		p2.textContent = 'More documentation content here. '.repeat(5);
 		document.body.appendChild(p2);
@@ -658,26 +718,32 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with > 2 JS patterns
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		document.body.appendChild(jsDiv);
-		
+
 		// Add short paragraph (<= 50 chars)
 		const shortP = document.createElement('p');
 		shortP.textContent = 'Short text.';
 		document.body.appendChild(shortP);
-		
+
 		// Add valid documentation paragraph (> 50 chars, no JS patterns)
 		const validP = document.createElement('p');
-		validP.textContent = 'This is valid documentation content that should be extracted. '.repeat(5);
+		validP.textContent =
+			'This is valid documentation content that should be extracted. '.repeat(
+				5,
+			);
 		document.body.appendChild(validP);
 
 		const result = extractContent(document);
@@ -693,23 +759,26 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with > 2 JS patterns but no valid doc paragraphs
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		document.body.appendChild(jsDiv);
-		
+
 		// Add only short paragraphs or paragraphs with JS patterns
 		const shortP = document.createElement('p');
 		shortP.textContent = 'Short.';
 		document.body.appendChild(shortP);
-		
+
 		const jsP = document.createElement('p');
 		jsP.textContent = 'function test() { return x => x; }';
 		document.body.appendChild(jsP);
@@ -727,13 +796,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with length <= 500
 		const div = document.createElement('div');
 		div.textContent = 'Short body text. '.repeat(20); // ~300 chars, <= 500
@@ -752,13 +823,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with very few words (wordCount <= 0)
 		// This is hard to achieve, but let's try with minimal text
 		const div = document.createElement('div');
@@ -777,13 +850,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text > 500 but <= 5000 chars with high cookie ratio (>= 0.2)
 		const cookieText = 'cookie consent accept all '.repeat(50);
 		const normalText = 'This is body text. '.repeat(10);
@@ -802,15 +877,20 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text > 500 chars with low cookie ratio (< 0.2)
-		const normalText = 'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(8);
+		const normalText =
+			'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
+				8,
+			);
 		document.body.textContent = normalText;
 
 		const result = extractContent(document);

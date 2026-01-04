@@ -28,4 +28,3 @@ describe('CLI entry points', () => {
 		expect(repoTodosModule).toHaveProperty('main');
 	});
 });
-

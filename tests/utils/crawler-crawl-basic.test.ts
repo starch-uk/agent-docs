@@ -27,14 +27,16 @@ describe('crawlSalesforcePage', () => {
 			const dom = createDOM();
 			const { window } = dom;
 			const fnString = fn.toString();
-			const isRetryEvaluate = fnString.includes('createTreeWalker') || fnString.includes('textParts');
+			const isRetryEvaluate =
+				fnString.includes('createTreeWalker') ||
+				fnString.includes('textParts');
 			try {
 				const wrappedFn = new Function(
 					'globalThis',
 					`const window = arguments[0];
 					window.globalThis = window;
 					const document = window.document;
-					return (${fnString}).call(window);`
+					return (${fnString}).call(window);`,
 				);
 				return await wrappedFn(window);
 			} catch {
@@ -80,7 +82,8 @@ describe('crawlSalesforcePage', () => {
 
 	it('should crawl page and return content', async () => {
 		// Content must be at least 100 chars (minimum requirement in code)
-		const mockContent = '<html><body>' + 'Test Content '.repeat(20) + '</body></html>';
+		const mockContent =
+			'<html><body>' + 'Test Content '.repeat(20) + '</body></html>';
 		let testHandler: (context: { page: any }) => Promise<void>;
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
@@ -107,9 +110,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -119,7 +123,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle page navigation errors', async () => {
 		// When crawler.run() itself throws, it's caught and re-thrown with a message
 		let testHandler: (context: { page: any }) => Promise<void>;
-		const testMockRun = vi.fn().mockRejectedValue(new Error('Crawler run failed'));
+		const testMockRun = vi
+			.fn()
+			.mockRejectedValue(new Error('Crawler run failed'));
 
 		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
 			if (config.requestHandler) {
@@ -137,25 +143,28 @@ describe('crawlSalesforcePage', () => {
 		} catch (error) {
 			caughtError = error as Error;
 		}
-		
+
 		// Verify the error was thrown and caught
 		expect(caughtError).toBeInstanceOf(Error);
 		if (caughtError) {
-			expect(caughtError.message).toContain('Failed to crawl Salesforce page');
+			expect(caughtError.message).toContain(
+				'Failed to crawl Salesforce page',
+			);
 		}
 	});
 
 	it('should handle cookie banner clicks', async () => {
 		// Content must be at least 100 chars
-		const mockContent = '<html><body>' + 'Content '.repeat(20) + '</body></html>';
+		const mockContent =
+			'<html><body>' + 'Content '.repeat(20) + '</body></html>';
 		let testHandler: (context: { page: any }) => Promise<void>;
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn()
+					waitForSelector: vi
+						.fn()
 						.mockResolvedValueOnce({}) // Cookie banner found
 						.mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
@@ -179,7 +188,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -194,11 +205,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -223,9 +230,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -242,11 +250,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -271,9 +275,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -285,11 +290,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -314,9 +315,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -330,11 +332,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -359,9 +357,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -372,15 +371,12 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn()
+					waitForSelector: vi
+						.fn()
 						.mockRejectedValueOnce(new Error('Not found'))
 						.mockResolvedValueOnce(undefined), // Second selector succeeds
 					click: vi.fn().mockResolvedValue(undefined),
@@ -403,14 +399,14 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
 	});
-
 
 	it('should handle cookie button click timeout', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
@@ -420,11 +416,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -449,9 +441,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -462,11 +455,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -476,7 +465,9 @@ describe('crawlSalesforcePage', () => {
 					content: vi.fn().mockResolvedValue(mockContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockRejectedValue(new Error('Button query timeout')),
+					$$: vi
+						.fn()
+						.mockRejectedValue(new Error('Button query timeout')),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -491,9 +482,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -504,11 +496,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -533,9 +521,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -547,11 +536,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -582,9 +567,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -595,11 +581,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -625,9 +607,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -638,11 +621,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -667,9 +646,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -681,11 +661,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -713,9 +689,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -731,11 +708,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -760,9 +733,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -780,11 +754,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -809,9 +779,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -827,11 +798,7 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -856,9 +823,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);
@@ -878,7 +846,9 @@ describe('crawlSalesforcePage', () => {
 					content: vi.fn().mockResolvedValue(mockContent),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockRejectedValue(new Error('Modal query timeout')),
+					$$: vi
+						.fn()
+						.mockRejectedValue(new Error('Modal query timeout')),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -894,7 +864,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toBe(mockContent);

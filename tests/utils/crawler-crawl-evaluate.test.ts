@@ -27,14 +27,16 @@ describe('crawlSalesforcePage', () => {
 			const dom = createDOM();
 			const { window } = dom;
 			const fnString = fn.toString();
-			const isRetryEvaluate = fnString.includes('createTreeWalker') || fnString.includes('textParts');
+			const isRetryEvaluate =
+				fnString.includes('createTreeWalker') ||
+				fnString.includes('textParts');
 			try {
 				const wrappedFn = new Function(
 					'globalThis',
 					`const window = arguments[0];
 					window.globalThis = window;
 					const document = window.document;
-					return (${fnString}).call(window);`
+					return (${fnString}).call(window);`,
 				);
 				return await wrappedFn(window);
 			} catch {
@@ -70,12 +72,13 @@ describe('crawlSalesforcePage', () => {
 		await new Promise((resolve) => setTimeout(resolve, 0));
 	});
 
-
-
 	it('should execute evaluate function with jsdom for comprehensive coverage', async () => {
-			// Create a real DOM using jsdom to actually execute the evaluate function
-			const createDOMWithContent = () => {
-			const longText = 'Documentation content paragraph with substantial text. '.repeat(50);
+		// Create a real DOM using jsdom to actually execute the evaluate function
+		const createDOMWithContent = () => {
+			const longText =
+				'Documentation content paragraph with substantial text. '.repeat(
+					50,
+				);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -92,18 +95,20 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
-			
+
 			// Mock window.scrollTo which is not implemented in jsdom
 			window.scrollTo = vi.fn() as any;
-			
+
 			// Add scrollHeight to body for scrolling logic
 			Object.defineProperty(window.document.body, 'scrollHeight', {
 				value: 10000,
 				writable: true,
 			});
-			
+
 			return dom;
 		};
 
@@ -111,8 +116,6 @@ describe('crawlSalesforcePage', () => {
 		let testHandler: (context: { page: any }) => Promise<void>;
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -123,23 +126,25 @@ describe('crawlSalesforcePage', () => {
 						// Create a real DOM using jsdom
 						const dom = createDOMWithContent();
 						const { window } = dom;
-						
+
 						// The evaluate function accesses globalThis.document
 						// We need to execute it in a context where globalThis.document exists
 						// Use Function constructor to create a new function that has access to jsdom's window
 						const fnString = fn.toString();
-						
+
 						// Check if this is the retry evaluate (no parameters, returns string)
 						// or main evaluate (returns object with content and debugInfo)
-						const isRetryEvaluate = fnString.includes('createTreeWalker') || fnString.includes('textParts');
-						
+						const isRetryEvaluate =
+							fnString.includes('createTreeWalker') ||
+							fnString.includes('textParts');
+
 						try {
 							const wrappedFn = new Function(
 								'globalThis',
 								`const window = arguments[0];
 								window.globalThis = window;
 								const document = window.document;
-								return (${fnString}).call(window);`
+								return (${fnString}).call(window);`,
 							);
 							const result = await wrappedFn(window);
 							return result;
@@ -156,7 +161,11 @@ describe('crawlSalesforcePage', () => {
 							};
 						}
 					}),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -175,7 +184,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -184,7 +195,10 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with shadow DOM scenario', async () => {
 		// Test shadow DOM traversal path
 		const createDOMWithShadowDOM = () => {
-			const longText = 'Documentation content paragraph with substantial text. '.repeat(50);
+			const longText =
+				'Documentation content paragraph with substantial text. '.repeat(
+					50,
+				);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -200,9 +214,11 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
-			
+
 			// Mock shadow DOM using Object.defineProperty since shadowRoot is read-only
 			const docXml = window.document.querySelector('doc-xml-content');
 			if (docXml) {
@@ -210,13 +226,19 @@ describe('crawlSalesforcePage', () => {
 					value: {
 						querySelector: (sel: string) => {
 							if (sel.includes('[data-name="content"]')) {
-								return window.document.querySelector('.container[data-name="content"]');
+								return window.document.querySelector(
+									'.container[data-name="content"]',
+								);
 							}
 							return null;
 						},
 						querySelectorAll: (sel: string) => {
 							if (sel === '*') {
-								return Array.from(window.document.querySelectorAll('.container[data-name="content"]'));
+								return Array.from(
+									window.document.querySelectorAll(
+										'.container[data-name="content"]',
+									),
+								);
 							}
 							return [];
 						},
@@ -225,23 +247,19 @@ describe('crawlSalesforcePage', () => {
 					configurable: true,
 				});
 			}
-			
+
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
 				value: 10000,
 				writable: true,
 			});
-			
+
 			return dom;
 		};
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -256,13 +274,15 @@ describe('crawlSalesforcePage', () => {
 								'globalThis',
 								`const window = arguments[0];
 								const document = window.document;
-								return (${fnString}).call(window);`
+								return (${fnString}).call(window);`,
 							);
 							return await wrappedFn(window);
 						} catch {
 							// Fallback for retry evaluate calls - need at least 200 chars
 							const fnString = fn.toString();
-							const isRetryEvaluate = fnString.includes('createTreeWalker') || fnString.includes('textParts');
+							const isRetryEvaluate =
+								fnString.includes('createTreeWalker') ||
+								fnString.includes('textParts');
 							if (isRetryEvaluate) {
 								return 'Documentation content. '.repeat(200);
 							}
@@ -272,7 +292,11 @@ describe('crawlSalesforcePage', () => {
 							};
 						}
 					}),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -290,9 +314,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -301,7 +326,10 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with different content structures', async () => {
 		// Test different content extraction paths
 		const createDOMWithVariedContent = () => {
-			const longText = 'Documentation content paragraph with substantial text. '.repeat(50);
+			const longText =
+				'Documentation content paragraph with substantial text. '.repeat(
+					50,
+				);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -317,7 +345,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -329,18 +359,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithVariedContent),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -358,9 +388,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -369,8 +400,12 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with JavaScript filtering scenario', async () => {
 		// Test JavaScript pattern filtering path
 		const createDOMWithJavaScript = () => {
-			const jsCode = 'function test() { const x = document.querySelector(); addEventListener("click", () => {}); }';
-			const docText = 'Documentation content paragraph with substantial text. '.repeat(50);
+			const jsCode =
+				'function test() { const x = document.querySelector(); addEventListener("click", () => {}); }';
+			const docText =
+				'Documentation content paragraph with substantial text. '.repeat(
+					50,
+				);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -383,7 +418,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -395,18 +432,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithJavaScript),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -424,9 +461,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -435,7 +473,10 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with body text fallback scenario', async () => {
 		// Test body text fallback path (when main element not found)
 		const createDOMWithBodyTextOnly = () => {
-			const longText = 'Documentation content paragraph with substantial text. '.repeat(100);
+			const longText =
+				'Documentation content paragraph with substantial text. '.repeat(
+					100,
+				);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -445,7 +486,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -457,18 +500,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithBodyTextOnly),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -486,9 +529,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -497,7 +541,8 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with cookie ratio filtering scenario', async () => {
 		// Test cookie ratio filtering path (high cookie ratio, short text)
 		const createDOMWithCookieContent = () => {
-			const cookieText = 'cookie consent accept all do not accept '.repeat(20);
+			const cookieText =
+				'cookie consent accept all do not accept '.repeat(20);
 			const docText = 'Documentation content. '.repeat(10);
 			const html = `
 				<!DOCTYPE html>
@@ -510,7 +555,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -522,18 +569,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithCookieContent),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -551,9 +598,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -575,7 +623,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -587,18 +637,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithCodeContent),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -616,9 +666,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -627,7 +678,10 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with paragraph collection scenario', async () => {
 		// Test paragraph collection path
 		const createDOMWithParagraphs = () => {
-			const longText = 'Documentation content paragraph with substantial text. '.repeat(50);
+			const longText =
+				'Documentation content paragraph with substantial text. '.repeat(
+					50,
+				);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -639,7 +693,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -651,18 +707,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithParagraphs),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -680,9 +736,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -691,7 +748,8 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with text element collection scenario', async () => {
 		// Test text element collection path (span, li, td, etc.)
 		const createDOMWithTextElements = () => {
-			const longText = 'Text element content with substantial length. '.repeat(30);
+			const longText =
+				'Text element content with substantial length. '.repeat(30);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -705,7 +763,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -717,18 +777,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithTextElements),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -746,9 +806,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -774,7 +835,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -786,18 +849,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithSelectors),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -815,9 +878,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -826,7 +890,8 @@ describe('crawlSalesforcePage', () => {
 	it('should execute evaluate function with fallback element extraction scenario', async () => {
 		// Test fallback element extraction path (allElementsFallback)
 		const createDOMWithFallbackElements = () => {
-			const longText = 'Documentation content with substantial text. '.repeat(50);
+			const longText =
+				'Documentation content with substantial text. '.repeat(50);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -838,7 +903,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -850,18 +917,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithFallbackElements),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -879,9 +946,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -906,7 +974,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -918,18 +988,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithMainSelectors),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -947,9 +1017,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -973,7 +1044,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -985,18 +1058,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMForBodyClone),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1014,9 +1087,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1039,7 +1113,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1051,18 +1127,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithContentContainer),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1080,9 +1156,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1107,20 +1184,29 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			const docXml = window.document.querySelector('doc-xml-content');
 			if (docXml) {
-				const contentContainer = window.document.querySelector('.container[data-name="content"]');
-				const bodyContent = window.document.querySelector('.body.conbody');
+				const contentContainer = window.document.querySelector(
+					'.container[data-name="content"]',
+				);
+				const bodyContent =
+					window.document.querySelector('.body.conbody');
 				Object.defineProperty(docXml, 'shadowRoot', {
 					value: {
 						querySelector: (sel: string) => {
-							if (sel.includes('[data-name="content"]')) return contentContainer;
+							if (sel.includes('[data-name="content"]'))
+								return contentContainer;
 							return null;
 						},
 						querySelectorAll: (sel: string) => {
-							if (sel === '*') return contentContainer ? [contentContainer] : [];
+							if (sel === '*')
+								return contentContainer
+									? [contentContainer]
+									: [];
 							return [];
 						},
 					},
@@ -1138,18 +1224,20 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithShadowBodyContent),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					evaluate: createEvaluateMock(
+						createDOMWithShadowBodyContent,
+					),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1167,9 +1255,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1191,7 +1280,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1203,18 +1294,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithLinkTitles),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1232,9 +1323,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1255,7 +1347,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1267,18 +1361,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithHighCookieRatio),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1296,9 +1390,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1317,7 +1412,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1329,18 +1426,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithLowCodeRatio),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1358,9 +1455,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1381,7 +1479,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1393,18 +1493,20 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithMainSelectorCookieRatio),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					evaluate: createEvaluateMock(
+						createDOMWithMainSelectorCookieRatio,
+					),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1422,9 +1524,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1443,7 +1546,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1455,18 +1560,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithBodyCookieRatio),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1484,9 +1589,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1505,7 +1611,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1517,18 +1625,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMForLastResort),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1546,9 +1654,10 @@ describe('crawlSalesforcePage', () => {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
-		
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);
@@ -1569,7 +1678,9 @@ describe('crawlSalesforcePage', () => {
 					</body>
 				</html>
 			`;
-			const dom = new JSDOM(html, { url: 'https://help.salesforce.com/test' });
+			const dom = new JSDOM(html, {
+				url: 'https://help.salesforce.com/test',
+			});
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
@@ -1581,18 +1692,18 @@ describe('crawlSalesforcePage', () => {
 
 		let testHandler: (context: { page: any }) => Promise<void>;
 
-
 		const testMockRun = vi.fn().mockImplementation(async () => {
-		
-
-
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
 					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: createEvaluateMock(createDOMWithContainerOnly),
-					content: vi.fn().mockResolvedValue('<html><body>' + 'x'.repeat(200) + '</body></html>'),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
@@ -1611,7 +1722,9 @@ describe('crawlSalesforcePage', () => {
 			} as unknown as PlaywrightCrawler;
 		});
 
-		const resultPromise = crawlSalesforcePage('https://help.salesforce.com/test');
+		const resultPromise = crawlSalesforcePage(
+			'https://help.salesforce.com/test',
+		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result.length).toBeGreaterThan(100);

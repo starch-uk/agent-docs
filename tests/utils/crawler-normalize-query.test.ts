@@ -14,20 +14,22 @@ vi.mock('crawlee', () => ({
 const DEFAULT_LIMIT = 20;
 
 describe('normalizeQuery', () => {
-	let storedRequestHandler: ((
-		context: Readonly<{
-			page: Readonly<{
-				evaluate: <T>(
-					fn: (maxResults: Readonly<number>) => T,
-					...args: unknown[]
-				) => Promise<T>;
-				waitForSelector: (
-					selector: string,
-					options?: Readonly<{ timeout?: number }>,
-				) => Promise<unknown>;
-			}>;
-		}>,
-	) => Promise<void>) | undefined = undefined;
+	let storedRequestHandler:
+		| ((
+				context: Readonly<{
+					page: Readonly<{
+						evaluate: <T>(
+							fn: (maxResults: Readonly<number>) => T,
+							...args: unknown[]
+						) => Promise<T>;
+						waitForSelector: (
+							selector: string,
+							options?: Readonly<{ timeout?: number }>,
+						) => Promise<unknown>;
+					}>;
+				}>,
+		  ) => Promise<void>)
+		| undefined = undefined;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -221,4 +223,3 @@ describe('normalizeQuery', () => {
 		expect(PlaywrightCrawler).toHaveBeenCalled();
 	});
 });
-

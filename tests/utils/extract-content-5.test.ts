@@ -36,13 +36,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text > 5000 chars with high cookie ratio (>= 0.2)
 		const cookieText = 'cookie consent accept all '.repeat(200);
 		const normalText = 'This is body text. '.repeat(100);
@@ -58,13 +60,15 @@ describe('extractContent', () => {
 		// This is hard to test in JSDOM since doc.body is always present
 		// But we can test the path when body exists
 		document.body.innerHTML = '';
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create lastResortText that passes
 		const div = document.createElement('div');
 		div.textContent = 'Last resort text with enough content. '.repeat(5);
@@ -83,13 +87,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create lastResortText with length <= 100
 		const div = document.createElement('div');
 		div.textContent = 'Short text.'; // <= 100 chars
@@ -108,13 +114,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create empty body (lastResortText will be empty or very short)
 		document.body.innerHTML = '';
 
@@ -130,13 +138,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create empty body (rawBodyText will be empty)
 		document.body.innerHTML = '';
 
@@ -152,18 +162,20 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create lastResortText that fails (codeRatio >= 0.1)
 		const codeDiv = document.createElement('div');
 		codeDiv.textContent = '{}();=;'.repeat(20); // High code ratio
 		document.body.appendChild(codeDiv);
-		
+
 		// Create rawBodyText with length <= 100
 		const shortDiv = document.createElement('div');
 		shortDiv.textContent = 'Short.'; // <= 100 chars
@@ -175,17 +187,16 @@ describe('extractContent', () => {
 		expect(result.content).toBe('');
 	});
 
-
 	it('should handle className that is not a string in processMainElement', () => {
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
-		
+
 		// Create element and try to set className to non-string (though this is unlikely in real DOM)
 		const div = document.createElement('div');
 		// In JSDOM, className is always a string, but we can test the typeof check
 		div.textContent = 'Content';
 		main.appendChild(div);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -197,12 +208,12 @@ describe('extractContent', () => {
 	it('should handle elements without textContent in processMainElement forEach loop', () => {
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
-		
+
 		// Create element without textContent (though this is unlikely)
 		const div = document.createElement('div');
 		// Don't set textContent
 		main.appendChild(div);
-		
+
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -218,7 +229,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create regular content without shadow DOM
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(10);
@@ -237,14 +248,17 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create contentContainer via fallback querySelector (not in shadow DOM)
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body conbody';
-		bodyContent.textContent = 'Content from fallback querySelector with enough text to meet the minimum length requirement of 200 characters. '.repeat(3);
+		bodyContent.textContent =
+			'Content from fallback querySelector with enough text to meet the minimum length requirement of 200 characters. '.repeat(
+				3,
+			);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
 
@@ -261,12 +275,14 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create container matching .container[data-name="content"] selector
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
-		container.textContent = 'Container content with enough text. '.repeat(10);
+		container.textContent = 'Container content with enough text. '.repeat(
+			10,
+		);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
@@ -282,11 +298,13 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create container matching [data-name="content"] selector (without .container class)
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Container content with enough text. '.repeat(10);
+		container.textContent = 'Container content with enough text. '.repeat(
+			10,
+		);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
@@ -302,13 +320,16 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create contentContainer via fallback
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body conbody';
-		bodyContent.textContent = 'Body content from .body.conbody selector with enough text. '.repeat(5);
+		bodyContent.textContent =
+			'Body content from .body.conbody selector with enough text. '.repeat(
+				5,
+			);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
 
@@ -325,13 +346,14 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create contentContainer via fallback
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'conbody';
-		bodyContent.textContent = 'Body content from .conbody selector with enough text. '.repeat(5);
+		bodyContent.textContent =
+			'Body content from .conbody selector with enough text. '.repeat(5);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
 
@@ -348,13 +370,14 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create contentContainer via fallback
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body';
-		bodyContent.textContent = 'Body content from .body selector with enough text. '.repeat(5);
+		bodyContent.textContent =
+			'Body content from .body selector with enough text. '.repeat(5);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
 
@@ -371,11 +394,12 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create contentContainer via fallback but without bodyContent
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Container content without bodyContent. '.repeat(10);
+		container.textContent =
+			'Container content without bodyContent. '.repeat(10);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
@@ -395,7 +419,10 @@ describe('extractContent', () => {
 		p.textContent = 'Paragraph text. '.repeat(30);
 		container.appendChild(p);
 		// Add enough text to make it greater than 500 chars
-		container.textContent = 'Container text with enough content to exceed 500 characters. '.repeat(15);
+		container.textContent =
+			'Container text with enough content to exceed 500 characters. '.repeat(
+				15,
+			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -524,7 +551,10 @@ describe('extractContent', () => {
 		container.className = 'container';
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body conbody';
-		bodyContent.textContent = 'Body content from .body.conbody selector in shadow DOM with enough text. '.repeat(5);
+		bodyContent.textContent =
+			'Body content from .body.conbody selector in shadow DOM with enough text. '.repeat(
+				5,
+			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -543,7 +573,10 @@ describe('extractContent', () => {
 		container.className = 'container';
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'conbody';
-		bodyContent.textContent = 'Body content from .conbody selector in shadow DOM with enough text. '.repeat(5);
+		bodyContent.textContent =
+			'Body content from .conbody selector in shadow DOM with enough text. '.repeat(
+				5,
+			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -562,7 +595,10 @@ describe('extractContent', () => {
 		container.className = 'container';
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body';
-		bodyContent.textContent = 'Body content from .body selector in shadow DOM with enough text. '.repeat(5);
+		bodyContent.textContent =
+			'Body content from .body selector in shadow DOM with enough text. '.repeat(
+				5,
+			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -579,7 +615,10 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
-		container.textContent = 'Content from div.container[data-name="content"] selector. '.repeat(10);
+		container.textContent =
+			'Content from div.container[data-name="content"] selector. '.repeat(
+				10,
+			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -596,7 +635,10 @@ describe('extractContent', () => {
 		const container = document.createElement('span');
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
-		container.textContent = 'Content from .container[data-name="content"] selector. '.repeat(10);
+		container.textContent =
+			'Content from .container[data-name="content"] selector. '.repeat(
+				10,
+			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -612,7 +654,8 @@ describe('extractContent', () => {
 		// Create container without container class
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Content from [data-name="content"] selector. '.repeat(10);
+		container.textContent =
+			'Content from [data-name="content"] selector. '.repeat(10);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -629,7 +672,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element (contentContainer will be null)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(20);
@@ -648,7 +691,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element (contentContainer will be null)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(20);
@@ -667,7 +710,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element (contentContainer will be null)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(20);
@@ -686,7 +729,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element (bodyContent will be null)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(20);
@@ -705,7 +748,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element (bodyContent will be null)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(20);
@@ -724,7 +767,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element (bodyContent will be null)
 		const main = document.createElement('main');
 		main.textContent = 'Main content. '.repeat(20);
@@ -743,13 +786,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create div without main element (mainElement will be null)
 		const div = document.createElement('div');
 		div.textContent = 'Content. '.repeat(20);
@@ -768,13 +813,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create div without main element (mainElement will be null)
 		const div = document.createElement('div');
 		div.textContent = 'Content. '.repeat(20);
@@ -793,13 +840,15 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create div without main element (mainElement will be null)
 		const div = document.createElement('div');
 		div.textContent = 'Content. '.repeat(20);
@@ -818,7 +867,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element that will cause processMainElement to return null
 		// (e.g., mainText.length <= 200 and no valid filtered text)
 		const main = document.createElement('main');
@@ -838,25 +887,30 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to ensure we reach bodyText path
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Create body text with > 2 JS patterns (function, =>, document.querySelector, addEventListener)
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		document.body.appendChild(jsDiv);
-		
+
 		// Add paragraphs that meet filtering conditions (text.length > 50, no JS patterns)
 		const p1 = document.createElement('p');
-		p1.textContent = 'This is a valid paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering.';
+		p1.textContent =
+			'This is a valid paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering.';
 		document.body.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
-		p2.textContent = 'This is another valid paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering.';
+		p2.textContent =
+			'This is another valid paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering.';
 		document.body.appendChild(p2);
 
 		const result = extractContent(document);

@@ -42,25 +42,25 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 	const scrollCount = 5;
 	const scrollDivisor = 5;
 
-		const timeouts: TimeoutConstants = {
-			buttonClickTimeoutMs,
-			buttonClickWaitMs,
-			clickTimeoutMs,
-			closeButtonTimeoutMs,
-			contentWaitMs,
-			cookieBannerWaitMs,
-			cookieClickWaitMs,
-			finalWaitMs,
-			longWaitMs,
-			navigationTimeoutMs,
-			pageInitWaitMs,
-			scrollBackWaitMs,
-			scrollCount,
-			scrollDivisor,
-			scrollWaitMs,
-		};
+	const timeouts: TimeoutConstants = {
+		buttonClickTimeoutMs,
+		buttonClickWaitMs,
+		clickTimeoutMs,
+		closeButtonTimeoutMs,
+		contentWaitMs,
+		cookieBannerWaitMs,
+		cookieClickWaitMs,
+		finalWaitMs,
+		longWaitMs,
+		navigationTimeoutMs,
+		pageInitWaitMs,
+		scrollBackWaitMs,
+		scrollCount,
+		scrollDivisor,
+		scrollWaitMs,
+	};
 
-		const crawler = new PlaywrightCrawler({
+	const crawler = new PlaywrightCrawler({
 		headless: true,
 		navigationTimeoutSecs: 60,
 

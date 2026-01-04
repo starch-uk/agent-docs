@@ -64,9 +64,9 @@ describe('repo-todos CLI', () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as typeof process.exit);
-			
+
 			await main([]);
-			
+
 			expect(console.error).toHaveBeenCalledWith(
 				'Usage: pnpm repo-todos <repo-path> [--output <file>]',
 			);
@@ -77,7 +77,7 @@ describe('repo-todos CLI', () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as typeof process.exit);
-			
+
 			await main(['']);
 
 			expect(console.error).toHaveBeenCalled();
@@ -86,11 +86,21 @@ describe('repo-todos CLI', () => {
 
 		it('should generate todos and output to stdout', async () => {
 			const mockTodos = [
-				{ id: 'file-1', status: 'pending' as const, content: 'Inspect file1.ts' },
-				{ id: 'file-2', status: 'pending' as const, content: 'Inspect file2.ts' },
+				{
+					id: 'file-1',
+					status: 'pending' as const,
+					content: 'Inspect file1.ts',
+				},
+				{
+					id: 'file-2',
+					status: 'pending' as const,
+					content: 'Inspect file2.ts',
+				},
 			];
 
-			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(mockTodos);
+			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(
+				mockTodos,
+			);
 			vi.mocked(repoTodosUtils.validateTodoCount).mockReturnValue(true);
 			vi.mocked(repoTodosUtils.findDuplicateIds).mockReturnValue([]);
 
@@ -106,10 +116,16 @@ describe('repo-todos CLI', () => {
 
 		it('should generate todos and write to file with --output', async () => {
 			const mockTodos = [
-				{ id: 'file-1', status: 'pending' as const, content: 'Inspect file1.ts' },
+				{
+					id: 'file-1',
+					status: 'pending' as const,
+					content: 'Inspect file1.ts',
+				},
 			];
 
-			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(mockTodos);
+			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(
+				mockTodos,
+			);
 			vi.mocked(repoTodosUtils.validateTodoCount).mockReturnValue(true);
 			vi.mocked(repoTodosUtils.findDuplicateIds).mockReturnValue([]);
 			vi.mocked(writeFile).mockResolvedValue(undefined);
@@ -130,12 +146,18 @@ describe('repo-todos CLI', () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as typeof process.exit);
-			
+
 			const mockTodos = [
-				{ id: 'file-1', status: 'pending' as const, content: 'Inspect file1.ts' },
+				{
+					id: 'file-1',
+					status: 'pending' as const,
+					content: 'Inspect file1.ts',
+				},
 			];
 
-			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(mockTodos);
+			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(
+				mockTodos,
+			);
 			vi.mocked(repoTodosUtils.validateTodoCount).mockReturnValue(false);
 			vi.mocked(repoTodosUtils.findDuplicateIds).mockReturnValue([]);
 
@@ -151,14 +173,22 @@ describe('repo-todos CLI', () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as typeof process.exit);
-			
+
 			const mockTodos = [
-				{ id: 'file-1', status: 'pending' as const, content: 'Inspect file1.ts' },
+				{
+					id: 'file-1',
+					status: 'pending' as const,
+					content: 'Inspect file1.ts',
+				},
 			];
 
-			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(mockTodos);
+			vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue(
+				mockTodos,
+			);
 			vi.mocked(repoTodosUtils.validateTodoCount).mockReturnValue(true);
-			vi.mocked(repoTodosUtils.findDuplicateIds).mockReturnValue(['file-1']);
+			vi.mocked(repoTodosUtils.findDuplicateIds).mockReturnValue([
+				'file-1',
+			]);
 
 			await main(['/tmp/test-repo']);
 
@@ -172,7 +202,7 @@ describe('repo-todos CLI', () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as typeof process.exit);
-			
+
 			vi.mocked(repoTodosUtils.generateRepoTodos).mockRejectedValue(
 				new Error('Test error'),
 			);
@@ -187,4 +217,3 @@ describe('repo-todos CLI', () => {
 		});
 	});
 });
-

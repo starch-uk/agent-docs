@@ -50,11 +50,9 @@ export function extractContent(doc: Document): {
 
 	// Check main element
 	const mainEl =
-		doc.querySelector('[role="main"]') ??
-		doc.querySelector('main');
+		doc.querySelector('[role="main"]') ?? doc.querySelector('main');
 	if (mainEl !== null) {
-		const mainElTextLength =
-			mainEl.textContent?.trim()?.length ?? 0;
+		const mainElTextLength = mainEl.textContent?.trim()?.length ?? 0;
 		debugInfo.mainElements = [
 			{
 				children: mainEl.children.length,
@@ -121,10 +119,7 @@ export function extractContent(doc: Document): {
 				docXmlContent,
 				'div.container[data-name="content"]',
 			) ??
-			findInShadowDOM(
-				docXmlContent,
-				'.container[data-name="content"]',
-			) ??
+			findInShadowDOM(docXmlContent, '.container[data-name="content"]') ??
 			findInShadowDOM(docXmlContent, '[data-name="content"]');
 
 		debugInfo.shadowDOMSearchResult = !!contentContainer;
@@ -142,10 +137,9 @@ export function extractContent(doc: Document): {
 			// Also try to get all text directly from the container if body not found
 			if (!bodyContent) {
 				// Get all paragraphs, divs, and text elements from the container
-				const allTextElements =
-					contentContainer.querySelectorAll(
-						'p, div, span, li, h1, h2, h3, h4, h5, h6',
-					);
+				const allTextElements = contentContainer.querySelectorAll(
+					'p, div, span, li, h1, h2, h3, h4, h5, h6',
+				);
 
 				if (allTextElements.length > 0) {
 					// Use the container itself if it has substantial text
@@ -432,7 +426,10 @@ export function extractContent(doc: Document): {
 		);
 
 		// Try to find and extract from main content areas
-		const mainSelectorsResult = processMainSelectors(body as HTMLBodyElement, debugInfo);
+		const mainSelectorsResult = processMainSelectors(
+			body as HTMLBodyElement,
+			debugInfo,
+		);
 		if (mainSelectorsResult !== null) {
 			return mainSelectorsResult;
 		}
@@ -474,7 +471,10 @@ export function extractContent(doc: Document): {
 
 		// Filter out JavaScript-like content from the text itself
 		// If the text contains too much JavaScript syntax, try to extract only documentation parts
-		const filteredDocText = filterBodyTextDocParagraphs(bodyClone, bodyText);
+		const filteredDocText = filterBodyTextDocParagraphs(
+			bodyClone,
+			bodyText,
+		);
 		if (filteredDocText !== null) {
 			return {
 				content: filteredDocText,
@@ -492,7 +492,10 @@ export function extractContent(doc: Document): {
 
 	// Last resort: return whatever body text we have
 	if (doc.body) {
-		const lastResortResult = tryLastResortBodyText(doc.body as HTMLBodyElement, debugInfo);
+		const lastResortResult = tryLastResortBodyText(
+			doc.body as HTMLBodyElement,
+			debugInfo,
+		);
 		if (lastResortResult !== null) {
 			return lastResortResult;
 		}
@@ -500,7 +503,10 @@ export function extractContent(doc: Document): {
 
 	// Absolute last resort: return body text as-is (might include scripts but better than nothing)
 	if (doc.body) {
-		const rawBodyTextResult = tryRawBodyText(doc.body as HTMLBodyElement, debugInfo);
+		const rawBodyTextResult = tryRawBodyText(
+			doc.body as HTMLBodyElement,
+			debugInfo,
+		);
 		if (rawBodyTextResult !== null) {
 			return rawBodyTextResult;
 		}

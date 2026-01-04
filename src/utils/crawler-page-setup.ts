@@ -17,11 +17,7 @@ type Page = {
 		url: Readonly<string>,
 		options?: Readonly<{
 			timeout?: number;
-			waitUntil?:
-				| 'commit'
-				| 'domcontentloaded'
-				| 'load'
-				| 'networkidle';
+			waitUntil?: 'commit' | 'domcontentloaded' | 'load' | 'networkidle';
 		}>,
 	) => Promise<unknown>;
 	waitForSelector: (
@@ -35,7 +31,9 @@ type Page = {
 	} | null>;
 	$$: (selector: Readonly<string>) => Promise<
 		{
-			click: (options?: Readonly<{ timeout?: number }>) => Promise<unknown>;
+			click: (
+				options?: Readonly<{ timeout?: number }>,
+			) => Promise<unknown>;
 		}[]
 	>;
 	waitForFunction: (
@@ -114,10 +112,7 @@ async function handleCookieConsent(
 					),
 				]).catch(() => null);
 
-				if (
-					acceptButton !== null &&
-					acceptButton !== undefined
-				) {
+				if (acceptButton !== null && acceptButton !== undefined) {
 					// Add timeout to click to avoid hanging
 					try {
 						await Promise.race([
@@ -177,13 +172,9 @@ async function handleCookieConsent(
 				for (let i = buttonLoopStart; i < buttonLimit; i++) {
 					try {
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- buttons is array-like from Playwright
-						const button = (buttons as readonly unknown[])[
-							i
-						] as {
+						const button = (buttons as readonly unknown[])[i] as {
 							readonly isVisible: () => Promise<boolean>;
-							readonly textContent: () => Promise<
-								string | null
-							>;
+							readonly textContent: () => Promise<string | null>;
 							readonly click: (options?: {
 								readonly timeout?: number;
 							}) => Promise<unknown>;
@@ -224,9 +215,7 @@ async function handleCookieConsent(
 								}),
 								new Promise((_, reject) =>
 									setTimeout(() => {
-										reject(
-											new Error('Click timeout'),
-										);
+										reject(new Error('Click timeout'));
 									}, timeouts.buttonClickTimeoutMs),
 								),
 							]).catch(() => {
@@ -266,15 +255,11 @@ async function handleCookieConsent(
 
 				for (
 					let i = closeButtonsLoopStart;
-					i <
-					(closeButtons as { readonly length: number })
-						.length;
+					i < (closeButtons as { readonly length: number }).length;
 					i++
 				) {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- closeButtons is array-like from Playwright
-					const btn = (closeButtons as readonly unknown[])[
-						i
-					] as {
+					const btn = (closeButtons as readonly unknown[])[i] as {
 						readonly isVisible: () => Promise<boolean>;
 						readonly click: (options?: {
 							readonly timeout?: number;
@@ -308,9 +293,7 @@ async function handleCookieConsent(
 							new Promise((_, reject) =>
 								setTimeout(() => {
 									reject(
-										new Error(
-											'Close button click timeout',
-										),
+										new Error('Close button click timeout'),
 									);
 								}, timeouts.closeButtonTimeoutMs),
 							),
@@ -405,11 +388,7 @@ async function waitForContent(
 
 	const contentSelectorsLoopStart = 0;
 	const selectorWaitTimeoutMs = 5000;
-	for (
-		let i = contentSelectorsLoopStart;
-		i < contentSelectors.length;
-		i++
-	) {
+	for (let i = contentSelectorsLoopStart; i < contentSelectors.length; i++) {
 		const selector = contentSelectors[i];
 		try {
 			if (page.isClosed()) {
@@ -456,9 +435,7 @@ async function waitForContent(
 										contentContainer.querySelector(
 											'.conbody',
 										) ??
-										contentContainer.querySelector(
-											'.body',
-										);
+										contentContainer.querySelector('.body');
 									const target =
 										bodyContent ?? contentContainer;
 									// target is always truthy here since we checked contentContainer !== null and bodyContent ?? contentContainer will never be null
@@ -466,49 +443,42 @@ async function waitForContent(
 									const clone = target.cloneNode(
 										true,
 									) as Element;
-									const scripts =
-										clone.querySelectorAll(
-											'script, style, noscript',
-										);
+									const scripts = clone.querySelectorAll(
+										'script, style, noscript',
+									);
 
 									scripts.forEach((el: Element) => {
 										el.remove();
 									});
-									const {
-										textContent: textContentValue,
-									} = clone;
+									const { textContent: textContentValue } =
+										clone;
 
 									const text = (
 										textContentValue ?? ''
 									).trim();
 									// Wait for at least 1000 characters of actual content
 									const minContentLength = 1000;
-									return (
-										text.length > minContentLength
-									);
+									return text.length > minContentLength;
 								}
 								// Fallback to main element
 								const main =
-									document.querySelector(
-										'[role="main"]',
-									) ?? document.querySelector('main');
+									document.querySelector('[role="main"]') ??
+									document.querySelector('main');
 								if (main !== null) {
 									// Clone and remove scripts to get actual content length
 									// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- cloneNode returns Node, but we know it's an Element
 									const clone = main.cloneNode(
 										true,
 									) as Element;
-									const scripts =
-										clone.querySelectorAll(
-											'script, style, noscript',
-										);
+									const scripts = clone.querySelectorAll(
+										'script, style, noscript',
+									);
 
 									scripts.forEach((el: Element) => {
 										el.remove();
 									});
 									const {
-										textContent:
-											textContentMainValue,
+										textContent: textContentMainValue,
 									} = clone;
 
 									const text = (
@@ -516,10 +486,7 @@ async function waitForContent(
 									).trim();
 									// Wait for at least 2000 characters of actual content
 									const minMainContentLength = 2000;
-									return (
-										text.length >
-										minMainContentLength
-									);
+									return text.length > minMainContentLength;
 								}
 								return false;
 							},
@@ -540,7 +507,11 @@ async function waitForContent(
 
 		// Scroll through the page multiple times to trigger lazy loading
 		const scrollStart = 0;
-		for (let scroll = scrollStart; scroll < timeouts.scrollCount; scroll++) {
+		for (
+			let scroll = scrollStart;
+			scroll < timeouts.scrollCount;
+			scroll++
+		) {
 			try {
 				if (!page.isClosed()) {
 					await page.evaluate(
@@ -554,10 +525,8 @@ async function waitForContent(
 							const scrollIndexOffsetValue = 1;
 							window.scrollTo(
 								scrollTopValue,
-								(document.body.scrollHeight /
-									args.divisor) *
-									(args.scrollIndex +
-										scrollIndexOffsetValue),
+								(document.body.scrollHeight / args.divisor) *
+									(args.scrollIndex + scrollIndexOffsetValue),
 							);
 						},
 						{
@@ -615,7 +584,9 @@ async function setupPage(
 	});
 
 	// Additional wait for page to fully initialize - use setTimeout instead of page.waitForTimeout
-	await new Promise((resolve) => setTimeout(resolve, timeouts.pageInitWaitMs));
+	await new Promise((resolve) =>
+		setTimeout(resolve, timeouts.pageInitWaitMs),
+	);
 
 	// Handle cookie consent
 	await handleCookieConsent(page, timeouts);
@@ -625,4 +596,3 @@ async function setupPage(
 }
 
 export { setupPage, type Page, type TimeoutConstants };
-

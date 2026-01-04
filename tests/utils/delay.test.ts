@@ -47,5 +47,3 @@ describe('delay', () => {
 		await expect(delayPromise).resolves.toBeUndefined();
 	});
 });
-
-

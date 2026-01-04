@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { isMainEntryPoint, executeIfMainEntryPoint, program } from '../../src/cli/index.js';
+import {
+	isMainEntryPoint,
+	executeIfMainEntryPoint,
+	program,
+} from '../../src/cli/index.js';
 
 describe('CLI entry point', () => {
 	const originalArgv = process.argv;
@@ -36,12 +40,11 @@ describe('CLI entry point', () => {
 		const parseSpy = vi.spyOn(program, 'parse').mockImplementation(() => {
 			// Mock implementation to avoid actual parsing
 		});
-		
+
 		// Test that the function can be called (entry point execution happens at module load)
 		// The actual execution is tested via the isMainEntryPoint() tests
 		expect(() => executeIfMainEntryPoint()).not.toThrow();
-		
+
 		parseSpy.mockRestore();
 	});
 });
-

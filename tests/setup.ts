@@ -35,4 +35,3 @@ process.on('unhandledRejection', (reason, promise) => {
 		handler(reason, promise);
 	}
 });
-

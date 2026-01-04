@@ -6,9 +6,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
-import {
-	extractContent,
-} from '../../src/utils/extract-content.js';
+import { extractContent } from '../../src/utils/extract-content.js';
 
 describe('extractContent', () => {
 	let dom: JSDOM;
@@ -53,7 +51,9 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
-		container.textContent = 'Container content with enough text. '.repeat(15);
+		container.textContent = 'Container content with enough text. '.repeat(
+			15,
+		);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -70,7 +70,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create [role="main"] element
 		const main = document.createElement('div');
 		main.setAttribute('role', 'main');
@@ -90,13 +90,13 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any [role="main"] elements
 		const roleMain = document.querySelector('[role="main"]');
 		if (roleMain) {
 			roleMain.remove();
 		}
-		
+
 		// Create main element
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(15);
@@ -150,7 +150,7 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Create main element without className
 		const main = document.createElement('main');
 		main.textContent = 'Main content with enough text. '.repeat(15);
@@ -221,23 +221,27 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to prevent mainSelectors from returning
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Remove elements that might be caught by selectors array
-		const selectorsElements = document.querySelectorAll('#main-content, [role="main"], main, article, .main, .content');
-		selectorsElements.forEach(el => el.remove());
-		
+		const selectorsElements = document.querySelectorAll(
+			'#main-content, [role="main"], main, article, .main, .content',
+		);
+		selectorsElements.forEach((el) => el.remove());
+
 		// To prevent fallback loop from returning, we need body to have cookieTextCount >= 3 AND text.length <= 2000
 		// Add cookie keywords to make cookieTextCount >= 3
 		const cookieDiv = document.createElement('div');
 		cookieDiv.textContent = 'cookie consent accept all'; // 3 cookie keywords
 		document.body.appendChild(cookieDiv);
-		
+
 		// Create body text with > 2 JS patterns to trigger docTexts filtering
 		// Use patterns that DON'T trigger element removal: 'function' alone, 'let', 'var'
 		// These patterns are in jsPatterns array but don't match removal conditions
@@ -251,21 +255,24 @@ describe('extractContent', () => {
 		const jsDiv3 = document.createElement('div');
 		jsDiv3.textContent = 'var y = 10;'; // 'var' pattern, won't be removed
 		document.body.appendChild(jsDiv3);
-		
+
 		// Add paragraphs that meet filtering conditions (text.length > 50, no JS patterns)
 		// Keep total body text <= 2000 to prevent fallback loop from returning
 		const p1 = document.createElement('p');
-		p1.textContent = 'This is valid documentation paragraph one with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		p1.textContent =
+			'This is valid documentation paragraph one with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		document.body.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
-		p2.textContent = 'This is valid documentation paragraph two with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		p2.textContent =
+			'This is valid documentation paragraph two with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		document.body.appendChild(p2);
-		
+
 		const p3 = document.createElement('p');
-		p3.textContent = 'This is valid documentation paragraph three with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		p3.textContent =
+			'This is valid documentation paragraph three with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		document.body.appendChild(p3);
-		
+
 		// Ensure total body text is > 500 (for bodyText path) but <= 2000 (to prevent fallback loop from returning)
 		// With cookie keywords, cookieTextCount = 3, so fallback loop condition (cookieTextCount < 3 || text.length > 2000) is false
 		// So fallback loop won't return, allowing bodyText path to be reached
@@ -275,9 +282,15 @@ describe('extractContent', () => {
 		// filterBodyTextDocParagraphs is called (line 918)
 		// filterBodyTextDocParagraphs returns non-null (line 919)
 		// Then lines 920-924 execute
-		expect(result.content).toContain('This is valid documentation paragraph one');
-		expect(result.content).toContain('This is valid documentation paragraph two');
-		expect(result.content).toContain('This is valid documentation paragraph three');
+		expect(result.content).toContain(
+			'This is valid documentation paragraph one',
+		);
+		expect(result.content).toContain(
+			'This is valid documentation paragraph two',
+		);
+		expect(result.content).toContain(
+			'This is valid documentation paragraph three',
+		);
 	});
 
 	it('should return bodyText when tryBodyTextContent returns non-null (lines 1040-1041)', () => {
@@ -287,23 +300,27 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to prevent mainSelectors from returning
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Remove elements that might be caught by selectors array
-		const selectorsElements = document.querySelectorAll('#main-content, [role="main"], main, article, .main, .content');
-		selectorsElements.forEach(el => el.remove());
-		
+		const selectorsElements = document.querySelectorAll(
+			'#main-content, [role="main"], main, article, .main, .content',
+		);
+		selectorsElements.forEach((el) => el.remove());
+
 		// To prevent tryFallbackContentExtraction from returning:
 		// - Add cookie keywords (cookieTextCount = 3) AND keep text.length <= 2000
 		const cookieDiv = document.createElement('div');
 		cookieDiv.textContent = 'cookie consent accept all'; // 3 cookie keywords
 		document.body.appendChild(cookieDiv);
-		
+
 		// Create body text that will make filterBodyTextDocParagraphs return null
 		// (jsPatternCount <= 2) but tryBodyTextContent return non-null
 		// (bodyText.length > 500 AND cookieRatio < 0.2)
@@ -311,9 +328,12 @@ describe('extractContent', () => {
 		const jsDiv = document.createElement('div');
 		jsDiv.textContent = 'function test() { return x => x; }'; // Only 2 JS patterns (function, =>)
 		document.body.appendChild(jsDiv);
-		
+
 		// Add substantial body text (> 500 chars) with low cookie ratio (< 0.2)
-		const normalText = 'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(10);
+		const normalText =
+			'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
+				10,
+			);
 		document.body.appendChild(document.createTextNode(normalText));
 
 		const result = extractContent(document);
@@ -332,30 +352,37 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to prevent mainSelectors from returning
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Remove elements that might be caught by selectors array
-		const selectorsElements = document.querySelectorAll('#main-content, [role="main"], main, article, .main, .content');
-		selectorsElements.forEach(el => el.remove());
-		
+		const selectorsElements = document.querySelectorAll(
+			'#main-content, [role="main"], main, article, .main, .content',
+		);
+		selectorsElements.forEach((el) => el.remove());
+
 		// To prevent tryFallbackContentExtraction from returning:
 		// - Add cookie keywords (cookieTextCount = 3) AND keep text.length <= 2000
 		const cookieDiv = document.createElement('div');
 		cookieDiv.textContent = 'cookie consent accept all'; // 3 cookie keywords
 		document.body.appendChild(cookieDiv);
-		
+
 		// Create element with 'const ' and '= document' pattern
 		const constDocDiv = document.createElement('div');
 		constDocDiv.textContent = 'const x = document.getElementById("test");'; // Contains both 'const ' and '= document'
 		document.body.appendChild(constDocDiv);
-		
+
 		// Add substantial body text so we reach bodyText path
-		const normalText = 'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(10);
+		const normalText =
+			'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
+				10,
+			);
 		document.body.appendChild(document.createTextNode(normalText));
 
 		const result = extractContent(document);
@@ -365,7 +392,9 @@ describe('extractContent', () => {
 		// Line 1018 is evaluated
 		expect(result.content.length).toBeGreaterThan(500);
 		expect(result.content).toContain('substantial body text content');
-		expect(result.content).not.toContain('const x = document.getElementById');
+		expect(result.content).not.toContain(
+			'const x = document.getElementById',
+		);
 	});
 
 	it('should return rawBodyText when tryRawBodyText returns non-null (lines 1056-1057)', () => {
@@ -375,34 +404,38 @@ describe('extractContent', () => {
 		if (existingDocXml) {
 			existingDocXml.remove();
 		}
-		
+
 		// Remove any main elements to prevent mainSelectors from returning
-		const mainEl = document.querySelector('main') || document.querySelector('[role="main"]');
+		const mainEl =
+			document.querySelector('main') ||
+			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
-		
+
 		// Remove elements that might be caught by selectors array
-		const selectorsElements = document.querySelectorAll('#main-content, [role="main"], main, article, .main, .content');
-		selectorsElements.forEach(el => el.remove());
-		
+		const selectorsElements = document.querySelectorAll(
+			'#main-content, [role="main"], main, article, .main, .content',
+		);
+		selectorsElements.forEach((el) => el.remove());
+
 		// To prevent tryFallbackContentExtraction from returning:
 		// - Add cookie keywords (cookieTextCount = 3) AND keep text.length <= 2000
 		const cookieDiv = document.createElement('div');
 		cookieDiv.textContent = 'cookie consent accept all'; // 3 cookie keywords
 		document.body.appendChild(cookieDiv);
-		
+
 		// Create body text that will make:
 		// - filterBodyTextDocParagraphs return null (jsPatternCount <= 2)
 		// - tryBodyTextContent return null (cookieRatio >= 0.2 AND bodyText.length <= 5000)
 		// - tryLastResortBodyText return null (codeRatio >= 0.1)
 		// - tryRawBodyText return non-null (rawBodyText.length > 100 AND codeRatio < 0.1)
-		
+
 		// First, create body text with high cookie ratio to make tryBodyTextContent return null
 		const cookieText = 'cookie consent accept all. '.repeat(100); // High cookie ratio
 		const normalText = 'Short normal text. '.repeat(50); // Normal text
 		document.body.textContent = cookieText + normalText; // Total > 500, cookieRatio >= 0.2, length <= 5000
-		
+
 		// Add high code ratio content to make tryLastResortBodyText return null
 		// (but this will be in bodyClone, not raw body text)
 		// Actually, tryLastResortBodyText processes bodyClone (with removeElements),
@@ -410,14 +443,18 @@ describe('extractContent', () => {
 		// So we can have high code ratio in bodyClone but low code ratio in raw body text.
 		// Add code-like content that removeElements will remove, but also add normal text
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = 'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
+		codeDiv.textContent =
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
 		document.body.appendChild(codeDiv);
-		
+
 		// Add enough normal text to reduce code ratio for tryRawBodyText
 		// Need to ensure codeRatio < 0.1 for tryRawBodyText to return non-null
 		// codeDiv adds ~70 code chars per repetition, so 10 repetitions = ~700 code chars
 		// Need totalChars > 7000 to get codeRatio < 0.1
-		const rawText = 'This is raw body text content with enough text to meet the minimum length requirement. '.repeat(100);
+		const rawText =
+			'This is raw body text content with enough text to meet the minimum length requirement. '.repeat(
+				100,
+			);
 		document.body.appendChild(document.createTextNode(rawText));
 
 		const result = extractContent(document);

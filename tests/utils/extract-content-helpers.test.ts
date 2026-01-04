@@ -212,9 +212,10 @@ describe('filterBodyTextDocParagraphs', () => {
 	it('should return null when no paragraphs meet filtering conditions', () => {
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		bodyClone.appendChild(jsDiv);
-		
+
 		// Add short paragraphs (< 50 chars)
 		const shortP = document.createElement('p');
 		shortP.textContent = 'Short.';
@@ -228,16 +229,19 @@ describe('filterBodyTextDocParagraphs', () => {
 	it('should return filtered docTexts when jsPatternCount > 2 and paragraphs meet conditions', () => {
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		bodyClone.appendChild(jsDiv);
-		
+
 		// Add paragraphs that meet filtering conditions
 		const p1 = document.createElement('p');
-		p1.textContent = 'This is valid documentation paragraph one with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		p1.textContent =
+			'This is valid documentation paragraph one with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		bodyClone.appendChild(p1);
-		
+
 		const p2 = document.createElement('p');
-		p2.textContent = 'This is valid documentation paragraph two with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		p2.textContent =
+			'This is valid documentation paragraph two with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		bodyClone.appendChild(p2);
 
 		const bodyText = bodyClone.textContent?.trim() ?? '';
@@ -250,17 +254,20 @@ describe('filterBodyTextDocParagraphs', () => {
 	it('should filter out paragraphs with JavaScript patterns', () => {
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		bodyClone.appendChild(jsDiv);
-		
+
 		// Add valid paragraph
 		const validP = document.createElement('p');
-		validP.textContent = 'This is valid documentation paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		validP.textContent =
+			'This is valid documentation paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		bodyClone.appendChild(validP);
-		
+
 		// Add paragraph with JS pattern
 		const jsP = document.createElement('p');
-		jsP.textContent = 'function test() { return x => x; } This paragraph has a JavaScript pattern and should be filtered out.';
+		jsP.textContent =
+			'function test() { return x => x; } This paragraph has a JavaScript pattern and should be filtered out.';
 		bodyClone.appendChild(jsP);
 
 		const bodyText = bodyClone.textContent?.trim() ?? '';
@@ -273,17 +280,20 @@ describe('filterBodyTextDocParagraphs', () => {
 	it('should filter out paragraphs with const = document pattern', () => {
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
-		jsDiv.textContent = 'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
+		jsDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); }';
 		bodyClone.appendChild(jsDiv);
-		
+
 		// Add valid paragraph
 		const validP = document.createElement('p');
-		validP.textContent = 'This is valid documentation paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
+		validP.textContent =
+			'This is valid documentation paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		bodyClone.appendChild(validP);
-		
+
 		// Add paragraph with const = document pattern
 		const constDocP = document.createElement('p');
-		constDocP.textContent = 'const x = document.querySelector("div"); This paragraph has the const = document pattern and should be filtered out.';
+		constDocP.textContent =
+			'const x = document.querySelector("div"); This paragraph has the const = document pattern and should be filtered out.';
 		bodyClone.appendChild(constDocP);
 
 		const bodyText = bodyClone.textContent?.trim() ?? '';
@@ -308,7 +318,10 @@ describe('tryBodyTextContent', () => {
 	});
 
 	it('should return content when cookieRatio < 0.2', () => {
-		const bodyText = 'This is valid documentation content with enough text to meet the minimum length requirement of 500 characters. '.repeat(10);
+		const bodyText =
+			'This is valid documentation content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
+				10,
+			);
 		const result = tryBodyTextContent(bodyText, debugInfo);
 		expect(result).not.toBeNull();
 		expect(result?.content).toBe(bodyText);
@@ -359,14 +372,18 @@ describe('tryLastResortBodyText', () => {
 	});
 
 	it('should return content when codeRatio < 0.1', () => {
-		body.textContent = 'This is valid documentation content with enough text to meet the minimum length requirement of 100 characters. '.repeat(2);
+		body.textContent =
+			'This is valid documentation content with enough text to meet the minimum length requirement of 100 characters. '.repeat(
+				2,
+			);
 		const result = tryLastResortBodyText(body, debugInfo);
 		expect(result).not.toBeNull();
 		expect(result?.content).toContain('valid documentation content');
 	});
 
 	it('should return null when codeRatio >= 0.1', () => {
-		body.textContent = 'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
+		body.textContent =
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
 		const result = tryLastResortBodyText(body, debugInfo);
 		expect(result).toBeNull();
 	});
@@ -394,14 +411,18 @@ describe('tryRawBodyText', () => {
 	});
 
 	it('should return content when codeRatio < 0.1', () => {
-		body.textContent = 'This is valid documentation content with enough text to meet the minimum length requirement of 100 characters. '.repeat(2);
+		body.textContent =
+			'This is valid documentation content with enough text to meet the minimum length requirement of 100 characters. '.repeat(
+				2,
+			);
 		const result = tryRawBodyText(body, debugInfo);
 		expect(result).not.toBeNull();
 		expect(result?.content).toBe(body.textContent.trim());
 	});
 
 	it('should return null when codeRatio >= 0.1', () => {
-		body.textContent = 'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
+		body.textContent =
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
 		const result = tryRawBodyText(body, debugInfo);
 		expect(result).toBeNull();
 	});

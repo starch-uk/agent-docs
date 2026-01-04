@@ -5,8 +5,8 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-		test: {
-			coverage: {
+	test: {
+		coverage: {
 			exclude: [
 				'node_modules/',
 				'dist/',
@@ -17,8 +17,8 @@ export default defineConfig({
 				'src/utils/crawler-crawl.ts', // Browser-side code in page.evaluate() cannot be unit tested
 				'src/utils/crawler-page-setup.ts', // Browser-side code in page.evaluate() cannot be unit tested
 			],
-				provider: 'v8',
-				reporter: ['text', 'json', 'html'],
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
 			thresholds: {
 				branches: 100,
 				functions: 100,
@@ -38,7 +38,7 @@ export default defineConfig({
 					statements: 30,
 				},
 			},
-			},
+		},
 		environment: 'node',
 		globals: true,
 		setupFiles: ['./tests/setup.ts'],
