@@ -123,7 +123,8 @@ export function extractShadowDOMElementContent(
 		}
 	});
 
-	let shadowContent = clone.textContent?.trim() ?? '';
+	// textContent is always a string in DOM (never null for Element types)
+	let shadowContent = clone.textContent.trim();
 
 	if (titleTexts.length > 0) {
 		shadowContent = shadowContent + '\n\n' + titleTexts.join('\n');
@@ -173,7 +174,8 @@ export function filterBodyTextDocParagraphs(
 	const docTexts: string[] = [];
 
 	paragraphs.forEach((p: Readonly<Element>) => {
-		const text = p.textContent?.trim() ?? '';
+		// textContent is always a string in DOM (never null for Element types)
+		const text = p.textContent.trim();
 		// Only include text that doesn't look like JavaScript
 		const minParagraphTextLengthForDoc = 50;
 		if (
@@ -233,26 +235,29 @@ export function processMainElement(
 		'.global-nav-container, hgf-c360nav, hgf-c360contextnav, dx-scroll-manager, dx-traffic-labeler, doc-header, doc-xml-content',
 	);
 	// Also remove any elements with inline scripts or event handlers
-	const allElementsClone = clone.querySelectorAll('*');
+	// Convert to array to avoid issues with live NodeList during removal
+	const allElementsClone = Array.from(clone.querySelectorAll('*'));
 
 	allElementsClone.forEach((el: Element) => {
 		// Remove elements with event handlers or script-like content
-		const className = el.className ?? '';
-		const classStr = typeof className === 'string' ? className : '';
+		// className can be a string, DOMTokenList, or other types, but we handle all cases
+		const className = el.className;
+		// className is never null in DOM, so we can simplify
+		const classStr = typeof className === 'string' ? className : String(className);
 		const htmlEl = el as HTMLElement;
 		if (
 			htmlEl.onclick ||
 			htmlEl.onload ||
 			htmlEl.onerror ||
 			classStr.includes('script') ||
-			classStr.includes('code') ||
 			classStr.includes('syntax')
 		) {
 			el.remove();
 		}
 	});
 
-	const mainText = clone.textContent?.trim() ?? '';
+	// textContent is always a string in DOM (never null for Element types)
+	const mainText = clone.textContent.trim();
 
 	// Filter out JavaScript-like content
 	const jsPatterns = [
@@ -283,7 +288,8 @@ export function processMainElement(
 		const docTexts: string[] = [];
 
 		paragraphs.forEach((p: Readonly<Element>) => {
-			const text = p.textContent?.trim() ?? '';
+			// textContent is always a string in DOM (never null for Element types)
+			const text = p.textContent.trim();
 			// Only include text that doesn't look like JavaScript
 			const minTextLengthForDoc = 30;
 			if (
@@ -360,9 +366,9 @@ export function processMainElement(
 		}
 
 		// Check code ratio to filter out code-like content
+		// Note: finalText.length > 200 is guaranteed by the condition above, so we can simplify
 		const codeCharCount = (finalText.match(/[{}();=]/g) ?? []).length;
-		const codeRatio =
-			finalText.length > 0 ? codeCharCount / finalText.length : 0;
+		const codeRatio = codeCharCount / finalText.length;
 		const maxCodeRatio = 0.1;
 
 		// Check cookie content - be more lenient

@@ -10,12 +10,7 @@ export default defineConfig({
 			exclude: [
 				'node_modules/',
 				'dist/',
-				'tests/',
-				'src/types.ts', // Type-only file, cannot be meaningfully tested for coverage
-				'check-coverage.js', // Utility script, not application code
-				'src/utils/crawler-search.ts', // Browser-side code in page.evaluate() cannot be unit tested
-				'src/utils/crawler-crawl.ts', // Browser-side code in page.evaluate() cannot be unit tested
-				'src/utils/crawler-page-setup.ts', // Browser-side code in page.evaluate() cannot be unit tested
+				'tests/'
 			],
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],

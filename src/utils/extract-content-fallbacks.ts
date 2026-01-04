@@ -23,7 +23,8 @@ export function tryFallbackContentExtraction(
 	const allElementsFallback = doc.querySelectorAll('*');
 	const minFallbackTextLength = 500;
 	for (const el of allElementsFallback) {
-		const text = el.textContent?.trim() ?? '';
+		// textContent is always a string in DOM (never null for Element types)
+		const text = el.textContent.trim();
 		if (text.length > minFallbackTextLength) {
 			// Check if it has actual content (not just cookie text)
 			const cookieKeywords = [
@@ -49,7 +50,8 @@ export function tryFallbackContentExtraction(
 					'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"]',
 				);
 
-				const cleanText = el.textContent?.trim() ?? '';
+				// textContent is always a string in DOM (never null for Element types)
+				const cleanText = el.textContent.trim();
 				const minCleanTextLength = 500;
 				if (cleanText.length > minCleanTextLength) {
 					return { content: cleanText, debugInfo };
@@ -110,7 +112,8 @@ export function tryLastResortBodyText(
 		lastResortBodyClone,
 		'script, style, noscript, iframe, svg, canvas, nav, footer, header',
 	);
-	const lastResortText = lastResortBodyClone.textContent?.trim() ?? '';
+	// textContent is always a string in DOM (never null for Element types)
+	const lastResortText = lastResortBodyClone.textContent.trim();
 	const minLastResortTextLength = 100;
 	if (lastResortText.length > minLastResortTextLength) {
 		// Check code ratio - if it's mostly code, don't return it
@@ -156,13 +159,14 @@ export function processMainSelectors(
 				'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"]',
 			);
 
-			const mainText = mainElBody.textContent?.trim() ?? '';
+			// textContent is always a string in DOM (never null for Element types)
+			const mainText = mainElBody.textContent.trim();
 			const minMainElBodyTextLength = 1000;
 			if (mainText.length > minMainElBodyTextLength) {
 				// Check cookie content ratio
-				const cookieMatches = (
-					mainText.match(/cookie|consent|accept all/gi) ?? []
-				).length;
+				// match() returns null when no matches - handle both cases to cover branch
+				const matchResult = mainText.match(/cookie|consent|accept all/gi);
+				const cookieMatches = matchResult ? matchResult.length : 0;
 				const wordCount = mainText.split(/\s+/).length;
 				const cookieRatio = cookieMatches / wordCount;
 
@@ -196,7 +200,8 @@ export function tryRawBodyText(
 	body: HTMLBodyElement,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
-	const rawBodyText = body.textContent?.trim() ?? '';
+	// textContent is always a string in DOM (never null for Element types)
+	const rawBodyText = body.textContent.trim();
 	const minRawBodyTextLength = 100;
 	if (rawBodyText.length > minRawBodyTextLength) {
 		// Check code ratio - if it's mostly code, don't return it

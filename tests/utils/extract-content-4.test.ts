@@ -440,14 +440,18 @@ describe('extractContent', () => {
 		}
 
 		// Create article element with text > 1000 but <= 5000 chars and cookieRatio >= 0.05
+		// Also ensure match() returns null to cover the : 0 branch at line 169
 		const article = document.createElement('article');
-		article.textContent = 'cookie consent accept all. '.repeat(150); // > 1000, <= 5000, high cookie ratio
+		// Use text with NO cookie keywords to make match() return null
+		article.textContent = 'This is article content with enough text to meet the minimum length requirement. '.repeat(20); // > 1000, <= 5000, no cookie keywords
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
-		// Should skip article (line 816-817 condition fails)
-		// Will fall back to other strategies
-		expect(result.content).toBeDefined();
+		// Should process article (line 165 condition passes)
+		// match() returns null, so cookieMatches = 0 (covers : 0 branch at line 169)
+		// cookieRatio = 0 < 0.05, so article is used
+		expect(result.content).toContain('article content');
+		expect(result.content.length).toBeGreaterThan(1000);
 	});
 
 	it('should not update bestMainText when mainText.length <= bestMainLength in mainSelectors loop', () => {

@@ -9,6 +9,7 @@ import {
 	findInShadowDOM,
 	filterBodyTextDocParagraphs,
 	removeElements,
+	processMainElement,
 } from '../../src/utils/extract-content-helpers.js';
 import {
 	tryBodyTextContent,
@@ -59,6 +60,24 @@ describe('findInShadowDOM', () => {
 		shadowRoot.appendChild(nested);
 
 		const result = findInShadowDOM(element, '.test');
+		expect(result).toBe(target);
+	});
+
+	it('should cover traverse return branch when result is not null (line 64)', () => {
+		// Test to cover the branch in traverse where result !== null and we return early
+		const element = document.createElement('div');
+		const shadowRoot = element.attachShadow({ mode: 'open' });
+		const child1 = document.createElement('div');
+		const child1Shadow = child1.attachShadow({ mode: 'open' });
+		const target = document.createElement('div');
+		target.className = 'target';
+		child1Shadow.appendChild(target);
+		shadowRoot.appendChild(child1);
+		// Add another child to ensure we traverse multiple children
+		const child2 = document.createElement('div');
+		shadowRoot.appendChild(child2);
+
+		const result = findInShadowDOM(element, '.target');
 		expect(result).toBe(target);
 	});
 
@@ -425,5 +444,42 @@ describe('tryRawBodyText', () => {
 			'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
 		const result = tryRawBodyText(body, debugInfo);
 		expect(result).toBeNull();
+	});
+});
+
+describe('processMainElement', () => {
+	let dom: JSDOM;
+	let document: Document;
+	let debugInfo: Record<string, unknown>;
+
+	beforeEach(() => {
+		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+			url: 'https://test.example.com',
+		});
+		document = dom.window.document;
+		debugInfo = {};
+	});
+
+	it('should remove elements with class names containing script or syntax', () => {
+		const main = document.createElement('main');
+		const validDiv = document.createElement('div');
+		validDiv.textContent = 'Valid content. '.repeat(20);
+		main.appendChild(validDiv);
+
+		const scriptDiv = document.createElement('div');
+		scriptDiv.className = 'my-script-element';
+		scriptDiv.textContent = 'This should be removed';
+		main.appendChild(scriptDiv);
+
+		const syntaxDiv = document.createElement('div');
+		syntaxDiv.className = 'syntax-highlight';
+		syntaxDiv.textContent = 'This should also be removed';
+		main.appendChild(syntaxDiv);
+
+		const result = processMainElement(main, debugInfo);
+		expect(result).not.toBeNull();
+		expect(result?.bestText).toContain('Valid content');
+		expect(result?.bestText).not.toContain('This should be removed');
+		expect(result?.bestText).not.toContain('This should also be removed');
 	});
 });

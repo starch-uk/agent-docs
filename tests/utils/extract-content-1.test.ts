@@ -31,6 +31,20 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		expect(result.content).toBe('');
 		expect(result.debugInfo).toBeDefined();
+		// Covers line 36: doc.body?.textContent?.trim()?.length ?? 0
+		// When body is null or textContent is null, the ?? 0 branch is reached
+		expect(result.debugInfo.bodyTextLength).toBe(0);
+	});
+
+	it('should handle doc-xml-content without shadowRoot (covers line 48)', () => {
+		// Create doc-xml-content element but don't attach shadow root
+		const docXmlContent = document.createElement('doc-xml-content');
+		document.body.appendChild(docXmlContent);
+
+		const result = extractContent(document);
+		// Should set shadowDOMFound to false when shadowRoot is null
+		expect(result.debugInfo.shadowDOMFound).toBe(false);
+		expect(result.debugInfo.docXmlContentFound).toBe(true);
 	});
 
 	it('should extract content from shadow DOM', () => {
