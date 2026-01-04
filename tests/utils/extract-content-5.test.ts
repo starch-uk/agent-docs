@@ -8,15 +8,32 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { extractContent } from '../../src/utils/extract-content.js';
 
+// Constants for test values
+const REPEAT_COUNT_200 = 200;
+const REPEAT_COUNT_100 = 100;
+const REPEAT_COUNT_5 = 5;
+const REPEAT_COUNT_10 = 10;
+const REPEAT_COUNT_15 = 15;
+const REPEAT_COUNT_20 = 20;
+const REPEAT_COUNT_30 = 30;
+const REPEAT_COUNT_3 = 3;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_100 = 100;
+const MIN_LENGTH_500 = 500;
+const MIN_LENGTH_5000 = 5000;
+const ZERO = 0;
+
 describe('extractContent', () => {
-	let dom: JSDOM;
-	let document: Document;
+	let dom: JSDOM = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
+	});
+	let document: Document = dom.window.document;
 
 	beforeEach(() => {
 		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
 			url: 'https://test.example.com',
 		});
-		document = dom.window.document;
+		({ document } = dom.window);
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -36,20 +53,22 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
 
 		// Create body text > 5000 chars with high cookie ratio (>= 0.2)
-		const cookieText = 'cookie consent accept all '.repeat(200);
-		const normalText = 'This is body text. '.repeat(100);
+		const cookieText = 'cookie consent accept all '.repeat(
+			REPEAT_COUNT_200,
+		);
+		const normalText = 'This is body text. '.repeat(REPEAT_COUNT_100);
 		document.body.textContent = cookieText + normalText; // > 5000 chars, high cookie ratio
 
 		const result = extractContent(document);
 		// Should return bodyText (line 940 condition passes)
-		expect(result.content.length).toBeGreaterThan(5000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_5000);
 		expect(result.content).toContain('This is body text');
 	});
 
@@ -60,7 +79,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -68,12 +87,14 @@ describe('extractContent', () => {
 
 		// Create lastResortText that passes
 		const div = document.createElement('div');
-		div.textContent = 'Last resort text with enough content. '.repeat(5);
+		div.textContent = 'Last resort text with enough content. '.repeat(
+			REPEAT_COUNT_5,
+		);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
 		// Should handle lastResortText path (line 949)
-		expect(result.content.length).toBeGreaterThan(100);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_100);
 		expect(result.content).toContain('Last resort text');
 	});
 
@@ -87,7 +108,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -114,7 +135,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -138,7 +159,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -162,7 +183,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -170,7 +191,7 @@ describe('extractContent', () => {
 
 		// Create lastResortText that fails (codeRatio >= 0.1)
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = '{}();=;'.repeat(20); // High code ratio
+		codeDiv.textContent = '{}();=;'.repeat(REPEAT_COUNT_20); // High code ratio
 		document.body.appendChild(codeDiv);
 
 		// Create rawBodyText with length <= 100
@@ -186,7 +207,9 @@ describe('extractContent', () => {
 
 	it('should handle className that is not a string in processMainElement', () => {
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(
+			REPEAT_COUNT_10,
+		);
 
 		// Create element with className as string (covers string branch)
 		const div1 = document.createElement('div');
@@ -205,7 +228,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// The typeof className === 'string' check should be executed (covers both branches)
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	// Note: This test was removed because the path is unreachable in practice.
@@ -217,7 +240,9 @@ describe('extractContent', () => {
 
 	it('should handle elements without textContent in processMainElement forEach loop', () => {
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(
+			REPEAT_COUNT_10,
+		);
 
 		// Create element without textContent (though this is unlikely)
 		const div = document.createElement('div');
@@ -229,7 +254,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// The el.textContent check should be executed (line 188)
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should set shadowDOMSearchAttempted to false when doc-xml-content is not found', () => {
@@ -242,7 +267,9 @@ describe('extractContent', () => {
 
 		// Create regular content without shadow DOM
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(
+			REPEAT_COUNT_10,
+		);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -267,7 +294,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'body conbody';
 		bodyContent.textContent =
 			'Content from fallback querySelector with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				REPEAT_COUNT_3,
 			);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
@@ -275,7 +302,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should use fallback querySelector (line 480-492)
 		expect(result.content).toContain('Content from fallback querySelector');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use fallback querySelector with .container[data-name="content"] selector', () => {
@@ -291,14 +318,14 @@ describe('extractContent', () => {
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
 		container.textContent = 'Container content with enough text. '.repeat(
-			10,
+			REPEAT_COUNT_10,
 		);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
 		// Should use fallback querySelector (line 483)
 		expect(result.content).toContain('Container content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use fallback querySelector with [data-name="content"] selector', () => {
@@ -313,14 +340,14 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.textContent = 'Container content with enough text. '.repeat(
-			10,
+			REPEAT_COUNT_10,
 		);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
 		// Should use fallback querySelector (line 484)
 		expect(result.content).toContain('Container content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should find bodyContent via .body.conbody selector in fallback querySelector', () => {
@@ -338,7 +365,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'body conbody';
 		bodyContent.textContent =
 			'Body content from .body.conbody selector with enough text. '.repeat(
-				5,
+				REPEAT_COUNT_5,
 			);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
@@ -346,7 +373,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should find bodyContent via .body.conbody (line 488)
 		expect(result.content).toContain('Body content from .body.conbody');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should find bodyContent via .conbody selector in fallback querySelector', () => {
@@ -363,14 +390,16 @@ describe('extractContent', () => {
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'conbody';
 		bodyContent.textContent =
-			'Body content from .conbody selector with enough text. '.repeat(5);
+			'Body content from .conbody selector with enough text. '.repeat(
+				REPEAT_COUNT_5,
+			);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
 		// Should find bodyContent via .conbody (line 489)
 		expect(result.content).toContain('Body content from .conbody');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should find bodyContent via .body selector in fallback querySelector', () => {
@@ -387,14 +416,16 @@ describe('extractContent', () => {
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body';
 		bodyContent.textContent =
-			'Body content from .body selector with enough text. '.repeat(5);
+			'Body content from .body selector with enough text. '.repeat(
+				REPEAT_COUNT_5,
+			);
 		container.appendChild(bodyContent);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
 		// Should find bodyContent via .body (line 490)
 		expect(result.content).toContain('Body content from .body');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should not find bodyContent when contentContainer querySelector returns null', () => {
@@ -409,7 +440,7 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.textContent =
-			'Container content without bodyContent. '.repeat(10);
+			'Container content without bodyContent. '.repeat(REPEAT_COUNT_10);
 		document.body.appendChild(container);
 
 		const result = extractContent(document);
@@ -426,19 +457,19 @@ describe('extractContent', () => {
 		container.className = 'container';
 		// Container has text elements and total text is greater than 500
 		const p = document.createElement('p');
-		p.textContent = 'Paragraph text. '.repeat(30);
+		p.textContent = 'Paragraph text. '.repeat(REPEAT_COUNT_30);
 		container.appendChild(p);
 		// Add enough text to make it greater than 500 chars
 		container.textContent =
 			'Container text with enough content to exceed 500 characters. '.repeat(
-				15,
+				REPEAT_COUNT_15,
 			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
 		const result = extractContent(document);
 		// Should use container as bodyContent (line 470)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.debugInfo.shadowDOMContentUsed).toBe(true);
 	});
 
@@ -449,7 +480,7 @@ describe('extractContent', () => {
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
 		// Container has no text elements
-		container.textContent = 'Container text. '.repeat(20);
+		container.textContent = 'Container text. '.repeat(REPEAT_COUNT_20);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -467,10 +498,12 @@ describe('extractContent', () => {
 		container.className = 'container';
 		// Container has text elements but total text is <= 500
 		const p = document.createElement('p');
-		p.textContent = 'Paragraph text. '.repeat(10);
+		p.textContent = 'Paragraph text. '.repeat(REPEAT_COUNT_10);
 		container.appendChild(p);
 		// Add text but <= 500 chars
-		container.textContent = 'Short container text. '.repeat(10);
+		container.textContent = 'Short container text. '.repeat(
+			REPEAT_COUNT_10,
+		);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -485,7 +518,7 @@ describe('extractContent', () => {
 		const shadowRoot = docXmlContent.attachShadow({ mode: 'open' });
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Shadow DOM content. '.repeat(15);
+		container.textContent = 'Shadow DOM content. '.repeat(REPEAT_COUNT_15);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -500,7 +533,7 @@ describe('extractContent', () => {
 		const shadowRoot = docXmlContent.attachShadow({ mode: 'open' });
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Shadow DOM content. '.repeat(15);
+		container.textContent = 'Shadow DOM content. '.repeat(REPEAT_COUNT_15);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -515,7 +548,7 @@ describe('extractContent', () => {
 		const shadowRoot = docXmlContent.attachShadow({ mode: 'open' });
 		// Don't add container, so contentContainer won't be found
 		const otherDiv = document.createElement('div');
-		otherDiv.textContent = 'Other content. '.repeat(15);
+		otherDiv.textContent = 'Other content. '.repeat(REPEAT_COUNT_15);
 		shadowRoot.appendChild(otherDiv);
 		document.body.appendChild(docXmlContent);
 
@@ -529,7 +562,7 @@ describe('extractContent', () => {
 		const shadowRoot = docXmlContent.attachShadow({ mode: 'open' });
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Shadow DOM content. '.repeat(15);
+		container.textContent = 'Shadow DOM content. '.repeat(REPEAT_COUNT_15);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -544,7 +577,7 @@ describe('extractContent', () => {
 		const shadowRoot = docXmlContent.attachShadow({ mode: 'open' });
 		// Don't add container, so contentContainer won't be found
 		const otherDiv = document.createElement('div');
-		otherDiv.textContent = 'Other content. '.repeat(15);
+		otherDiv.textContent = 'Other content. '.repeat(REPEAT_COUNT_15);
 		shadowRoot.appendChild(otherDiv);
 		document.body.appendChild(docXmlContent);
 
@@ -563,7 +596,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'body conbody';
 		bodyContent.textContent =
 			'Body content from .body.conbody selector in shadow DOM with enough text. '.repeat(
-				5,
+				REPEAT_COUNT_5,
 			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
@@ -572,7 +605,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should find bodyContent via .body.conbody (line 452)
 		expect(result.content).toContain('Body content from .body.conbody');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should find bodyContent via .conbody selector in shadow DOM', () => {
@@ -585,7 +618,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'conbody';
 		bodyContent.textContent =
 			'Body content from .conbody selector in shadow DOM with enough text. '.repeat(
-				5,
+				REPEAT_COUNT_5,
 			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
@@ -594,7 +627,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should find bodyContent via .conbody (line 453)
 		expect(result.content).toContain('Body content from .conbody');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should find bodyContent via .body selector in shadow DOM', () => {
@@ -607,7 +640,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'body';
 		bodyContent.textContent =
 			'Body content from .body selector in shadow DOM with enough text. '.repeat(
-				5,
+				REPEAT_COUNT_5,
 			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
@@ -616,7 +649,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should find bodyContent via .body (line 454)
 		expect(result.content).toContain('Body content from .body');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use findInShadowDOM with div.container[data-name="content"] selector', () => {
@@ -627,7 +660,7 @@ describe('extractContent', () => {
 		container.className = 'container';
 		container.textContent =
 			'Content from div.container[data-name="content"] selector. '.repeat(
-				10,
+				REPEAT_COUNT_10,
 			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -635,7 +668,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should use findInShadowDOM with div.container[data-name="content"] (line 434-436)
 		expect(result.content).toContain('Content from div.container');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use findInShadowDOM with .container[data-name="content"] selector when div.container fails', () => {
@@ -647,7 +680,7 @@ describe('extractContent', () => {
 		container.className = 'container';
 		container.textContent =
 			'Content from .container[data-name="content"] selector. '.repeat(
-				10,
+				REPEAT_COUNT_10,
 			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -655,7 +688,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should use findInShadowDOM with .container[data-name="content"] (line 438-440)
 		expect(result.content).toContain('Content from .container');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use findInShadowDOM with [data-name="content"] selector when other selectors fail', () => {
@@ -665,14 +698,16 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.textContent =
-			'Content from [data-name="content"] selector. '.repeat(10);
+			'Content from [data-name="content"] selector. '.repeat(
+				REPEAT_COUNT_10,
+			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
 		const result = extractContent(document);
 		// Should use findInShadowDOM with [data-name="content"] (line 442)
 		expect(result.content).toContain('Content from [data-name="content"]');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should set contentContainerFound to false when contentContainer is null', () => {
@@ -685,7 +720,7 @@ describe('extractContent', () => {
 
 		// Create main element (contentContainer will be null)
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(20);
+		main.textContent = 'Main content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -704,7 +739,7 @@ describe('extractContent', () => {
 
 		// Create main element (contentContainer will be null)
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(20);
+		main.textContent = 'Main content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -723,12 +758,12 @@ describe('extractContent', () => {
 
 		// Create main element (contentContainer will be null)
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(20);
+		main.textContent = 'Main content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should set contentContainerTextLength to 0 (line 501)
-		expect(result.debugInfo.contentContainerTextLength).toBe(0);
+		expect(result.debugInfo.contentContainerTextLength).toBe(ZERO);
 		expect(result.content).toContain('Main content');
 	});
 
@@ -742,7 +777,7 @@ describe('extractContent', () => {
 
 		// Create main element (bodyContent will be null)
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(20);
+		main.textContent = 'Main content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -761,7 +796,7 @@ describe('extractContent', () => {
 
 		// Create main element (bodyContent will be null)
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(20);
+		main.textContent = 'Main content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -780,12 +815,12 @@ describe('extractContent', () => {
 
 		// Create main element (bodyContent will be null)
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(20);
+		main.textContent = 'Main content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should set bodyContentTextLength to 0 (line 511)
-		expect(result.debugInfo.bodyContentTextLength).toBe(0);
+		expect(result.debugInfo.bodyContentTextLength).toBe(ZERO);
 		expect(result.content).toContain('Main content');
 	});
 
@@ -799,7 +834,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -807,7 +842,7 @@ describe('extractContent', () => {
 
 		// Create div without main element (mainElement will be null)
 		const div = document.createElement('div');
-		div.textContent = 'Content. '.repeat(20);
+		div.textContent = 'Content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -826,7 +861,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -834,7 +869,7 @@ describe('extractContent', () => {
 
 		// Create div without main element (mainElement will be null)
 		const div = document.createElement('div');
-		div.textContent = 'Content. '.repeat(20);
+		div.textContent = 'Content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -853,7 +888,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -861,7 +896,7 @@ describe('extractContent', () => {
 
 		// Create div without main element (mainElement will be null)
 		const div = document.createElement('div');
-		div.textContent = 'Content. '.repeat(20);
+		div.textContent = 'Content. '.repeat(REPEAT_COUNT_20);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -900,7 +935,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure we reach bodyText path
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();

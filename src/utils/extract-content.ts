@@ -34,7 +34,8 @@ export function extractContent(doc: Document): {
 } {
 	const debugInfo: Record<string, unknown> = {
 		// textContent is always a string in DOM (never null for Element types)
-		bodyTextLength: doc.body ? doc.body.textContent.trim().length : 0,
+		// doc.body is always present in HTML documents
+		bodyTextLength: doc.body.textContent.trim().length,
 		divCount: doc.querySelectorAll('div').length,
 		mainElements: [],
 		paragraphCount: doc.querySelectorAll('p').length,

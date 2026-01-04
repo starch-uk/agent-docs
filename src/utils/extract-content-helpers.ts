@@ -240,11 +240,10 @@ export function processMainElement(
 
 	allElementsClone.forEach((el: Element) => {
 		// Remove elements with event handlers or script-like content
-		// className can be a string, DOMTokenList, or other types, but we handle all cases
+		// className is always a string in DOM (never DOMTokenList in jsdom/real DOM)
 		const className = el.className;
-		// className is never null in DOM, so we can simplify
-		const classStr =
-			typeof className === 'string' ? className : String(className);
+		// className is always a string, so no need for typeof check
+		const classStr = className as string;
 		const htmlEl = el as HTMLElement;
 		if (
 			htmlEl.onclick ||

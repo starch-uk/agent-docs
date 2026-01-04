@@ -81,6 +81,25 @@ describe('findInShadowDOM', () => {
 		expect(result).toBe(target);
 	});
 
+	it('should continue when traverse result is null (line 64 branch)', () => {
+		// Test to cover the branch where result is null and we continue to next child
+		const element = document.createElement('div');
+		const shadowRoot = element.attachShadow({ mode: 'open' });
+		// Add first child without target (result will be null)
+		const child1 = document.createElement('div');
+		shadowRoot.appendChild(child1);
+		// Add second child with target
+		const child2 = document.createElement('div');
+		const child2Shadow = child2.attachShadow({ mode: 'open' });
+		const target = document.createElement('div');
+		target.className = 'target';
+		child2Shadow.appendChild(target);
+		shadowRoot.appendChild(child2);
+
+		const result = findInShadowDOM(element, '.target');
+		expect(result).toBe(target);
+	});
+
 	it('should respect maxDepth limit', () => {
 		const element = document.createElement('div');
 		let current = element;
@@ -111,6 +130,24 @@ describe('findInShadowDOM', () => {
 		// So this should return null since there's no shadow root
 		const result = findInShadowDOM(element, '.test');
 		expect(result).toBeNull();
+	});
+
+	it('should continue when traverse result is null in regular children loop (line 64 branch)', () => {
+		// Test to cover the branch where result is null and we continue to next child in regular children loop
+		const element = document.createElement('div');
+		// Add first child without target (result will be null, continues loop)
+		const child1 = document.createElement('div');
+		element.appendChild(child1);
+		// Add second child with shadow root containing target
+		const child2 = document.createElement('div');
+		const child2Shadow = child2.attachShadow({ mode: 'open' });
+		const target = document.createElement('div');
+		target.className = 'target';
+		child2Shadow.appendChild(target);
+		element.appendChild(child2);
+
+		const result = findInShadowDOM(element, '.target');
+		expect(result).toBe(target);
 	});
 
 	it('should handle querySelector errors gracefully', () => {
@@ -309,10 +346,10 @@ describe('filterBodyTextDocParagraphs', () => {
 			'This is valid documentation paragraph with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		bodyClone.appendChild(validP);
 
-		// Add paragraph with const = document pattern
+		// Add paragraph with const = document pattern (must include both 'const ' and '= document' to trigger line 188 branch)
 		const constDocP = document.createElement('p');
 		constDocP.textContent =
-			'const x = document.querySelector("div"); This paragraph has the const = document pattern and should be filtered out.';
+			'const x = document.getElementById("test"); This paragraph has both const and = document and should be filtered out because it includes both patterns.';
 		bodyClone.appendChild(constDocP);
 
 		const bodyText = bodyClone.textContent?.trim() ?? '';
@@ -447,6 +484,37 @@ describe('tryRawBodyText', () => {
 	});
 });
 
+describe('processMainSelectors', () => {
+	let dom: JSDOM;
+	let document: Document;
+	let body: HTMLBodyElement;
+	let debugInfo: Record<string, unknown>;
+
+	beforeEach(() => {
+		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+			url: 'https://test.example.com',
+		});
+		document = dom.window.document;
+		body = document.body;
+		debugInfo = {};
+	});
+
+	it('should handle match() returning null (line 171 branch)', () => {
+		// Create article with > 1000 chars but NO cookie keywords to make match() return null
+		const article = document.createElement('article');
+		article.textContent =
+			'This is article content with enough text to meet the minimum length requirement of 1000 characters. '.repeat(
+				15,
+			); // > 1000 chars, no cookie keywords
+		body.appendChild(article);
+
+		const result = processMainSelectors(body, debugInfo);
+		expect(result).not.toBeNull();
+		expect(result?.content).toContain('article content');
+		expect(result?.content.length).toBeGreaterThan(1000);
+	});
+});
+
 describe('processMainElement', () => {
 	let dom: JSDOM;
 	let document: Document;
@@ -481,5 +549,43 @@ describe('processMainElement', () => {
 		expect(result?.bestText).toContain('Valid content');
 		expect(result?.bestText).not.toContain('This should be removed');
 		expect(result?.bestText).not.toContain('This should also be removed');
+	});
+
+	it('should filter out paragraphs with const and = document pattern (line 188)', () => {
+		const main = document.createElement('main');
+		// Create main with substantial content first to ensure it returns
+		const validDiv = document.createElement('div');
+		validDiv.textContent =
+			'This is valid documentation content with enough text. '.repeat(15);
+		main.appendChild(validDiv);
+
+		// Add JS patterns in text (not in script elements) to trigger filtering code path
+		// Need jsPatternCount > 2 AND mainText.length > 200
+		const jsTextDiv = document.createElement('div');
+		// This text contains: 'function', 'const', 'document.querySelector', 'addEventListener', 'let', 'var' = 6 patterns
+		jsTextDiv.textContent =
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); let y = 5; var z = 10; } '.repeat(
+				3,
+			);
+		main.appendChild(jsTextDiv);
+
+		// Add valid paragraph (should be included after filtering)
+		const validP = document.createElement('p');
+		validP.textContent =
+			'This is valid documentation paragraph with enough text to meet the minimum length requirement of 30 characters for documentation filtering and extraction.';
+		main.appendChild(validP);
+
+		// Add paragraph with const and = document pattern (should be filtered out - line 188 branch)
+		const constDocP = document.createElement('p');
+		constDocP.textContent =
+			'const x = document.getElementById("test"); This paragraph has both const and = document and should be filtered out because it includes both patterns.';
+		main.appendChild(constDocP);
+
+		const result = processMainElement(main, debugInfo);
+		expect(result).not.toBeNull();
+		expect(result?.bestText).toContain('This is valid documentation');
+		expect(result?.bestText).not.toContain(
+			'const x = document.getElementById',
+		);
 	});
 });

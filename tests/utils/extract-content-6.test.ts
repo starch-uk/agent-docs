@@ -8,15 +8,32 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { extractContent } from '../../src/utils/extract-content.js';
 
+// Constants for test values
+const REPEAT_COUNT_15 = 15;
+const REPEAT_COUNT_20 = 20;
+const REPEAT_COUNT_10 = 10;
+const REPEAT_COUNT_30 = 30;
+const REPEAT_COUNT_3 = 3;
+const REPEAT_COUNT_100 = 100;
+const REPEAT_COUNT_50 = 50;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_500 = 500;
+const MIN_LENGTH_100 = 100;
+const MIN_LENGTH_50 = 50;
+const MIN_LENGTH_1000 = 1000;
+const ZERO = 0;
+
 describe('extractContent', () => {
-	let dom: JSDOM;
-	let document: Document;
+	let dom: JSDOM = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
+	});
+	let document: Document = dom.window.document;
 
 	beforeEach(() => {
 		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
 			url: 'https://test.example.com',
 		});
-		document = dom.window.document;
+		({ document } = dom.window);
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -34,7 +51,9 @@ describe('extractContent', () => {
 		container.className = 'container';
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body conbody';
-		bodyContent.textContent = 'Body content with enough text. '.repeat(15);
+		bodyContent.textContent = 'Body content with enough text. '.repeat(
+			REPEAT_COUNT_15,
+		);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -42,7 +61,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should use bodyContent as mainElement (line 516)
 		expect(result.content).toContain('Body content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use contentContainer as mainElement when bodyContent is null but contentContainer exists', () => {
@@ -52,7 +71,7 @@ describe('extractContent', () => {
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
 		container.textContent = 'Container content with enough text. '.repeat(
-			15,
+			REPEAT_COUNT_15,
 		);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -60,7 +79,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should use contentContainer as mainElement (line 517)
 		expect(result.content).toContain('Container content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use [role="main"] as mainElement when bodyContent and contentContainer are null', () => {
@@ -74,13 +93,15 @@ describe('extractContent', () => {
 		// Create [role="main"] element
 		const main = document.createElement('div');
 		main.setAttribute('role', 'main');
-		main.textContent = 'Role main content with enough text. '.repeat(15);
+		main.textContent = 'Role main content with enough text. '.repeat(
+			REPEAT_COUNT_15,
+		);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should use [role="main"] as mainElement (line 518)
 		expect(result.content).toContain('Role main content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should use main as mainElement when bodyContent, contentContainer, and [role="main"] are null', () => {
@@ -99,13 +120,15 @@ describe('extractContent', () => {
 
 		// Create main element
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(15);
+		main.textContent = 'Main content with enough text. '.repeat(
+			REPEAT_COUNT_15,
+		);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should use main as mainElement (line 519)
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should set contentContainerTextLength when contentContainer.textContent is null', () => {
@@ -120,7 +143,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should set contentContainerTextLength to 0 when textContent is null (line 500)
-		expect(result.debugInfo.contentContainerTextLength).toBe(0);
+		expect(result.debugInfo.contentContainerTextLength).toBe(ZERO);
 		expect(result.content).toBeDefined();
 	});
 
@@ -139,7 +162,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should set bodyContentTextLength to 0 when textContent is null (line 510)
-		expect(result.debugInfo.bodyContentTextLength).toBe(0);
+		expect(result.debugInfo.bodyContentTextLength).toBe(ZERO);
 		expect(result.content).toBeDefined();
 	});
 
@@ -153,7 +176,9 @@ describe('extractContent', () => {
 
 		// Create main element without className
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(15);
+		main.textContent = 'Main content with enough text. '.repeat(
+			REPEAT_COUNT_15,
+		);
 		// Don't set className, so it will be empty string
 		document.body.appendChild(main);
 
@@ -169,7 +194,7 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		// Don't set className, so it will be empty string
-		container.textContent = 'Container content. '.repeat(15);
+		container.textContent = 'Container content. '.repeat(REPEAT_COUNT_15);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -192,7 +217,7 @@ describe('extractContent', () => {
 		// Actually, the ?? '' branch is when className is null/undefined, not empty string
 		// In DOM, className is always a string (never null), so this branch is unreachable
 		// Let's test with an element that has className as empty string
-		bodyContent.textContent = 'Body content. '.repeat(15);
+		bodyContent.textContent = 'Body content. '.repeat(REPEAT_COUNT_15);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -228,7 +253,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to prevent mainSelectors from returning
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -284,7 +309,9 @@ describe('extractContent', () => {
 
 		// Add more cookie text to ensure cookieRatio >= 0.2 and total length <= 5000
 		// This makes tryBodyTextContent return null, allowing filterBodyTextDocParagraphs result to be used
-		const moreCookieText = 'cookie consent accept all. '.repeat(20);
+		const moreCookieText = 'cookie consent accept all. '.repeat(
+			REPEAT_COUNT_20,
+		);
 		document.body.appendChild(document.createTextNode(moreCookieText));
 
 		// Ensure total body text is > 500 (for bodyText path) but <= 2000 (to prevent fallback loop from returning)
@@ -318,7 +345,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to prevent mainSelectors from returning
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -348,7 +375,7 @@ describe('extractContent', () => {
 		// Add substantial body text (> 500 chars) with low cookie ratio (< 0.2)
 		const normalText =
 			'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
-				10,
+				REPEAT_COUNT_10,
 			);
 		document.body.appendChild(document.createTextNode(normalText));
 
@@ -357,7 +384,7 @@ describe('extractContent', () => {
 		// filterBodyTextDocParagraphs returns null (jsPatternCount = 2 <= 2)
 		// tryBodyTextContent returns non-null (bodyText.length > 500, cookieRatio < 0.2)
 		// Lines 1040-1041 execute
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('substantial body text content');
 	});
 
@@ -371,7 +398,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to prevent mainSelectors from returning
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -398,7 +425,7 @@ describe('extractContent', () => {
 		// Add substantial body text so we reach bodyText path
 		const normalText =
 			'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
-				10,
+				REPEAT_COUNT_10,
 			);
 		document.body.appendChild(document.createTextNode(normalText));
 
@@ -407,7 +434,7 @@ describe('extractContent', () => {
 		// allBodyElements.forEach processes elements (line 1007)
 		// Element with 'const ' and '= document' is removed (line 1018)
 		// Line 1018 is evaluated
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('substantial body text content');
 		expect(result.content).not.toContain(
 			'const x = document.getElementById',
@@ -419,13 +446,15 @@ describe('extractContent', () => {
 		// When text.includes('const ') is false, the second part is not evaluated (short-circuit)
 		// This covers the branch where the first condition is false
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(20);
+		main.textContent = 'Main content with enough text. '.repeat(
+			REPEAT_COUNT_20,
+		);
 
 		// Add paragraph with '= document' but NOT 'const ' to cover the && branch
 		const p = document.createElement('p');
 		p.textContent =
 			'This is a paragraph with = document but no const keyword. '.repeat(
-				10,
+				REPEAT_COUNT_10,
 			);
 		main.appendChild(p);
 
@@ -461,7 +490,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to prevent mainSelectors from returning
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -488,8 +517,10 @@ describe('extractContent', () => {
 
 		// First, create body text with high cookie ratio to make tryBodyTextContent return null
 		// Don't use textContent assignment as it removes all elements - append text nodes instead
-		const cookieText = 'cookie consent accept all. '.repeat(100); // High cookie ratio
-		const normalText = 'Short normal text. '.repeat(50); // Normal text
+		const cookieText = 'cookie consent accept all. '.repeat(
+			REPEAT_COUNT_100,
+		); // High cookie ratio
+		const normalText = 'Short normal text. '.repeat(REPEAT_COUNT_50); // Normal text
 		document.body.appendChild(
 			document.createTextNode(cookieText + normalText),
 		); // Total > 500, cookieRatio >= 0.2, length <= 5000
@@ -513,7 +544,7 @@ describe('extractContent', () => {
 		const nav = document.createElement('nav');
 		nav.textContent =
 			'This is normal text content with enough text to dilute the code ratio in raw body text so tryRawBodyText returns non-null. '.repeat(
-				30,
+				REPEAT_COUNT_30,
 			); // ~3000 chars of normal text
 		document.body.appendChild(nav);
 
@@ -529,7 +560,7 @@ describe('extractContent', () => {
 		// tryLastResortBodyText returns null (codeRatio >= 0.1)
 		// tryRawBodyText returns non-null (rawBodyText.length > 100, codeRatio < 0.1)
 		// Lines 511-512 execute
-		expect(result.content.length).toBeGreaterThan(100);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_100);
 		expect(result.content).toContain(
 			'normal text content with enough text to dilute',
 		);
