@@ -18,12 +18,14 @@ import {
 } from '../utils/repo-todos.ts';
 
 /**
- * Main function for repo-todos CLI.
- * @returns Promise that resolves when the CLI completes.
+ * Parse command line arguments for repo-todos CLI.
+ * @param args - Command line arguments (typically process.argv.slice(2)).
+ * @returns Parsed arguments with repoPath and outputFile.
  */
-async function main(): Promise<void> {
-	const argvSkipCount = 2;
-	const args = process.argv.slice(argvSkipCount);
+export function parseArgs(args: readonly string[]): {
+	repoPath: string | undefined;
+	outputFile: string | undefined;
+} {
 	let repoPath: string | undefined = undefined;
 	let outputFile: string | undefined = undefined;
 
@@ -40,6 +42,19 @@ async function main(): Promise<void> {
 		}
 	}
 
+	return { outputFile, repoPath };
+}
+
+/**
+ * Main function for repo-todos CLI.
+ * @param args - Optional command line arguments (defaults to process.argv.slice(2)).
+ * @returns Promise that resolves when the CLI completes.
+ */
+export async function main(args?: readonly string[]): Promise<void> {
+	const argvSkipCount = 2;
+	const cliArgs = args ?? process.argv.slice(argvSkipCount);
+	const { outputFile, repoPath } = parseArgs(cliArgs);
+
 	if (repoPath === undefined || repoPath === '') {
 		console.error('Usage: pnpm repo-todos <repo-path> [--output <file>]');
 		console.error('');
@@ -54,6 +69,7 @@ async function main(): Promise<void> {
 		);
 		const exitCode = 1;
 		process.exit(exitCode);
+		return; // Exit early to satisfy TypeScript
 	}
 
 	const resolvedPath = resolve(repoPath);
@@ -112,4 +128,26 @@ async function main(): Promise<void> {
 	}
 }
 
-void main();
+/**
+ * Check if this module is being run as the main entry point.
+ * @returns True if this module is being executed directly.
+ */
+export function isMainEntryPoint(): boolean {
+	return (
+		(process.argv[1] && import.meta.url.endsWith(process.argv[1])) ||
+		process.argv[1]?.includes('repo-todos') === true
+	);
+}
+
+/**
+ * Execute main if this is the main entry point.
+ * This function is exported for testing purposes.
+ */
+export function executeIfMainEntryPoint(): void {
+	if (isMainEntryPoint()) {
+		void main();
+	}
+}
+
+// Only run main if this file is executed directly (not imported)
+executeIfMainEntryPoint();

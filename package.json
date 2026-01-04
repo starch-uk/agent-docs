@@ -43,6 +43,7 @@
 		"simple-git": "^3.30.0"
 	},
 	"devDependencies": {
+		"@types/jsdom": "^21.1.7",
 		"@types/node": "^20.19.27",
 		"@typescript-eslint/eslint-plugin": "^8.51.0",
 		"@typescript-eslint/parser": "^8.51.0",
@@ -53,6 +54,7 @@
 		"eslint-plugin-sort-class-members": "^1.21.0",
 		"eslint-plugin-sort-keys": "^2.3.5",
 		"husky": "^8.0.3",
+		"jsdom": "^25.0.1",
 		"prettier": "^3.7.4",
 		"typescript": "^5.9.3",
 		"vitest": "^1.6.1"

@@ -169,6 +169,39 @@ describe('searchAndDownloadSalesforceHelp', () => {
 		);
 	});
 
+	it('should log verbose messages when verbose is true', async () => {
+		const mockResults = getSearchResultsFixture();
+		const mockFolderPath = '/tmp/sf-docs-helper-123';
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.searchSalesforceHelp).mockResolvedValue(mockResults);
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+		vi.spyOn(console, 'log').mockImplementation(() => {
+			// Intentionally empty for test mocking
+		});
+
+		const result = await searchAndDownloadSalesforceHelp('test', {
+			verbose: true,
+			limit: 3,
+		});
+
+		// Verify verbose logging occurred
+		expect(console.log).toHaveBeenCalledWith(
+			expect.stringContaining('Downloading'),
+		);
+		expect(console.log).toHaveBeenCalledWith(
+			expect.stringContaining('Created todo file:'),
+		);
+		expect(result.folderPath).toBe(mockFolderPath);
+
+		vi.restoreAllMocks();
+	});
+
 	it('should create TODO.md file with correct format using fixture data', async () => {
 		const mockResults = getSearchResultsFixture();
 		const mockFolderPath = '/tmp/sf-docs-helper-123';
@@ -302,6 +335,88 @@ describe('getSalesforceUrl', () => {
 		// Verify writeFile was called (filename generation is tested via behavior)
 		expect(writeFile).toHaveBeenCalled();
 		expect(crawler.crawlSalesforcePage).toHaveBeenCalledWith(url);
+	});
+
+	it('should use index-based filename when both searchParamId and pathnameLast are null', async () => {
+		// URL without id param and without meaningful pathname
+		const url = 'https://help.salesforce.com/';
+		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+
+		await getSalesforceUrl(url, { verbose: false });
+
+		// Should still work, using index-based filename (article_0.html)
+		expect(writeFile).toHaveBeenCalled();
+		expect(crawler.crawlSalesforcePage).toHaveBeenCalledWith(url);
+	});
+
+	it('should use pathnameLast when searchParamId is null', async () => {
+		// URL without id param but with pathname that has a valid article name
+		// This tests line 68: searchParamId ?? pathnameLast ?? null
+		// where searchParamId is null, so pathnameLast is used
+		// The branch coverage needs to see: searchParamId (null) -> pathnameLast (not null) -> use pathnameLast
+		const url = 'https://help.salesforce.com/s/articleView/apex-annotations';
+		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+
+		await getSalesforceUrl(url, { verbose: false });
+
+		// Should use pathnameLast (apex-annotations) for filename
+		// This ensures the pathnameLast branch is covered at line 68
+		// The pathnameLast branch is: searchParamId ?? pathnameLast ?? null
+		// where searchParamId is null, so pathnameLast ('apex-annotations') is used
+		expect(writeFile).toHaveBeenCalled();
+		expect(crawler.crawlSalesforcePage).toHaveBeenCalledWith(url);
+		// Verify the filename uses pathnameLast
+		const writeFileCalls = vi.mocked(writeFile).mock.calls;
+		expect(writeFileCalls.length).toBeGreaterThan(0);
+		const filename = writeFileCalls[0]?.[0] as string;
+		expect(filename).toContain('apex-annotations');
+		// Ensure the pathnameLast branch is explicitly covered by verifying the filename pattern
+		expect(filename).toMatch(/apex-annotations\.html$/);
+	});
+
+	it('should handle non-Error objects in downloadContent error handling', async () => {
+		const url = 'https://help.salesforce.com/s/articleView?id=test';
+		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
+		// Create a non-Error object to test line 104: error instanceof Error ? error.message : String(error)
+		const nonError = { message: 'Not an Error', code: 'TEST_ERROR' };
+
+		vi.mocked(crawler.crawlSalesforcePage).mockRejectedValue(nonError);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+		vi.spyOn(console, 'warn').mockImplementation(() => {
+			// Intentionally empty for test mocking
+		});
+
+		await getSalesforceUrl(url, { verbose: true });
+
+		// Should handle non-Error object and convert to string
+		expect(writeFile).toHaveBeenCalled();
+		// Verify error message was written (String(error) path)
+		const writeCalls = vi.mocked(writeFile).mock.calls;
+		const errorCall = writeCalls.find(
+			(call: readonly unknown[]) =>
+				typeof call[SECOND_INDEX] === 'string' &&
+				typeof call[FIRST_INDEX] === 'string' &&
+				call[SECOND_INDEX].includes('Error downloading'),
+		);
+		expect(errorCall).toBeTruthy();
 	});
 });
 
@@ -443,5 +558,157 @@ describe('dumpSalesforceHelp', () => {
 		expect(output).toContain('---');
 		// Verify fixture content appears in output
 		expect(output).toContain('AuraEnabled');
+	});
+
+	it('should handle verbose mode in dumpSalesforceHelp', async () => {
+		const mockResults = getSearchResultsFixture();
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.searchSalesforceHelp).mockResolvedValue(mockResults);
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+
+		await dumpSalesforceHelp('test', { verbose: true });
+
+		// Verify verbose logging to stderr
+		expect(console.error).toHaveBeenCalledWith(
+			expect.stringContaining('Fetching'),
+		);
+	});
+
+	it('should handle fetch errors in dumpSalesforceHelp with verbose mode', async () => {
+		const mockResults = getSearchResultsFixture();
+
+		vi.mocked(crawler.searchSalesforceHelp).mockResolvedValue(mockResults);
+		vi.mocked(crawler.crawlSalesforcePage)
+			.mockRejectedValueOnce(new Error('Fetch failed'))
+			.mockResolvedValueOnce(await loadFixture('article-annotations.txt'))
+			.mockResolvedValueOnce(await loadFixture('article-auraenabled.txt'));
+
+		await dumpSalesforceHelp('test', { verbose: true });
+
+		// Verify error was logged to stderr in verbose mode
+		expect(console.error).toHaveBeenCalledWith(
+			expect.stringContaining('Failed to fetch'),
+		);
+
+		// Verify error content was included in output
+		const logCalls = vi.mocked(console.log).mock.calls;
+		const output = logCalls
+			.map((call: readonly unknown[]) =>
+				typeof call[FIRST_INDEX] === 'string' ? call[FIRST_INDEX] : '',
+			)
+			.join('');
+		expect(output).toContain('Error:');
+	});
+
+	it('should handle fetch errors in dumpSalesforceHelp without verbose mode', async () => {
+		const mockResults = getSearchResultsFixture();
+
+		vi.mocked(crawler.searchSalesforceHelp).mockResolvedValue(mockResults);
+		vi.mocked(crawler.crawlSalesforcePage)
+			.mockRejectedValueOnce(new Error('Fetch failed'))
+			.mockResolvedValueOnce(await loadFixture('article-annotations.txt'))
+			.mockResolvedValueOnce(await loadFixture('article-auraenabled.txt'));
+
+		await dumpSalesforceHelp('test', { verbose: false });
+
+		// Verify error content was still included in output
+		const logCalls = vi.mocked(console.log).mock.calls;
+		const output = logCalls
+			.map((call: readonly unknown[]) =>
+				typeof call[FIRST_INDEX] === 'string' ? call[FIRST_INDEX] : '',
+			)
+			.join('');
+		expect(output).toContain('Error:');
+	});
+
+	it('should add initial search results to urlsToFetch map', async () => {
+		const mockResults = getSearchResultsFixture();
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.searchSalesforceHelp).mockResolvedValue(mockResults);
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+
+		await dumpSalesforceHelp('test', {});
+
+		// Verify all initial results were processed
+		expect(crawler.crawlSalesforcePage).toHaveBeenCalledTimes(
+			mockResults.length,
+		);
+	});
+
+	it('should handle verbose mode in getSalesforceUrl', async () => {
+		const url =
+			'https://help.salesforce.com/s/articleView?id=sf.apexcode_annotation_auraenabled.htm';
+		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+
+		await getSalesforceUrl(url, { verbose: true });
+
+		// Verify verbose logging occurred
+		expect(console.log).toHaveBeenCalledWith(
+			expect.stringContaining('Getting content from:'),
+		);
+		expect(console.log).toHaveBeenCalledWith(
+			expect.stringContaining('Created temporary folder:'),
+		);
+		expect(console.log).toHaveBeenCalledWith(
+			expect.stringContaining('Created todo file:'),
+		);
+	});
+
+	it('should handle invalid URL in filename generation', async () => {
+		// Test that invalid URLs fall back to index-based filename
+		const invalidUrl = 'not-a-valid-url';
+		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
+		const articleContent = await loadFixture('article-auraenabled.txt');
+
+		vi.mocked(crawler.crawlSalesforcePage).mockResolvedValue(
+			articleContent,
+		);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+
+		await getSalesforceUrl(invalidUrl, { verbose: false });
+
+		// Should still work, using index-based filename (article_0.html)
+		expect(writeFile).toHaveBeenCalled();
+		expect(crawler.crawlSalesforcePage).toHaveBeenCalledWith(invalidUrl);
+	});
+
+	it('should handle download error with verbose mode', async () => {
+		const url = 'https://help.salesforce.com/s/articleView?id=test';
+		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
+		const downloadError = new Error('Download failed');
+
+		vi.mocked(crawler.crawlSalesforcePage).mockRejectedValue(downloadError);
+		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);
+		vi.mocked(writeFile).mockResolvedValue(undefined);
+		vi.mocked(tmpdir).mockReturnValue('/tmp');
+		vi.spyOn(console, 'warn').mockImplementation(() => {
+			// Intentionally empty for test mocking
+		});
+
+		await getSalesforceUrl(url, { verbose: true });
+
+		// Should log warning with verbose mode
+		expect(console.warn).toHaveBeenCalledWith(
+			expect.stringContaining('Failed to download'),
+			downloadError,
+		);
+		// Should still write error message to file
+		expect(writeFile).toHaveBeenCalled();
 	});
 });

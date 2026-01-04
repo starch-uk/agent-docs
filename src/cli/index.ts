@@ -14,7 +14,94 @@ import {
 	dumpSalesforceHelp,
 } from '../sources/salesforce.ts';
 
-const program = new Command();
+/**
+ * Handle search command.
+ * @param item - Salesforce item to search for.
+ * @param options - Command options.
+ */
+export async function handleSearchCommand(
+	item: string,
+	options: Readonly<{
+		concurrency?: number;
+		limit?: number;
+		verbose?: boolean;
+	}>,
+): Promise<void> {
+	try {
+		const result = await searchAndDownloadSalesforceHelp(item, {
+			concurrency: options.concurrency,
+			limit: options.limit,
+			verbose: options.verbose,
+		});
+
+		const fileCountStr = String(result.fileCount);
+		console.log(`\nDownloaded ${fileCountStr} files to:`);
+		console.log(result.folderPath);
+		console.log(`\nTodo file: ${result.todoFilePath}`);
+		console.log(
+			`\nReview the TODO.md file in the folder to process each document.`,
+		);
+	} catch (error) {
+		console.error('Error searching Salesforce Help:', error);
+		const exitCode = 1;
+		process.exit(exitCode);
+	}
+}
+
+/**
+ * Handle get command.
+ * @param url - Salesforce Help URL.
+ * @param options - Command options.
+ */
+export async function handleGetCommand(
+	url: string,
+	options: Readonly<{ verbose?: boolean }>,
+): Promise<void> {
+	try {
+		const result = await getSalesforceUrl(url, {
+			verbose: options.verbose,
+		});
+
+		console.log(`\nDownloaded file to:`);
+		console.log(result.folderPath);
+		console.log(`\nTodo file: ${result.todoFilePath}`);
+		console.log(
+			`\nReview the TODO.md file in the folder to process the document.`,
+		);
+	} catch (error) {
+		console.error('Error getting Salesforce Help URL:', error);
+		const exitCode = 1;
+		process.exit(exitCode);
+	}
+}
+
+/**
+ * Handle dump command.
+ * @param item - Salesforce item to search for.
+ * @param options - Command options.
+ */
+export async function handleDumpCommand(
+	item: string,
+	options: Readonly<{
+		concurrency?: number;
+		limit?: number;
+		verbose?: boolean;
+	}>,
+): Promise<void> {
+	try {
+		await dumpSalesforceHelp(item, {
+			concurrency: options.concurrency,
+			limit: options.limit,
+			verbose: options.verbose,
+		});
+	} catch (error) {
+		console.error('Error dumping Salesforce Help:', error);
+		const exitCode = 1;
+		process.exit(exitCode);
+	}
+}
+
+export const program = new Command();
 
 program
 	.name('sf-docs-helper')
@@ -36,36 +123,7 @@ program
 		'Maximum number of results to download (default: 20)',
 		parseInt,
 	)
-	.action(
-		async (
-			item: string,
-			options: Readonly<{
-				concurrency?: number;
-				limit?: number;
-				verbose?: boolean;
-			}>,
-		) => {
-			try {
-				const result = await searchAndDownloadSalesforceHelp(item, {
-					concurrency: options.concurrency,
-					limit: options.limit,
-					verbose: options.verbose,
-				});
-
-				const fileCountStr = String(result.fileCount);
-				console.log(`\nDownloaded ${fileCountStr} files to:`);
-				console.log(result.folderPath);
-				console.log(`\nTodo file: ${result.todoFilePath}`);
-				console.log(
-					`\nReview the TODO.md file in the folder to process each document.`,
-				);
-			} catch (error) {
-				console.error('Error searching Salesforce Help:', error);
-				const exitCode = 1;
-				process.exit(exitCode);
-			}
-		},
-	);
+	.action(handleSearchCommand);
 
 program
 	.command('get')
@@ -74,24 +132,7 @@ program
 	)
 	.argument('<url>', 'Salesforce Help URL')
 	.option('-v, --verbose', 'Show progress during processing')
-	.action(async (url: string, options: Readonly<{ verbose?: boolean }>) => {
-		try {
-			const result = await getSalesforceUrl(url, {
-				verbose: options.verbose,
-			});
-
-			console.log(`\nDownloaded file to:`);
-			console.log(result.folderPath);
-			console.log(`\nTodo file: ${result.todoFilePath}`);
-			console.log(
-				`\nReview the TODO.md file in the folder to process the document.`,
-			);
-		} catch (error) {
-			console.error('Error getting Salesforce Help URL:', error);
-			const exitCode = 1;
-			process.exit(exitCode);
-		}
-	});
+	.action(handleGetCommand);
 
 program
 	.command('dump')
@@ -109,27 +150,29 @@ program
 		'Maximum number of results to download (default: 20)',
 		parseInt,
 	)
-	.action(
-		async (
-			item: string,
-			options: Readonly<{
-				concurrency?: number;
-				limit?: number;
-				verbose?: boolean;
-			}>,
-		) => {
-			try {
-				await dumpSalesforceHelp(item, {
-					concurrency: options.concurrency,
-					limit: options.limit,
-					verbose: options.verbose,
-				});
-			} catch (error) {
-				console.error('Error dumping Salesforce Help:', error);
-				const exitCode = 1;
-				process.exit(exitCode);
-			}
-		},
-	);
+	.action(handleDumpCommand);
 
-program.parse();
+/**
+ * Check if this module is being run as the main entry point.
+ * @returns True if this module is being executed directly.
+ */
+export function isMainEntryPoint(): boolean {
+	return (
+		(process.argv[1] && import.meta.url.endsWith(process.argv[1])) ||
+		process.argv[1]?.includes('index.ts') === true ||
+		process.argv[1]?.includes('sf-docs-helper') === true
+	);
+}
+
+/**
+ * Execute the CLI program if this is the main entry point.
+ * This function is exported for testing purposes.
+ */
+export function executeIfMainEntryPoint(): void {
+	if (isMainEntryPoint()) {
+		program.parse();
+	}
+}
+
+// Only parse if this file is executed directly (not imported)
+executeIfMainEntryPoint();
