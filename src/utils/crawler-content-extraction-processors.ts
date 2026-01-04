@@ -515,4 +515,3 @@ export function tryBodyTextExtraction(
 
 	return null;
 }
-

@@ -243,7 +243,8 @@ export function processMainElement(
 		// className can be a string, DOMTokenList, or other types, but we handle all cases
 		const className = el.className;
 		// className is never null in DOM, so we can simplify
-		const classStr = typeof className === 'string' ? className : String(className);
+		const classStr =
+			typeof className === 'string' ? className : String(className);
 		const htmlEl = el as HTMLElement;
 		if (
 			htmlEl.onclick ||

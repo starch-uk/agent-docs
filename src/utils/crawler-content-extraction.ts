@@ -1,7 +1,7 @@
 /**
  * @file Content extraction logic for Salesforce Help pages.
  * This code runs inside page.evaluate() in the browser context.
- * 
+ *
  * NOTE: All helper and processor functions are inlined here because
  * getFunctionString() stringifies the function, and imports don't work
  * in the browser context. The separate helper/processor files exist
@@ -422,8 +422,7 @@ function tryBodyTextExtraction(
 				bodyText.match(/cookie|consent|accept all/gi) ?? []
 			).length;
 			const wordCount = bodyText.split(/\s+/).length;
-			const cookieRatio =
-				wordCount > 0 ? cookieMatches / wordCount : 0;
+			const cookieRatio = wordCount > 0 ? cookieMatches / wordCount : 0;
 			const maxCookieRatioForAccept = 0.2;
 			const minBodyTextLengthForAccept = 5000;
 			if (
@@ -458,8 +457,7 @@ function tryBodyTextExtraction(
 		const rawBodyText = doc.body.textContent?.trim() ?? '';
 		const codeCharCount = (rawBodyText.match(/[{}();=]/g) ?? []).length;
 		const totalChars = rawBodyText.length;
-		const codeRatio =
-			totalChars > 0 ? codeCharCount / totalChars : 0;
+		const codeRatio = totalChars > 0 ? codeCharCount / totalChars : 0;
 		const minRawBodyTextLength = 100;
 		const maxCodeRatio = 0.1;
 		if (
@@ -471,7 +469,6 @@ function tryBodyTextExtraction(
 	}
 	return null;
 }
-
 
 /**
  * Main content extraction function that runs in browser context.

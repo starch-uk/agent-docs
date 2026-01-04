@@ -423,7 +423,10 @@ describe('extractContent', () => {
 
 		// Add paragraph with '= document' but NOT 'const ' to cover the && branch
 		const p = document.createElement('p');
-		p.textContent = 'This is a paragraph with = document but no const keyword. '.repeat(10);
+		p.textContent =
+			'This is a paragraph with = document but no const keyword. '.repeat(
+				10,
+			);
 		main.appendChild(p);
 
 		// Add JS patterns to trigger filterBodyTextDocParagraphs (jsPatternCount > 2)
@@ -487,7 +490,9 @@ describe('extractContent', () => {
 		// Don't use textContent assignment as it removes all elements - append text nodes instead
 		const cookieText = 'cookie consent accept all. '.repeat(100); // High cookie ratio
 		const normalText = 'Short normal text. '.repeat(50); // Normal text
-		document.body.appendChild(document.createTextNode(cookieText + normalText)); // Total > 500, cookieRatio >= 0.2, length <= 5000
+		document.body.appendChild(
+			document.createTextNode(cookieText + normalText),
+		); // Total > 500, cookieRatio >= 0.2, length <= 5000
 
 		// Strategy to make tryLastResortBodyText return null (codeRatio >= 0.1) but tryRawBodyText return non-null (codeRatio < 0.1):
 		// tryLastResortBodyText clones body and removes: 'script, style, noscript, iframe, svg, canvas, nav, footer, header'
@@ -496,7 +501,7 @@ describe('extractContent', () => {
 		// Then:
 		// - Raw body.textContent = code (from div) + normal text (from nav) = codeRatio is low (lots of normal text)
 		// - Cloned body.textContent = code (from div) only = codeRatio is high (only code)
-		
+
 		// Add code in a regular div (not removed by tryLastResortBodyText)
 		const codeDiv = document.createElement('div');
 		codeDiv.textContent =
@@ -525,6 +530,8 @@ describe('extractContent', () => {
 		// tryRawBodyText returns non-null (rawBodyText.length > 100, codeRatio < 0.1)
 		// Lines 511-512 execute
 		expect(result.content.length).toBeGreaterThan(100);
-		expect(result.content).toContain('normal text content with enough text to dilute');
+		expect(result.content).toContain(
+			'normal text content with enough text to dilute',
+		);
 	});
 });

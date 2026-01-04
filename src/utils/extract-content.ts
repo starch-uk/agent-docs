@@ -348,7 +348,9 @@ export function extractContent(doc: Document): {
 			);
 
 			// textContent is always a string in DOM (never null for Element types), so simplify
-			const text = element.textContent ? element.textContent.trim() : null;
+			const text = element.textContent
+				? element.textContent.trim()
+				: null;
 			const minSelectorTextLength = 200;
 
 			if (

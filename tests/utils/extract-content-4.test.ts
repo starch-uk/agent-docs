@@ -443,7 +443,10 @@ describe('extractContent', () => {
 		// Also ensure match() returns null to cover the : 0 branch at line 169
 		const article = document.createElement('article');
 		// Use text with NO cookie keywords to make match() return null
-		article.textContent = 'This is article content with enough text to meet the minimum length requirement. '.repeat(20); // > 1000, <= 5000, no cookie keywords
+		article.textContent =
+			'This is article content with enough text to meet the minimum length requirement. '.repeat(
+				20,
+			); // > 1000, <= 5000, no cookie keywords
 		document.body.appendChild(article);
 
 		const result = extractContent(document);

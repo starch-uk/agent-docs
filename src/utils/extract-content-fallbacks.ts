@@ -165,7 +165,9 @@ export function processMainSelectors(
 			if (mainText.length > minMainElBodyTextLength) {
 				// Check cookie content ratio
 				// match() returns null when no matches - handle both cases to cover branch
-				const matchResult = mainText.match(/cookie|consent|accept all/gi);
+				const matchResult = mainText.match(
+					/cookie|consent|accept all/gi,
+				);
 				const cookieMatches = matchResult ? matchResult.length : 0;
 				const wordCount = mainText.split(/\s+/).length;
 				const cookieRatio = cookieMatches / wordCount;
