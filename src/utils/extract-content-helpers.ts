@@ -255,16 +255,7 @@ export function processMainElement(
 	const mainText = clone.textContent?.trim() ?? '';
 
 	// Filter out JavaScript-like content
-	const jsPatterns = [
-		'function',
-		'=>',
-		'document.querySelector',
-		'addEventListener',
-		'fetch(',
-		'const ',
-		'let ',
-		'var ',
-	];
+	const jsPatterns = ['function', '=>', 'document.querySelector', 'addEventListener', 'fetch(', 'const ', 'let ', 'var '];
 	const jsPatternCount = jsPatterns.filter((pattern) =>
 		mainText.includes(pattern),
 	).length;
@@ -361,10 +352,9 @@ export function processMainElement(
 
 		// Check code ratio to filter out code-like content
 		const codeCharCount = (finalText.match(/[{}();=]/g) ?? []).length;
-		const codeRatio =
-			finalText.length > 0 ? codeCharCount / finalText.length : 0;
+		const codeRatio = finalText.length > 0 ? codeCharCount / finalText.length : 0;
 		const maxCodeRatio = 0.1;
-
+		
 		// Check cookie content - be more lenient
 		const cookieKeywords = [
 			'cookie',
