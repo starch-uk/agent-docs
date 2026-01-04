@@ -17,8 +17,21 @@ vi.mock('crawlee', () => ({
 	PlaywrightCrawler: vi.fn(),
 }));
 
+// Constants for test values
 const MIN_PARAM_COUNT = 1;
 const SINGLE_PARAM_COUNT = 1;
+const REPEAT_COUNT_200 = 200;
+const REPEAT_COUNT_100 = 100;
+const REPEAT_COUNT_50 = 50;
+const REPEAT_COUNT_20 = 20;
+const REPEAT_COUNT_15 = 15;
+const REPEAT_COUNT_10 = 10;
+const REPEAT_COUNT_5 = 5;
+const MIN_LENGTH_100 = 100;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_50 = 50;
+const SCROLL_HEIGHT_10000 = 10000;
+const ZERO = 0;
 
 describe('crawlSalesforcePage', () => {
 	// Helper to create evaluate mock that executes function with jsdom
@@ -41,10 +54,10 @@ describe('crawlSalesforcePage', () => {
 				return await wrappedFn(window);
 			} catch {
 				if (isRetryEvaluate) {
-					return 'Documentation content. '.repeat(200);
+					return 'Documentation content. '.repeat(REPEAT_COUNT_200);
 				}
 				return {
-					content: 'Documentation content. '.repeat(100),
+					content: 'Documentation content. '.repeat(REPEAT_COUNT_100),
 					debugInfo: {},
 				};
 			}
@@ -77,7 +90,7 @@ describe('crawlSalesforcePage', () => {
 		const createDOMWithContent = () => {
 			const longText =
 				'Documentation content paragraph with substantial text. '.repeat(
-					50,
+					REPEAT_COUNT_50,
 				);
 			const html = `
 				<!DOCTYPE html>
@@ -87,8 +100,8 @@ describe('crawlSalesforcePage', () => {
 						<main role="main">
 							<div class="container" data-name="content">
 								<div class="body conbody">
-									${Array.from({ length: 20 }, () => `<p>${longText}</p>`).join('')}
-									${Array.from({ length: 5 }, (_, i) => `<a href="#" title="Link title ${i} with enough text content here">Link ${i}</a>`).join('')}
+									${Array.from({ length: REPEAT_COUNT_20 }, () => `<p>${longText}</p>`).join('')}
+									${Array.from({ length: REPEAT_COUNT_5 }, (_, i) => `<a href="#" title="Link title ${i} with enough text content here">Link ${i}</a>`).join('')}
 								</div>
 							</div>
 						</main>
@@ -105,7 +118,7 @@ describe('crawlSalesforcePage', () => {
 
 			// Add scrollHeight to body for scrolling logic
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 
@@ -113,14 +126,21 @@ describe('crawlSalesforcePage', () => {
 		};
 
 		let evaluateCallCount = 0;
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+						),
 					evaluate: vi.fn().mockImplementation(async (fn: any) => {
 						evaluateCallCount++;
 						// Create a real DOM using jsdom
@@ -152,23 +172,18 @@ describe('crawlSalesforcePage', () => {
 							// Fallback for retry evaluate calls or if execution fails
 							if (isRetryEvaluate) {
 								// Retry evaluate returns string
-								return 'Documentation content. '.repeat(200);
+								return 'Documentation content. '.repeat(REPEAT_COUNT_200);
 							}
 							// Main evaluate returns object
 							return {
-								content: 'Documentation content. '.repeat(100),
+								content: 'Documentation content. '.repeat(REPEAT_COUNT_100),
 								debugInfo: {},
 							};
 						}
 					}),
-					content: vi
-						.fn()
-						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
-						),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -189,7 +204,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with shadow DOM scenario', async () => {
@@ -197,7 +212,7 @@ describe('crawlSalesforcePage', () => {
 		const createDOMWithShadowDOM = () => {
 			const longText =
 				'Documentation content paragraph with substantial text. '.repeat(
-					50,
+					REPEAT_COUNT_50,
 				);
 			const html = `
 				<!DOCTYPE html>
@@ -207,7 +222,7 @@ describe('crawlSalesforcePage', () => {
 						<doc-xml-content id="doc-xml">
 							<div class="container" data-name="content">
 								<div class="body conbody">
-									${Array.from({ length: 20 }, () => `<p>${longText}</p>`).join('')}
+									${Array.from({ length: REPEAT_COUNT_20 }, () => `<p>${longText}</p>`).join('')}
 								</div>
 							</div>
 						</doc-xml-content>
@@ -250,7 +265,7 @@ describe('crawlSalesforcePage', () => {
 
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 
@@ -284,10 +299,10 @@ describe('crawlSalesforcePage', () => {
 								fnString.includes('createTreeWalker') ||
 								fnString.includes('textParts');
 							if (isRetryEvaluate) {
-								return 'Documentation content. '.repeat(200);
+								return 'Documentation content. '.repeat(REPEAT_COUNT_200);
 							}
 							return {
-								content: 'Documentation content. '.repeat(100),
+								content: 'Documentation content. '.repeat(REPEAT_COUNT_100),
 								debugInfo: {},
 							};
 						}
@@ -295,7 +310,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -320,7 +335,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with different content structures', async () => {
@@ -328,7 +343,7 @@ describe('crawlSalesforcePage', () => {
 		const createDOMWithVariedContent = () => {
 			const longText =
 				'Documentation content paragraph with substantial text. '.repeat(
-					50,
+					REPEAT_COUNT_50,
 				);
 			const html = `
 				<!DOCTYPE html>
@@ -338,8 +353,8 @@ describe('crawlSalesforcePage', () => {
 						<article>
 							<div class="slds-text-longform">
 								${Array.from({ length: 30 }, () => `<p>${longText}</p>`).join('')}
-								${Array.from({ length: 10 }, (_, i) => `<div class="text">Text element ${i} with substantial content. `.repeat(20) + '</div>').join('')}
-								${Array.from({ length: 15 }, (_, i) => `<span>Span content ${i} with enough text. `.repeat(15) + '</span>').join('')}
+								${Array.from({ length: REPEAT_COUNT_10 }, (_, i) => `<div class="text">Text element ${i} with substantial content. `.repeat(REPEAT_COUNT_20) + '</div>').join('')}
+								${Array.from({ length: REPEAT_COUNT_15 }, (_, i) => `<span>Span content ${i} with enough text. `.repeat(REPEAT_COUNT_15) + '</span>').join('')}
 							</div>
 						</article>
 					</body>
@@ -351,7 +366,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -369,7 +384,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -394,7 +409,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with JavaScript filtering scenario', async () => {
@@ -424,7 +439,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -442,7 +457,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -467,7 +482,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with body text fallback scenario', async () => {
@@ -492,7 +507,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -510,7 +525,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -535,15 +550,15 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with cookie ratio filtering scenario', async () => {
 		// Test cookie ratio filtering path (high cookie ratio, short text)
 		const createDOMWithCookieContent = () => {
 			const cookieText =
-				'cookie consent accept all do not accept '.repeat(20);
-			const docText = 'Documentation content. '.repeat(10);
+				'cookie consent accept all do not accept '.repeat(REPEAT_COUNT_20);
+			const docText = 'Documentation content. '.repeat(REPEAT_COUNT_10);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -561,7 +576,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -579,7 +594,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -604,14 +619,14 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with code ratio filtering scenario', async () => {
 		// Test code ratio filtering path (high code ratio)
 		const createDOMWithCodeContent = () => {
-			const codeContent = '{}();= '.repeat(200); // High code character ratio
-			const docText = 'Documentation content. '.repeat(50);
+			const codeContent = '{}();= '.repeat(REPEAT_COUNT_200); // High code character ratio
+			const docText = 'Documentation content. '.repeat(REPEAT_COUNT_50);
 			const html = `
 				<!DOCTYPE html>
 				<html>
@@ -629,7 +644,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -647,7 +662,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -672,7 +687,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with paragraph collection scenario', async () => {
@@ -680,7 +695,7 @@ describe('crawlSalesforcePage', () => {
 		const createDOMWithParagraphs = () => {
 			const longText =
 				'Documentation content paragraph with substantial text. '.repeat(
-					50,
+					REPEAT_COUNT_50,
 				);
 			const html = `
 				<!DOCTYPE html>
@@ -699,7 +714,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -717,7 +732,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -742,7 +757,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with text element collection scenario', async () => {
@@ -769,7 +784,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -787,7 +802,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -812,7 +827,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with selector-based extraction scenario', async () => {
@@ -841,7 +856,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -859,7 +874,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -884,7 +899,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with fallback element extraction scenario', async () => {
@@ -909,7 +924,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -927,7 +942,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -952,7 +967,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with main selector extraction scenario', async () => {
@@ -980,7 +995,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -998,7 +1013,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1023,7 +1038,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with body clone fallback scenario', async () => {
@@ -1050,7 +1065,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1068,7 +1083,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1093,7 +1108,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with contentContainer scenario', async () => {
@@ -1119,7 +1134,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1137,7 +1152,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1162,7 +1177,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with shadow DOM bodyContent scenario', async () => {
@@ -1216,7 +1231,7 @@ describe('crawlSalesforcePage', () => {
 			}
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1236,7 +1251,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1261,7 +1276,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with link title extraction scenario', async () => {
@@ -1286,7 +1301,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1304,7 +1319,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1329,7 +1344,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with high cookie ratio rejection scenario', async () => {
@@ -1353,7 +1368,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1371,7 +1386,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1396,7 +1411,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with low code ratio acceptance scenario', async () => {
@@ -1418,7 +1433,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1436,7 +1451,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1461,7 +1476,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with main selector cookie ratio scenario', async () => {
@@ -1485,7 +1500,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1505,7 +1520,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1530,7 +1545,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with body text cookie ratio scenario', async () => {
@@ -1552,7 +1567,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1570,7 +1585,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1595,7 +1610,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with last resort body text scenario', async () => {
@@ -1617,7 +1632,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1635,7 +1650,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1660,7 +1675,7 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 
 	it('should execute evaluate function with contentContainer without bodyContent scenario', async () => {
@@ -1684,7 +1699,7 @@ describe('crawlSalesforcePage', () => {
 			const { window } = dom;
 			window.scrollTo = vi.fn() as any;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
-				value: 10000,
+				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
 			return dom;
@@ -1702,7 +1717,7 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(200) + '</body></html>',
+							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1727,6 +1742,6 @@ describe('crawlSalesforcePage', () => {
 		);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
-		expect(result.length).toBeGreaterThan(100);
+		expect(result.length).toBeGreaterThan(MIN_LENGTH_100);
 	});
 });
