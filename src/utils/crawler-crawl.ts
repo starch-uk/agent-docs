@@ -136,7 +136,9 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 					try {
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- page.evaluate returns any due to overloaded signatures
 						const fallbackContent = await Promise.race([
-							page.evaluate(getFunctionString(extractFallbackContent)),
+							page.evaluate(
+								getFunctionString(extractFallbackContent),
+							),
 							new Promise<string>((_, reject) => {
 								const fallbackTimeoutMs = 10000;
 								setTimeout(() => {

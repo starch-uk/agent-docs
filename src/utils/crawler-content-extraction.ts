@@ -644,17 +644,13 @@ export function extractContentInBrowser(): {
 	// Check for doc-xml-content element (entry point to shadow DOM)
 	const docXmlContent = doc.querySelector('doc-xml-content');
 	debugInfo.docXmlContentFound = docXmlContent !== null;
-	if (
-		docXmlContent !== null &&
-		docXmlContent.shadowRoot !== null
-	) {
+	if (docXmlContent !== null && docXmlContent.shadowRoot !== null) {
 		debugInfo.shadowDOMFound = true;
 	}
 
 	// Check main element
 	const mainEl =
-		doc.querySelector('[role="main"]') ??
-		doc.querySelector('main');
+		doc.querySelector('[role="main"]') ?? doc.querySelector('main');
 	if (mainEl !== null) {
 		const mainElTextLengthDefault = 0;
 		const mainElTextLength =
@@ -728,10 +724,7 @@ export function extractContentInBrowser(): {
 				docXmlContent,
 				'div.container[data-name="content"]',
 			) ??
-			findInShadowDOM(
-				docXmlContent,
-				'.container[data-name="content"]',
-			) ??
+			findInShadowDOM(docXmlContent, '.container[data-name="content"]') ??
 			findInShadowDOM(docXmlContent, '[data-name="content"]');
 
 		debugInfo.shadowDOMSearchResult = !!contentContainer;
@@ -749,10 +742,9 @@ export function extractContentInBrowser(): {
 			// Also try to get all text directly from the container if body not found
 			if (!bodyContent) {
 				// Get all paragraphs, divs, and text elements from the container
-				const allTextElements =
-					contentContainer.querySelectorAll(
-						'p, div, span, li, h1, h2, h3, h4, h5, h6',
-					);
+				const allTextElements = contentContainer.querySelectorAll(
+					'p, div, span, li, h1, h2, h3, h4, h5, h6',
+				);
 
 				if (allTextElements.length > 0) {
 					// Use the container itself if it has substantial text
@@ -1039,4 +1031,3 @@ export function extractContentInBrowser(): {
 
 	return { content: '', debugInfo };
 }
-

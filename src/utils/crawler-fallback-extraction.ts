@@ -60,10 +60,7 @@ export function extractRetryContent(): string {
 
 		// Get all text nodes
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- DOM API
-		const walker = doc.createTreeWalker(
-			body,
-			NodeFilter.SHOW_TEXT,
-		);
+		const walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT);
 		const textParts: string[] = [];
 
 		let node: Node | null = null;
@@ -100,4 +97,3 @@ export function extractRetryContent(): string {
 
 	return '';
 }
-

@@ -228,4 +228,3 @@ export function extractShadowDOMContent(
 	}
 	return null;
 }
-

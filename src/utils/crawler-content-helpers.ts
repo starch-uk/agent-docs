@@ -112,4 +112,3 @@ export function extractLinkTitles(element: Element): string[] {
 
 	return titleTexts;
 }
-
