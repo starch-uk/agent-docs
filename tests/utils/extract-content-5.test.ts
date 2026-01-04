@@ -24,16 +24,12 @@ const MIN_LENGTH_5000 = 5000;
 const ZERO = 0;
 
 describe('extractContent', () => {
-	let dom: JSDOM = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
 		url: 'https://test.example.com',
 	});
-	let document: Document = dom.window.document;
+	const { document } = dom.window;
 
 	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		({ document } = dom.window);
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist

@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types -- DOM API types cannot be made readonly */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
 /* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for lengths and DOM operations */
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- DOM API types require assertions */
 
 /**
  * Helper function to traverse shadow DOMs recursively.
@@ -16,7 +15,7 @@
  * @param selector - CSS selector to find.
  * @returns Found element or null.
  */
-export function findInShadowDOM(
+function findInShadowDOM(
 	element: Element | null,
 	selector: Readonly<string>,
 ): Element | null {
@@ -78,7 +77,7 @@ export function findInShadowDOM(
  * @param element - Document or Element to remove from.
  * @param selectors - CSS selectors for elements to remove.
  */
-export function removeElements(
+function removeElements(
 	element: Document | Element,
 	selectors: Readonly<string>,
 ): void {
@@ -93,7 +92,7 @@ export function removeElements(
  * @param element - Element to search for links.
  * @returns Array of title texts.
  */
-export function extractLinkTitles(element: Element): string[] {
+function extractLinkTitles(element: Element): string[] {
 	const linksWithTitles = element.querySelectorAll('a[title]');
 	const titleTexts: string[] = [];
 	const minTitleLength = 10;
@@ -112,3 +111,6 @@ export function extractLinkTitles(element: Element): string[] {
 
 	return titleTexts;
 }
+
+// Export all functions together
+export { extractLinkTitles, findInShadowDOM, removeElements };

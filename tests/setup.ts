@@ -9,12 +9,12 @@
 const originalUnhandledRejection = process.listeners('unhandledRejection');
 process.removeAllListeners('unhandledRejection');
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: Readonly<unknown>, promise: Readonly<Promise<unknown>>) => {
 	// Check if this is an expected error from our test scenarios
 	// These are errors like "No search results found" or "Insufficient content"
 	// which are expected when testing error conditions
 	const errorMessage =
-		reason instanceof Error ? reason.message : String(reason);
+		reason instanceof Error ? reason.message : (typeof reason === 'string' ? reason : JSON.stringify(reason));
 	const expectedPatterns = [
 		'No search results found',
 		'Insufficient content extracted',

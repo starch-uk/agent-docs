@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { PlaywrightCrawler } from 'crawlee';
+import type { PlaywrightCrawler } from 'crawlee';
 import { crawlSalesforcePage } from '../../src/utils/crawler.js';
 
 // Mock console.warn to avoid noise in tests
@@ -14,12 +14,11 @@ vi.spyOn(console, 'warn').mockImplementation(() => {
 });
 
 vi.mock('crawlee', () => ({
+	// eslint-disable-next-line @typescript-eslint/naming-convention -- Mock name must match imported name
 	PlaywrightCrawler: vi.fn(),
 }));
 
 // Constants for test values
-const MIN_PARAM_COUNT = 1;
-const SINGLE_PARAM_COUNT = 1;
 const REPEAT_COUNT_200 = 200;
 const REPEAT_COUNT_100 = 100;
 const REPEAT_COUNT_50 = 50;
@@ -28,30 +27,32 @@ const REPEAT_COUNT_15 = 15;
 const REPEAT_COUNT_10 = 10;
 const REPEAT_COUNT_5 = 5;
 const MIN_LENGTH_100 = 100;
-const MIN_LENGTH_200 = 200;
-const MIN_LENGTH_50 = 50;
 const SCROLL_HEIGHT_10000 = 10000;
-const ZERO = 0;
 
 describe('crawlSalesforcePage', () => {
-	// Helper to create evaluate mock that executes function with jsdom
-	const createEvaluateMock = (createDOM: () => JSDOM) => {
-		return vi.fn().mockImplementation(async (fn: any) => {
+	/**
+	 * Helper to create evaluate mock that executes function with jsdom.
+	 * @param createDOM - Function that creates a JSDOM instance.
+	 * @returns A mock function that executes the provided function with jsdom.
+	 */
+	const createEvaluateMock = (createDOM: () => JSDOM): ReturnType<typeof vi.fn<[() => unknown], Promise<unknown>>> => {
+		return vi.fn().mockImplementation(async (fn: () => unknown): Promise<unknown> => {
 			const dom = createDOM();
 			const { window } = dom;
-			const fnString = fn.toString();
+			const fnString = String(fn);
 			const isRetryEvaluate =
 				fnString.includes('createTreeWalker') ||
 				fnString.includes('textParts');
 			try {
+				// eslint-disable-next-line @typescript-eslint/no-implied-eval
 				const wrappedFn = new Function(
 					'globalThis',
 					`const window = arguments[0];
 					window.globalThis = window;
 					const document = window.document;
 					return (${fnString}).call(window);`,
-				);
-				return await wrappedFn(window);
+				) as unknown as (window: Readonly<typeof dom.window>) => unknown;
+				return await wrappedFn(window) as unknown;
 			} catch {
 				if (isRetryEvaluate) {
 					return 'Documentation content. '.repeat(REPEAT_COUNT_200);
@@ -77,17 +78,27 @@ describe('crawlSalesforcePage', () => {
 		try {
 			await vi.runAllTimersAsync();
 			await vi.runAllTimersAsync();
-		} catch (e) {
-			// Fake timers not active, ignore
+		} catch {
+			/**
+			 * Fake timers not active, ignore.
+			 */
 		}
 		vi.useRealTimers();
-		// Wait a bit for any remaining promises to settle
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		/**
+		 * Wait a bit for any remaining promises to settle.
+		 */
+		const ZERO = 0;
+		await new Promise((resolve: (value: unknown) => void): void => {
+			setTimeout(resolve, ZERO);
+		});
 	});
 
 	it('should execute evaluate function with jsdom for comprehensive coverage', async () => {
-		// Create a real DOM using jsdom to actually execute the evaluate function
-		const createDOMWithContent = () => {
+		/**
+		 * Create a real DOM using jsdom to actually execute the evaluate function.
+		 * @returns A JSDOM instance with test content.
+		 */
+		const createDOMWithContent = (): JSDOM => {
 			const longText =
 				'Documentation content paragraph with substantial text. '.repeat(
 					REPEAT_COUNT_50,
@@ -101,7 +112,7 @@ describe('crawlSalesforcePage', () => {
 							<div class="container" data-name="content">
 								<div class="body conbody">
 									${Array.from({ length: REPEAT_COUNT_20 }, () => `<p>${longText}</p>`).join('')}
-									${Array.from({ length: REPEAT_COUNT_5 }, (_, i) => `<a href="#" title="Link title ${i} with enough text content here">Link ${i}</a>`).join('')}
+									${Array.from({ length: REPEAT_COUNT_5 }, (_: unknown, i: number) => `<a href="#" title="Link title ${String(i)} with enough text content here">Link ${String(i)}</a>`).join('')}
 								</div>
 							</div>
 						</main>
@@ -113,11 +124,16 @@ describe('crawlSalesforcePage', () => {
 			});
 			const { window } = dom;
 
-			// Mock window.scrollTo which is not implemented in jsdom
-			window.scrollTo = vi.fn() as any;
+			/**
+			 * Mock window.scrollTo which is not implemented in jsdom.
+			 */
+			window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
 
-			// Add scrollHeight to body for scrolling logic
+			/**
+			 * Add scrollHeight to body for scrolling logic.
+			 */
 			Object.defineProperty(window.document.body, 'scrollHeight', {
+				configurable: true,
 				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
@@ -125,12 +141,21 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let evaluateCallCount = 0;
-		let testHandler: (context: { page: any }) => Promise<void> = async () => {
-			// Handler will be set by test
+		let testHandler: (context: Readonly<{
+			page: Readonly<{
+				$: () => Promise<unknown>;
+				$$: () => Promise<unknown[]>;
+				click: () => Promise<void>;
+				content: () => Promise<string>;
+				evaluate: (fn: () => unknown) => Promise<unknown>;
+			}>;
+		}>) => Promise<void> = async (): Promise<void> => {
+			/**
+			 * Handler will be set by test.
+			 */
 		};
 
-		const testMockRun = vi.fn().mockImplementation(async () => {
+		const testMockRun = vi.fn().mockImplementation(async (): Promise<void> => {
 			if (testHandler) {
 				const mockPage = {
 					$: vi.fn().mockResolvedValue(null),
@@ -139,18 +164,23 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
-					evaluate: vi.fn().mockImplementation(async (fn: any) => {
-						evaluateCallCount++;
-						// Create a real DOM using jsdom
+					evaluate: vi.fn().mockImplementation(async (fn: () => unknown): Promise<unknown> => {
+						/**
+						 * Create a real DOM using jsdom.
+						 */
 						const dom = createDOMWithContent();
 						const { window } = dom;
 
-						// The evaluate function accesses globalThis.document
-						// We need to execute it in a context where globalThis.document exists
-						// Use Function constructor to create a new function that has access to jsdom's window
-						const fnString = fn.toString();
+						/**
+						 * The evaluate function accesses globalThis.document.
+						 * We need to execute it in a context where globalThis.document exists.
+						 * Use Function constructor to create a new function that has access to jsdom's window.
+						 */
+						const fnString = String(fn);
 
 						// Check if this is the retry evaluate (no parameters, returns string)
 						// or main evaluate (returns object with content and debugInfo)
@@ -159,24 +189,29 @@ describe('crawlSalesforcePage', () => {
 							fnString.includes('textParts');
 
 						try {
+							// eslint-disable-next-line @typescript-eslint/no-implied-eval
 							const wrappedFn = new Function(
 								'globalThis',
 								`const window = arguments[0];
 								window.globalThis = window;
 								const document = window.document;
 								return (${fnString}).call(window);`,
-							);
+							) as (window: Readonly<typeof dom.window>) => unknown;
 							const result = await wrappedFn(window);
-							return result;
-						} catch (error) {
+							return result as unknown;
+						} catch {
 							// Fallback for retry evaluate calls or if execution fails
 							if (isRetryEvaluate) {
 								// Retry evaluate returns string
-								return 'Documentation content. '.repeat(REPEAT_COUNT_200);
+								return 'Documentation content. '.repeat(
+									REPEAT_COUNT_200,
+								);
 							}
 							// Main evaluate returns object
 							return {
-								content: 'Documentation content. '.repeat(REPEAT_COUNT_100),
+								content: 'Documentation content. '.repeat(
+									REPEAT_COUNT_100,
+								),
 								debugInfo: {},
 							};
 						}
@@ -190,13 +225,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof testHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = crawlSalesforcePage(
@@ -208,8 +243,10 @@ describe('crawlSalesforcePage', () => {
 	});
 
 	it('should execute evaluate function with shadow DOM scenario', async () => {
-		// Test shadow DOM traversal path
-		const createDOMWithShadowDOM = () => {
+		/**
+		 * Test shadow DOM traversal path.
+		 */
+		const createDOMWithShadowDOM = (): JSDOM => {
 			const longText =
 				'Documentation content paragraph with substantial text. '.repeat(
 					REPEAT_COUNT_50,
@@ -234,12 +271,15 @@ describe('crawlSalesforcePage', () => {
 			});
 			const { window } = dom;
 
-			// Mock shadow DOM using Object.defineProperty since shadowRoot is read-only
+			/**
+			 * Mock shadow DOM using Object.defineProperty since shadowRoot is read-only.
+			 */
 			const docXml = window.document.querySelector('doc-xml-content');
 			if (docXml) {
 				Object.defineProperty(docXml, 'shadowRoot', {
+					configurable: true,
 					value: {
-						querySelector: (sel: string) => {
+						querySelector: (sel: Readonly<string>): Element | null => {
 							if (sel.includes('[data-name="content"]')) {
 								return window.document.querySelector(
 									'.container[data-name="content"]',
@@ -247,7 +287,7 @@ describe('crawlSalesforcePage', () => {
 							}
 							return null;
 						},
-						querySelectorAll: (sel: string) => {
+						querySelectorAll: (sel: Readonly<string>): Element[] => {
 							if (sel === '*') {
 								return Array.from(
 									window.document.querySelectorAll(
@@ -259,12 +299,12 @@ describe('crawlSalesforcePage', () => {
 						},
 					},
 					writable: true,
-					configurable: true,
 				});
 			}
 
-			window.scrollTo = vi.fn() as any;
+			window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
 			Object.defineProperty(window.document.body, 'scrollHeight', {
+				configurable: true,
 				value: SCROLL_HEIGHT_10000,
 				writable: true,
 			});
@@ -272,26 +312,46 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: Readonly<{
+			page: Readonly<{
+				$: () => Promise<unknown>;
+				$$: () => Promise<unknown[]>;
+				click: () => Promise<void>;
+				content: () => Promise<string>;
+				evaluate: (fn: () => unknown) => Promise<unknown>;
+			}>;
+		}>) => Promise<void> = async (): Promise<void> => {
+			/**
+			 * Handler will be set by test.
+			 */
+		};
 
-		const testMockRun = vi.fn().mockImplementation(async () => {
+		const testMockRun = vi.fn().mockImplementation(async (): Promise<void> => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockImplementation(async (fn: any) => {
+					content: vi
+						.fn()
+						.mockResolvedValue(
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
+						),
+					evaluate: vi.fn().mockImplementation(async (fn: () => unknown): Promise<unknown> => {
 						const dom = createDOMWithShadowDOM();
 						const { window } = dom;
-						const fnString = fn.toString();
+						const fnString = String(fn);
 						try {
+							// eslint-disable-next-line @typescript-eslint/no-implied-eval
 							const wrappedFn = new Function(
 								'globalThis',
 								`const window = arguments[0];
 								const document = window.document;
-								return (${fnString}).call(window);`,
-							);
-							return await wrappedFn(window);
+								return (${String(fnString)}).call(window);`,
+							) as (window: Readonly<typeof dom.window>) => unknown;
+							return await wrappedFn(window) as unknown;
 						} catch {
 							// Fallback for retry evaluate calls - need at least 200 chars
 							const fnString = fn.toString();
@@ -299,22 +359,21 @@ describe('crawlSalesforcePage', () => {
 								fnString.includes('createTreeWalker') ||
 								fnString.includes('textParts');
 							if (isRetryEvaluate) {
-								return 'Documentation content. '.repeat(REPEAT_COUNT_200);
+								return 'Documentation content. '.repeat(
+									REPEAT_COUNT_200,
+								);
 							}
 							return {
-								content: 'Documentation content. '.repeat(REPEAT_COUNT_100),
+								content: 'Documentation content. '.repeat(
+									REPEAT_COUNT_100,
+								),
 								debugInfo: {},
 							};
 						}
 					}),
-					content: vi
-						.fn()
-						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
-						),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -372,23 +431,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithVariedContent),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithVariedContent),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -445,23 +508,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithJavaScript),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithJavaScript),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -513,23 +580,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithBodyTextOnly),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithBodyTextOnly),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -557,7 +628,9 @@ describe('crawlSalesforcePage', () => {
 		// Test cookie ratio filtering path (high cookie ratio, short text)
 		const createDOMWithCookieContent = () => {
 			const cookieText =
-				'cookie consent accept all do not accept '.repeat(REPEAT_COUNT_20);
+				'cookie consent accept all do not accept '.repeat(
+					REPEAT_COUNT_20,
+				);
 			const docText = 'Documentation content. '.repeat(REPEAT_COUNT_10);
 			const html = `
 				<!DOCTYPE html>
@@ -582,23 +655,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithCookieContent),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithCookieContent),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -650,23 +727,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithCodeContent),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithCodeContent),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -720,23 +801,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithParagraphs),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithParagraphs),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -790,23 +875,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithTextElements),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithTextElements),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -862,23 +951,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithSelectors),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithSelectors),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -930,23 +1023,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithFallbackElements),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithFallbackElements),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1001,23 +1098,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithMainSelectors),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithMainSelectors),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1071,7 +1172,9 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
@@ -1083,7 +1186,9 @@ describe('crawlSalesforcePage', () => {
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
 					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
@@ -1140,23 +1245,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithContentContainer),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithContentContainer),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1237,25 +1346,29 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(
-						createDOMWithShadowBodyContent,
-					),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(
+						createDOMWithShadowBodyContent,
+					),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1307,23 +1420,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithLinkTitles),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithLinkTitles),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1374,23 +1491,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithHighCookieRatio),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithHighCookieRatio),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1439,23 +1560,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithLowCodeRatio),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithLowCodeRatio),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1506,25 +1631,29 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(
-						createDOMWithMainSelectorCookieRatio,
-					),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(
+						createDOMWithMainSelectorCookieRatio,
+					),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1573,23 +1702,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithBodyCookieRatio),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithBodyCookieRatio),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1638,23 +1771,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMForLastResort),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMForLastResort),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -1705,23 +1842,27 @@ describe('crawlSalesforcePage', () => {
 			return dom;
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
 					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: createEvaluateMock(createDOMWithContainerOnly),
 					content: vi
 						.fn()
 						.mockResolvedValue(
-							'<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>',
+							'<html><body>' +
+								'x'.repeat(REPEAT_COUNT_200) +
+								'</body></html>',
 						),
+					evaluate: createEvaluateMock(createDOMWithContainerOnly),
+					goto: vi.fn().mockResolvedValue(undefined),
 					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();

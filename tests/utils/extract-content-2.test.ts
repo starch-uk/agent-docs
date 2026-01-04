@@ -4,20 +4,42 @@
  * All tests run offline using jsdom - no network access required.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { extractContent } from '../../src/utils/extract-content.js';
 import { findInShadowDOM } from '../../src/utils/extract-content-helpers.js';
 
+const COUNT_2 = 2;
+const COUNT_3 = 3;
+const COUNT_4 = 4;
+const COUNT_5 = 5;
+const COUNT_7 = 7;
+const COUNT_8 = 8;
+const COUNT_10 = 10;
+const COUNT_15 = 15;
+const COUNT_20 = 20;
+const COUNT_25 = 25;
+const COUNT_30 = 30;
+const COUNT_50 = 50;
+const COUNT_100 = 100;
+const COUNT_150 = 150;
+const COUNT_200 = 200;
+const COUNT_300 = 300;
+const MIN_LENGTH_100 = 100;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_500 = 500;
+const MIN_LENGTH_1000 = 1000;
+const MIN_LENGTH_2000 = 2000;
+const MIN_LENGTH_5000 = 5000;
+const ZERO = 0;
+
 describe('extractContent', () => {
-	let dom: JSDOM;
-	let document: Document;
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
+	});
+	const { document } = dom.window;
 
 	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -37,7 +59,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure main element path fails (bestMainText.length <= 0)
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -68,9 +90,9 @@ describe('extractContent', () => {
 		// Need enough text so bodyClone.textContent > 500, but body.textContent <= 2000
 		// cookieBanner will be removed from bodyClone, so bodyClone will have less text
 		// So put enough text to ensure bodyClone.textContent > 500 after cookieBanner is removed
-		for (let i = 0; i < 15; i++) {
+		for (let i = 0; i < COUNT_15; i++) {
 			const contentDiv = document.createElement('div');
-			contentDiv.textContent = docText.repeat(8); // ~400 chars per div, total ~6000 chars
+			contentDiv.textContent = docText.repeat(COUNT_8); // ~400 chars per div, total ~6000 chars
 			document.body.appendChild(contentDiv);
 		}
 		// body.textContent = cookieBanner (~50) + contentDivs (~6000) = ~6050 chars
@@ -83,9 +105,9 @@ describe('extractContent', () => {
 		cookieBanner2.textContent = 'cookie consent accept all do not accept ';
 		document.body.appendChild(cookieBanner2);
 		// Put just enough text to make bodyClone.textContent > 500, but keep body.textContent <= 2000
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < COUNT_5; i++) {
 			const contentDiv = document.createElement('div');
-			contentDiv.textContent = docText.repeat(8); // ~400 chars per div, total ~2000 chars
+			contentDiv.textContent = docText.repeat(COUNT_8); // ~400 chars per div, total ~2000 chars
 			document.body.appendChild(contentDiv);
 		}
 		// body.textContent = cookieBanner2 (~50) + contentDivs (~2000) = ~2050 chars
@@ -101,9 +123,9 @@ describe('extractContent', () => {
 		cookieBanner3.textContent = 'cookie consent accept all do not accept ';
 		document.body.appendChild(cookieBanner3);
 		// Put text so total body.textContent <= 2000
-		for (let i = 0; i < 4; i++) {
+		for (let i = 0; i < COUNT_4; i++) {
 			const contentDiv = document.createElement('div');
-			contentDiv.textContent = docText.repeat(7); // ~350 chars per div, total ~1400 chars
+			contentDiv.textContent = docText.repeat(COUNT_7); // ~350 chars per div, total ~1400 chars
 			document.body.appendChild(contentDiv);
 		}
 		// body.textContent = cookieBanner3 (~50) + contentDivs (~1400) = ~1450 chars <= 2000 ✓
@@ -114,8 +136,8 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should return body text when cookie ratio is low (lines 913-935, specifically line 930)
 		// bodyText.length > 500 but < 5000, cookieRatio < 0.2, so hits line 930 (cookieRatio < maxCookieRatioForAccept)
-		expect(result.content.length).toBeGreaterThan(500);
-		expect(result.content.length).toBeLessThan(5000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
+		expect(result.content.length).toBeLessThan(MIN_LENGTH_5000);
 		expect(result.content).toContain('Documentation text');
 	});
 
@@ -129,7 +151,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure main element path fails
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -144,12 +166,12 @@ describe('extractContent', () => {
 		// Create very long text (> 5000 chars) to bypass cookie ratio check
 		const docText =
 			'Documentation text content here with enough words to make substantial content. ';
-		contentDiv.textContent = docText.repeat(100); // ~6000 chars
+		contentDiv.textContent = docText.repeat(COUNT_100); // ~6000 chars
 		document.body.appendChild(contentDiv);
 
 		const result = extractContent(document);
 		// Should return body text when bodyText.length > 5000 (line 931)
-		expect(result.content.length).toBeGreaterThan(5000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_5000);
 		expect(result.content).toContain('Documentation text');
 	});
 
@@ -163,7 +185,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure main element path fails
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -180,9 +202,9 @@ describe('extractContent', () => {
 		// Add paragraphs with valid documentation text (> 50 chars each, no JS patterns)
 		const docText =
 			'This is valid documentation content that should be extracted. '.repeat(
-				2,
+				COUNT_2,
 			);
-		for (let i = 0; i < 5; i++) {
+		for (let i = ZERO; i < COUNT_5; i++) {
 			const p = document.createElement('p');
 			p.textContent = docText; // Each > 50 chars, no JS patterns
 			document.body.appendChild(p);
@@ -190,7 +212,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should return docTexts.join('\n\n') when JS patterns detected (lines 902-907)
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 		expect(result.content).toContain('valid documentation content');
 	});
 
@@ -203,12 +225,12 @@ describe('extractContent', () => {
 		}
 
 		// Create body text > 5000 chars with high cookie ratio (> 0.2)
-		const cookieText = 'cookie consent accept all '.repeat(100);
-		const normalText = 'This is substantial body text. '.repeat(200);
+		const cookieText = 'cookie consent accept all '.repeat(COUNT_100);
+		const normalText = 'This is substantial body text. '.repeat(COUNT_200);
 		document.body.textContent = cookieText + normalText;
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(5000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_5000);
 	});
 
 	it('should not return body text when cookieRatio >= maxCookieRatioForAccept and bodyText.length <= minBodyTextLengthForAccept', () => {
@@ -220,8 +242,8 @@ describe('extractContent', () => {
 		}
 
 		// Create body text > 500 chars but <= 5000 chars with high cookie ratio (>= 0.2)
-		const cookieText = 'cookie consent accept all '.repeat(50);
-		const normalText = 'This is body text. '.repeat(10);
+		const cookieText = 'cookie consent accept all '.repeat(COUNT_50);
+		const normalText = 'This is body text. '.repeat(COUNT_10);
 		document.body.textContent = cookieText + normalText;
 
 		const result = extractContent(document);
@@ -240,7 +262,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure main element path fails
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -254,17 +276,17 @@ describe('extractContent', () => {
 		// Put code in a div (in both lastResortText and rawBodyText) - enough to make lastResortText fail
 		// Put much more normal text in script (not in lastResortText, but in rawBodyText) - lowers rawBodyText code ratio
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = '{}();=;'.repeat(30); // ~210 chars of code
+		codeDiv.textContent = '{}();=;'.repeat(COUNT_30); // ~210 chars of code
 		document.body.appendChild(codeDiv);
 		// Small amount of normal text in div (in both lastResortText and rawBodyText)
 		const smallDocDiv = document.createElement('div');
-		smallDocDiv.textContent = 'Doc text. '.repeat(5); // ~50 chars
+		smallDocDiv.textContent = 'Doc text. '.repeat(COUNT_5); // ~50 chars
 		document.body.appendChild(smallDocDiv);
 		// lastResortText = codeDiv + smallDocDiv = ~260 chars, codeRatio = 210/260 = ~0.81 >= 0.1, fails ✓
 		// Put much more normal text in script (not in lastResortText, but in rawBodyText)
 		const normalTextScript = document.createElement('script');
 		normalTextScript.textContent =
-			'Normal documentation text here. '.repeat(300); // ~9000 chars
+			'Normal documentation text here. '.repeat(COUNT_300); // ~9000 chars
 		document.body.appendChild(normalTextScript);
 		// rawBodyText = codeDiv + smallDocDiv + normalTextScript = ~9260 chars
 		// codeChars = 210, codeRatio = 210/9260 = ~0.023 < 0.1, passes ✓
@@ -272,8 +294,11 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should return raw body text when code ratio is acceptable (lines 977-978)
 		// lastResortText: codeDiv + smallDocDiv, codeRatio >= 0.1, fails at line 965
-		// rawBodyText: includes script text, much more normal text, codeRatio < 0.1, passes at line 977
-		expect(result.content.length).toBeGreaterThan(100);
+
+		/**
+		 * RawBodyText: includes script text, much more normal text, codeRatio < 0.1, passes at line 977.
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_100);
 		expect(result.content).toContain('Normal documentation');
 	});
 
@@ -285,12 +310,17 @@ describe('extractContent', () => {
 			existingDocXml.remove();
 		}
 
-		// Create body text with high code ratio (> 0.1)
-		document.body.textContent = '{}();=;'.repeat(30); // High code ratio, but > 100 chars
+		/**
+		 * Create body text with high code ratio (> 0.1).
+		 */
+		document.body.textContent = '{}();=;'.repeat(COUNT_30);
 
 		const result = extractContent(document);
-		// Should filter out high code ratio content
-		expect(result.content.length).toBeLessThan(100);
+
+		/**
+		 * Should filter out high code ratio content.
+		 */
+		expect(result.content.length).toBeLessThan(MIN_LENGTH_100);
 	});
 
 	it('should handle querySelectorAll errors in findInShadowDOM', () => {
@@ -298,17 +328,23 @@ describe('extractContent', () => {
 		const shadowRoot = element.attachShadow({ mode: 'open' });
 		const child = document.createElement('div');
 		shadowRoot.appendChild(child);
-
-		// Mock querySelectorAll to throw an error
+		/**
+		 * Mock querySelectorAll to throw an error.
+		 */
+		// eslint-disable-next-line @typescript-eslint/unbound-method, @typescript-eslint/no-deprecated
 		const originalQuerySelectorAll = shadowRoot.querySelectorAll;
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelectorAll = vi.fn(() => {
 			throw new Error('Invalid selector');
-		});
+		}) as typeof shadowRoot.querySelectorAll;
 
 		const result = findInShadowDOM(element, '.test');
 		expect(result).toBeNull();
 
-		// Restore
+		/**
+		 * Restore.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelectorAll = originalQuerySelectorAll;
 	});
 
@@ -318,10 +354,13 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.className = 'container';
-		// Add substantial text directly to container (no bodyContent found)
+
+		/**
+		 * Add substantial text directly to container (no bodyContent found).
+		 */
 		container.textContent =
 			'Container text with enough content to meet the minimum length requirement of 500 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				5,
+				COUNT_5,
 			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -349,7 +388,7 @@ describe('extractContent', () => {
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent =
 			'Normal content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(normalDiv);
 		document.body.appendChild(main);
@@ -358,7 +397,7 @@ describe('extractContent', () => {
 		expect(result.content).toContain('Normal content');
 		// Cookie div should be removed, but text might still appear in some paths
 		// The important thing is that the removal code path is executed
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should filter JavaScript patterns and extract documentation from paragraphs', () => {
@@ -376,7 +415,7 @@ describe('extractContent', () => {
 		main.appendChild(docP1);
 
 		const docP2 = document.createElement('p');
-		docP2.textContent = 'More documentation content here. '.repeat(3);
+		docP2.textContent = 'More documentation content here. '.repeat(COUNT_3);
 		main.appendChild(docP2);
 
 		document.body.appendChild(main);
@@ -385,7 +424,7 @@ describe('extractContent', () => {
 		// Should extract documentation from paragraphs, not the JS code
 		expect(result.content).toContain('valid documentation content');
 		expect(result.content).toContain('More documentation content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should return rawBodyText when lastResortText fails but rawBodyText passes', () => {
@@ -398,7 +437,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -407,20 +446,26 @@ describe('extractContent', () => {
 		// Create lastResortText that fails (code ratio >= 0.1 or length <= 100)
 		// Need to ensure lastResortText.length > 100 but codeRatio >= 0.1
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = '{}();=;'.repeat(25); // ~175 chars, high code ratio
+		codeDiv.textContent = '{}();=;'.repeat(COUNT_25);
 		document.body.appendChild(codeDiv);
 
-		// Add small normal text div (in both lastResortText and rawBodyText)
+		/**
+		 * Add small normal text div (in both lastResortText and rawBodyText).
+		 */
 		const smallDiv = document.createElement('div');
-		smallDiv.textContent = 'Small text. '.repeat(3); // ~36 chars
+		smallDiv.textContent = 'Small text. '.repeat(COUNT_3);
 		document.body.appendChild(smallDiv);
 
-		// lastResortText = codeDiv + smallDiv = ~211 chars, codeRatio = ~0.83 >= 0.1, fails at line 965
+		/**
+		 * lastResortText = codeDiv + smallDiv = ~211 chars, codeRatio = ~0.83 >= 0.1, fails at line 965.
+		 */
 
-		// Add script with normal text (not in lastResortText because scripts are removed, but in rawBodyText)
+		/**
+		 * Add script with normal text (not in lastResortText because scripts are removed, but in rawBodyText).
+		 */
 		const script = document.createElement('script');
 		script.textContent =
-			'Normal documentation text here with enough content. '.repeat(300); // ~12000 chars
+			'Normal documentation text here with enough content. '.repeat(COUNT_300);
 		document.body.appendChild(script);
 
 		// rawBodyText = codeDiv + smallDiv + script = ~12211 chars
@@ -469,7 +514,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should return bestMainText when cookieRatio < 0.05 (line 794)
-		expect(result.content.length).toBeGreaterThan(1000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 		expect(result.content).toContain('Main content');
 	});
 
@@ -483,12 +528,12 @@ describe('extractContent', () => {
 
 		// Create main element with substantial text (> 5000 chars) even with high cookie ratio
 		const main = document.createElement('main');
-		main.textContent = 'cookie consent accept all. '.repeat(200); // > 5000 chars, high cookie ratio
+		main.textContent = 'cookie consent accept all. '.repeat(COUNT_200); // > 5000 chars, high cookie ratio
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should return bestMainText when mainText.length > 5000 (line 795)
-		expect(result.content.length).toBeGreaterThan(5000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_5000);
 	});
 
 	it('should update bestMainText when mainText.length > bestMainLength', () => {
@@ -501,23 +546,23 @@ describe('extractContent', () => {
 
 		// Create multiple main selectors with different lengths
 		const article = document.createElement('article');
-		article.textContent = 'Article content. '.repeat(100); // ~1800 chars
+		article.textContent = 'Article content. '.repeat(COUNT_100); // ~1800 chars
 		document.body.appendChild(article);
 
 		const main = document.createElement('main');
-		main.textContent = 'Main content with more text. '.repeat(100); // ~2800 chars, longer
+		main.textContent = 'Main content with more text. '.repeat(COUNT_100); // ~2800 chars, longer
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should use the longer mainText (line 798-800)
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(2000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_2000);
 	});
 
 	it('should not set bestText when mainText.length <= 200', () => {
 		const main = document.createElement('main');
 		// Create content with length <= 200
-		main.textContent = 'Short content. '.repeat(10); // ~150 chars
+		main.textContent = 'Short content. '.repeat(COUNT_10); // ~150 chars
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -555,15 +600,15 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
 
 		// Create body text > 500 chars but <= 5000 chars with high cookie ratio (>= 0.2)
-		const cookieText = 'cookie consent accept all '.repeat(50);
-		const normalText = 'This is body text. '.repeat(10);
+		const cookieText = 'cookie consent accept all '.repeat(COUNT_50);
+		const normalText = 'This is body text. '.repeat(COUNT_10);
 		document.body.textContent = cookieText + normalText;
 
 		const result = extractContent(document);
@@ -603,7 +648,7 @@ describe('extractContent', () => {
 
 		// Create main element with text <= 1000 chars
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(50); // ~750 chars, <= 1000
+		main.textContent = 'Main content. '.repeat(COUNT_50); // ~750 chars, <= 1000
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -622,7 +667,7 @@ describe('extractContent', () => {
 
 		// Create main element with text > 1000 but <= 5000 chars and cookieRatio >= 0.05
 		const main = document.createElement('main');
-		main.textContent = 'cookie consent accept all. '.repeat(150); // ~4500 chars, high cookie ratio
+		main.textContent = 'cookie consent accept all. '.repeat(COUNT_150);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -641,17 +686,17 @@ describe('extractContent', () => {
 
 		// Create multiple main selectors, first one is longer
 		const main = document.createElement('main');
-		main.textContent = 'Main content with more text. '.repeat(100); // ~2800 chars
+		main.textContent = 'Main content with more text. '.repeat(COUNT_100);
 		document.body.appendChild(main);
 
 		const article = document.createElement('article');
-		article.textContent = 'Article content. '.repeat(100); // ~1800 chars, shorter
+		article.textContent = 'Article content. '.repeat(COUNT_100); // ~1800 chars, shorter
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
 		// Should use the longer mainText (line 798-800)
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(2000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_2000);
 	});
 
 	it('should return lastResortText when lastResortText.length > minLastResortTextLength and codeRatio < maxCodeRatio', () => {
@@ -664,7 +709,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -694,7 +739,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -702,7 +747,7 @@ describe('extractContent', () => {
 
 		// Create lastResortText with high code ratio (>= 0.1)
 		const div = document.createElement('div');
-		div.textContent = '{}();=;{}();=;{}();=;'.repeat(10); // High code ratio, > 100 chars
+		div.textContent = '{}();=;{}();=;{}();=;'.repeat(COUNT_10); // High code ratio, > 100 chars
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -721,7 +766,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -729,12 +774,12 @@ describe('extractContent', () => {
 
 		// Create lastResortText that fails (codeRatio >= 0.1)
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = '{}();=;'.repeat(20); // High code ratio
+		codeDiv.textContent = '{}();=;'.repeat(COUNT_20);
 		document.body.appendChild(codeDiv);
 
 		// Add script with normal text (not in lastResortText, but in rawBodyText)
 		const script = document.createElement('script');
-		script.textContent = 'Normal documentation text here. '.repeat(200); // ~6000 chars, low code ratio
+		script.textContent = 'Normal documentation text here. '.repeat(COUNT_200); // ~6000 chars, low code ratio
 		document.body.appendChild(script);
 
 		const result = extractContent(document);
@@ -753,7 +798,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -761,7 +806,7 @@ describe('extractContent', () => {
 
 		// Create lastResortText that fails (codeRatio >= 0.1)
 		const codeDiv = document.createElement('div');
-		codeDiv.textContent = '{}();=;{}();=;{}();=;'.repeat(50); // High code ratio, > 100 chars
+		codeDiv.textContent = '{}();=;{}();=;{}();=;'.repeat(COUNT_50); // High code ratio, > 100 chars
 		document.body.appendChild(codeDiv);
 
 		const result = extractContent(document);
@@ -783,7 +828,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -793,8 +838,8 @@ describe('extractContent', () => {
 		const div = document.createElement('div');
 		div.className = 'content';
 		div.textContent = 'cookie consent accept all do not accept. '.repeat(
-			20,
-		); // ~800 chars, > 2 keywords
+			COUNT_20,
+		);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -813,7 +858,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText starts empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -830,7 +875,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should update bestText (line 696-699)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('substantial content');
 	});
 

@@ -7,17 +7,35 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { extractContent } from '../../src/utils/extract-content.js';
-import { findInShadowDOM } from '../../src/utils/extract-content-helpers.js';
+
+const ZERO = 0;
+const COUNT_2 = 2;
+const COUNT_3 = 3;
+const COUNT_5 = 5;
+const COUNT_8 = 8;
+const COUNT_10 = 10;
+const COUNT_14 = 14;
+const COUNT_15 = 15;
+const COUNT_18 = 18;
+const COUNT_20 = 20;
+const COUNT_30 = 30;
+const COUNT_80 = 80;
+const REPEAT_COUNT_10 = 10;
+const REPEAT_COUNT_20 = 20;
+const MIN_LENGTH_100 = 100;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_500 = 500;
+const MIN_LENGTH_1000 = 1000;
+const MIN_LENGTH_2000 = 2000;
+const MIN_LENGTH_5000 = 5000;
 
 describe('extractContent', () => {
-	let dom: JSDOM;
-	let document: Document;
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
+	});
+	const { document } = dom.window;
 
 	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -33,7 +51,7 @@ describe('extractContent', () => {
 		expect(result.debugInfo).toBeDefined();
 		// Covers line 36: doc.body?.textContent?.trim()?.length ?? 0
 		// When body is null or textContent is null, the ?? 0 branch is reached
-		expect(result.debugInfo.bodyTextLength).toBe(0);
+		expect(result.debugInfo.bodyTextLength).toBe(ZERO);
 	});
 
 	it('should handle doc-xml-content without shadowRoot (covers line 48)', () => {
@@ -57,7 +75,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'body conbody';
 		bodyContent.textContent =
 			'This is the main content from shadow DOM with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+				COUNT_2,
 			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
@@ -81,7 +99,7 @@ describe('extractContent', () => {
 		bodyContent.className = 'body conbody';
 		bodyContent.textContent =
 			'This is the main content from shadow DOM with enough text to meet the minimum length requirement of 200 characters for extraction. '.repeat(
-				2,
+				COUNT_2,
 			);
 		const link1 = document.createElement('a');
 		link1.setAttribute(
@@ -120,10 +138,10 @@ describe('extractContent', () => {
 		// Container has text elements and total text is greater than 500
 		// Don't set textContent directly (that removes children), append children instead
 		const p1 = document.createElement('p');
-		p1.textContent = 'Paragraph text with enough content. '.repeat(20);
+		p1.textContent = 'Paragraph text with enough content. '.repeat(REPEAT_COUNT_20);
 		container.appendChild(p1);
 		const p2 = document.createElement('p');
-		p2.textContent = 'More paragraph text with enough content. '.repeat(20);
+		p2.textContent = 'More paragraph text with enough content. '.repeat(REPEAT_COUNT_20);
 		container.appendChild(p2);
 		// Container textContent (from children) should now be > 500 chars
 		shadowRoot.appendChild(container);
@@ -131,7 +149,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should use container as bodyContent (lines 453-460)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.debugInfo.shadowDOMContentUsed).toBe(true);
 	});
 
@@ -146,7 +164,7 @@ describe('extractContent', () => {
 		p.textContent = 'Short paragraph text.';
 		container.appendChild(p);
 		// Add text but less than 500 chars
-		container.textContent = 'Short container text. '.repeat(10);
+		container.textContent = 'Short container text. '.repeat(REPEAT_COUNT_10);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
@@ -166,8 +184,8 @@ describe('extractContent', () => {
 
 		const main = document.createElement('main');
 		main.textContent =
-			'This is main content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'This is main content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		document.body.appendChild(main);
 
@@ -187,8 +205,8 @@ describe('extractContent', () => {
 		const main = document.createElement('div');
 		main.setAttribute('role', 'main');
 		main.textContent =
-			'This is role main content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'This is role main content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		document.body.appendChild(main);
 
@@ -213,8 +231,8 @@ describe('extractContent', () => {
 		main.appendChild(script);
 		main.appendChild(style);
 		main.textContent =
-			'Real content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'Real content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		document.body.appendChild(main);
 
@@ -233,8 +251,8 @@ describe('extractContent', () => {
 		main.appendChild(link);
 		const p = document.createElement('p');
 		p.textContent =
-			'Main content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'Main content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		main.appendChild(p);
 		document.body.appendChild(main);
@@ -268,7 +286,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should filter out cookie text if it's the only content
-		expect(result.content.length).toBeLessThan(100);
+		expect(result.content.length).toBeLessThan(MIN_LENGTH_100);
 	});
 
 	it('should extract content from paragraphs', () => {
@@ -297,13 +315,13 @@ describe('extractContent', () => {
 		// Create paragraphs that will be collected and combined
 		const p1 = document.createElement('p');
 		p1.textContent =
-			'First paragraph with substantial content that is longer than 100 characters to meet the minimum requirement for extraction. '.repeat(
-				3,
+			'First paragraph with substantial content that is longer than 100 characters to meet the minimum requirement for extraction. '			.repeat(
+				COUNT_3,
 			);
 		const p2 = document.createElement('p');
 		p2.textContent =
-			'Second paragraph with substantial content that is longer than 100 characters to meet the minimum requirement for extraction. '.repeat(
-				3,
+			'Second paragraph with substantial content that is longer than 100 characters to meet the minimum requirement for extraction. '			.repeat(
+				COUNT_3,
 			);
 		document.body.appendChild(p1);
 		document.body.appendChild(p2);
@@ -325,7 +343,7 @@ describe('extractContent', () => {
 		// Create an element matching a selector with cookie text (> 2 keywords, < 1000 chars)
 		const article = document.createElement('article');
 		article.textContent =
-			'cookie consent accept all do not accept. '.repeat(20); // < 1000 chars, > 2 keywords
+			'cookie consent accept all do not accept. '.repeat(REPEAT_COUNT_20); // < 1000 chars, > 2 keywords
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
@@ -346,7 +364,7 @@ describe('extractContent', () => {
 		const article = document.createElement('article');
 		article.textContent =
 			'This is substantial article content that is longer than 200 characters to meet the minimum requirement for extraction. '.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(article);
 
@@ -382,15 +400,15 @@ describe('extractContent', () => {
 		container.className = 'container';
 		// No bodyContent, just container with substantial text
 		container.textContent =
-			'Container content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'Container content with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
 		const result = extractContent(document);
 		// Should use contentContainer when bodyContent is not found (line 700-715)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.debugInfo.shadowDOMContentUsed).toBe(true);
 	});
 
@@ -405,8 +423,8 @@ describe('extractContent', () => {
 		// Create content that will set bestText
 		const main = document.createElement('main');
 		main.textContent =
-			'Main content with enough text to meet the minimum length requirement. '.repeat(
-				10,
+			'Main content with enough text to meet the minimum length requirement. '			.repeat(
+				COUNT_10,
 			);
 		document.body.appendChild(main);
 
@@ -425,7 +443,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -435,13 +453,13 @@ describe('extractContent', () => {
 		const div = document.createElement('div');
 		div.textContent =
 			'This is substantial content from a div element that is longer than 500 characters to meet the minimum requirement for fallback extraction. '.repeat(
-				8,
+				COUNT_8,
 			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
 		// Should return content from fallback element search (line 744)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('substantial content');
 	});
 
@@ -455,7 +473,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -464,14 +482,14 @@ describe('extractContent', () => {
 		// Create an element with substantial text (> 500 chars) and < 3 cookie keywords
 		const div = document.createElement('div');
 		div.textContent =
-			'This is substantial content with some cookie mentions but not too many. '.repeat(
-				10,
+			'This is substantial content with some cookie mentions but not too many. '			.repeat(
+				COUNT_10,
 			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
 		// Should return content when cookieTextCount < 3 (line 732)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('substantial content');
 	});
 
@@ -485,7 +503,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -493,14 +511,15 @@ describe('extractContent', () => {
 
 		// Create an element with substantial text (> 2000 chars) even with cookie keywords
 		const div = document.createElement('div');
+		const REPEAT_COUNT_100 = 100;
 		div.textContent = 'cookie consent accept all do not accept. '.repeat(
-			100,
+			REPEAT_COUNT_100,
 		); // > 2000 chars, > 3 keywords
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
 		// Should return content when text.length > 2000 (line 733)
-		expect(result.content.length).toBeGreaterThan(2000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_2000);
 	});
 
 	it('should not return content from fallback element when cleanText.length <= minCleanTextLength', () => {
@@ -513,7 +532,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -522,7 +541,7 @@ describe('extractContent', () => {
 		// Create an element with substantial text (> 500 chars) but after removing unwanted elements, it's <= 500
 		const div = document.createElement('div');
 		const script = document.createElement('script');
-		script.textContent = 'Script content that will be removed. '.repeat(20); // ~600 chars
+		script.textContent = 'Script content that will be removed. '.repeat(REPEAT_COUNT_20); // ~600 chars
 		div.appendChild(script);
 		div.textContent = 'Small remaining text. '; // < 500 chars after script removal
 		document.body.appendChild(div);
@@ -545,13 +564,13 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'Main content with enough text to meet the minimum length requirement of 1000 characters for bestMainText extraction. '.repeat(
-				20,
+				REPEAT_COUNT_20,
 			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should return bestMainText when bestMainText.length > 0 (line 822)
-		expect(result.content.length).toBeGreaterThan(1000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 		expect(result.content).toContain('Main content');
 	});
 
@@ -568,10 +587,10 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		// Add code-like characters to increase codeRatio >= 0.1
 		// ~210 code chars, ~1500 normal = ~1710 total, codeRatio = 210/1710 = ~0.123 > 0.1 ✓
-		const codeChars = '{}();=;'.repeat(30);
+		const codeChars = '{}();=;'.repeat(COUNT_30);
 		const normalText =
 			'This is substantial main content with enough text to meet the minimum length requirement of 1000 characters. '.repeat(
-				15,
+				COUNT_15,
 			);
 		main.textContent = codeChars + normalText;
 		document.body.appendChild(main);
@@ -580,7 +599,7 @@ describe('extractContent', () => {
 		// Should process through mainSelectors loop (lines 793-820)
 		// processMainElement returns null (codeRatio >= 0.1)
 		// But loop accepts it (cookieRatio < 0.05, text > 1000)
-		expect(result.content.length).toBeGreaterThan(1000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 		expect(result.content).toContain('substantial main content');
 	});
 
@@ -601,12 +620,15 @@ describe('extractContent', () => {
 		// Add cookie keywords (>= 3) but keep cookieRatio < 0.05 by having many words
 		// Text length MUST be <= 2000 so fallback loop doesn't return (if > 2000, fallback accepts)
 		const cookieText = 'cookie consent accept all do not accept. ';
-		// Many words so cookieRatio < 0.05 (cookieMatches / wordCount < 0.05)
-		// Text length must be > 1000 but <= 2000
+
+		/**
+		 * Many words so cookieRatio < 0.05 (cookieMatches / wordCount < 0.05).
+		 * Text length must be > 1000 but <= 2000.
+		 */
 		const normalText =
 			'This is substantial article content with enough text to meet the minimum length requirement. '.repeat(
-				18,
-			); // ~1800 chars, many words
+				COUNT_18,
+			);
 		article.textContent = cookieText + normalText; // Total ~1840 chars (<= 2000), cookieTextCount = 4, many words so cookieRatio < 0.05
 		document.body.appendChild(article);
 
@@ -616,7 +638,7 @@ describe('extractContent', () => {
 		// processMainElement not called, bestText stays empty
 		// Fallback loop doesn't return (cookieTextCount >= 3 AND text.length <= 2000)
 		// mainSelectors loop finds article element and processes it (text > 1000, cookieRatio < 0.05)
-		expect(result.content.length).toBeGreaterThan(1000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 		expect(result.content).toContain('substantial article content');
 	});
 
@@ -641,12 +663,15 @@ describe('extractContent', () => {
 		// Add cookie keywords (>= 3) but keep cookieRatio < 0.05 by having many words
 		// Text length MUST be <= 2000 so fallback loop doesn't return
 		const cookieText = 'cookie consent accept all do not accept. ';
-		// Many words so cookieRatio < 0.05
-		// Text length must be > 1000 but <= 2000
+
+		/**
+		 * Many words so cookieRatio < 0.05.
+		 * Text length must be > 1000 but <= 2000.
+		 */
 		const normalText =
 			'This is substantial main div content with enough text to meet the minimum length requirement of 1000 characters. '.repeat(
-				15,
-			); // ~1500 chars, many words
+				COUNT_15,
+			);
 		mainDiv.textContent = cookieText + normalText; // Total ~1540 chars (<= 2000), cookieTextCount = 4, many words so cookieRatio < 0.05
 		document.body.appendChild(mainDiv);
 
@@ -657,7 +682,7 @@ describe('extractContent', () => {
 		// Selectors array doesn't find #main (not in selectors array), so doesn't set bestText
 		// Fallback loop doesn't return (cookieTextCount >= 3 AND text.length <= 2000)
 		// mainSelectors loop finds #main and processes it (text > 1000, cookieRatio < 0.05)
-		expect(result.content.length).toBeGreaterThan(1000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 		expect(result.content).toContain('substantial main div content');
 	});
 
@@ -677,24 +702,33 @@ describe('extractContent', () => {
 		mainDiv.id = 'main';
 		// Add many cookie keywords to ensure cookieRatio >= 0.05
 		// The regex matches "cookie", "consent", or "accept all"
-		// Repeat cookie phrases many times to get high cookieMatches
+
+		/**
+		 * Repeat cookie phrases many times to get high cookieMatches.
+		 */
 		const cookieText =
 			'cookie consent accept all cookie consent accept all cookie consent. '.repeat(
-				30,
-			); // Many cookie matches
-		// Add normal text to get total length > 5000 but keep word count reasonable
+				COUNT_30,
+			);
+
+		/**
+		 * Add normal text to get total length > 5000 but keep word count reasonable.
+		 */
 		const normalText =
 			'This is substantial main div content with enough text. '.repeat(
-				80,
-			); // ~4000 chars
-		mainDiv.textContent = cookieText + normalText; // Total > 5000 chars, cookieRatio >= 0.05 (many cookie matches relative to word count)
+				COUNT_80,
+			);
+		mainDiv.textContent = cookieText + normalText;
 		document.body.appendChild(mainDiv);
 
 		const result = extractContent(document);
-		// Should process through mainSelectors loop (lines 793-820)
-		// Line 805 (mainText.length > minMainTextLengthValue) will be checked because cookieRatio >= 0.05 (first condition false)
-		// MainSelectors loop accepts it because mainText.length > 5000 (second condition true)
-		expect(result.content.length).toBeGreaterThan(5000);
+
+		/**
+		 * Should process through mainSelectors loop (lines 793-820).
+		 * Line 805 (mainText.length > minMainTextLengthValue) will be checked because cookieRatio >= 0.05 (first condition false).
+		 * MainSelectors loop accepts it because mainText.length > 5000 (second condition true).
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_5000);
 		expect(result.content).toContain('substantial main div content');
 	});
 
@@ -706,8 +740,8 @@ describe('extractContent', () => {
 		const bodyContent = document.createElement('div');
 		bodyContent.className = 'body conbody';
 		bodyContent.textContent =
-			'Body content from shadow DOM with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'Body content from shadow DOM with enough text to meet the minimum length requirement of 200 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		container.appendChild(bodyContent);
 		shadowRoot.appendChild(container);
@@ -731,8 +765,8 @@ describe('extractContent', () => {
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
 		container.textContent =
-			'Container content with enough text to meet the minimum length requirement of 200 characters for extraction from shadow DOM. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				2,
+			'Container content with enough text to meet the minimum length requirement of 200 characters for extraction from shadow DOM. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_2,
 			);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
@@ -745,21 +779,25 @@ describe('extractContent', () => {
 	it('should fallback to body text when no main content found', () => {
 		document.body.textContent =
 			'This is body text with enough content to meet the minimum length requirement of 500 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				5,
+				COUNT_5,
 			);
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should filter out code-like content based on code ratio', () => {
-		// Create content with high code ratio but less than 100 chars
-		document.body.textContent = '{}(()=;);'.repeat(10); // High code ratio, < 100 chars
+		/**
+		 * Create content with high code ratio but less than 100 chars.
+		 */
+		document.body.textContent = '{}(()=;);'.repeat(COUNT_10);
 
 		const result = extractContent(document);
-		// Code ratio check only applies if text length > 100
-		// Since this is < 100, it will be filtered by the minRawBodyTextLength check
-		expect(result.content.length).toBeLessThan(100);
+		/**
+		 * Code ratio check only applies if text length > 100.
+		 * Since this is < 100, it will be filtered by the minRawBodyTextLength check.
+		 */
+		expect(result.content.length).toBeLessThan(MIN_LENGTH_100);
 	});
 
 	it('should extract content from selectors array', () => {
@@ -775,13 +813,13 @@ describe('extractContent', () => {
 	it('should handle elements with substantial text', () => {
 		const div = document.createElement('div');
 		div.textContent =
-			'This is a div with substantial text content that is longer than 500 characters. '.repeat(
-				10,
+			'This is a div with substantial text content that is longer than 500 characters. '			.repeat(
+				COUNT_10,
 			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should collect unique text elements', () => {
@@ -817,13 +855,13 @@ describe('extractContent', () => {
 		// Create text elements that will be collected
 		const span1 = document.createElement('span');
 		span1.textContent =
-			'First span with substantial content that is longer than 50 characters to meet the minimum requirement. '.repeat(
-				2,
+			'First span with substantial content that is longer than 50 characters to meet the minimum requirement. '			.repeat(
+				COUNT_2,
 			);
 		const span2 = document.createElement('span');
 		span2.textContent =
-			'Second span with substantial content that is longer than 50 characters to meet the minimum requirement. '.repeat(
-				2,
+			'Second span with substantial content that is longer than 50 characters to meet the minimum requirement. '			.repeat(
+				COUNT_2,
 			);
 		document.body.appendChild(span1);
 		document.body.appendChild(span2);
@@ -844,7 +882,7 @@ describe('extractContent', () => {
 
 		// Create text element with high code ratio (> 0.1)
 		const div = document.createElement('div');
-		div.textContent = '{}();=;{}();=;{}();=;{}();=;{}();=;'.repeat(5); // High code ratio
+		div.textContent = '{}();=;{}();=;{}();=;{}();=;{}();=;'.repeat(COUNT_5); // High code ratio
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -864,8 +902,8 @@ describe('extractContent', () => {
 		// Create duplicate text elements
 		const p1 = document.createElement('p');
 		const text =
-			'Paragraph with substantial content that is longer than 50 characters. '.repeat(
-				2,
+			'Paragraph with substantial content that is longer than 50 characters. '			.repeat(
+				COUNT_2,
 			);
 		p1.textContent = text;
 		const p2 = document.createElement('p');
@@ -883,20 +921,20 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'This is a long main content with some cookie mentions but not too many. '.repeat(
-				20,
+				COUNT_20,
 			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should not return filtered text when filteredText length is less than 200', () => {
 		const main = document.createElement('main');
 		// Create JS content with > 2 patterns and > 200 chars
 		main.textContent =
-			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); } '.repeat(
-				3,
+			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); } '			.repeat(
+				COUNT_3,
 			);
 		// Add a very short doc text (< 200 chars total after filtering)
 		const p = document.createElement('p');
@@ -915,7 +953,7 @@ describe('extractContent', () => {
 		// Create content with high code ratio (> 0.1)
 		main.textContent =
 			'{}();=;{}();=;{}();=;{}();=;{}();=;{}();=;{}();=;{}();=;{}();=;{}();=;'.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(main);
 
@@ -929,7 +967,7 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		// Create short content (< 500 chars) with high cookie ratio (> 0.1)
 		main.textContent = 'cookie consent accept all do not accept. '.repeat(
-			15,
+			COUNT_15,
 		);
 		document.body.appendChild(main);
 
@@ -943,12 +981,12 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'Main content with enough text to meet the minimum length requirement. '.repeat(
-				20,
+				COUNT_20,
 			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should filter JavaScript patterns from body text', () => {
@@ -962,12 +1000,12 @@ describe('extractContent', () => {
 
 	it('should handle cookie ratio in body text', () => {
 		document.body.textContent =
-			'Cookie consent accept all do not accept. '.repeat(10);
+			'Cookie consent accept all do not accept. '.repeat(COUNT_10);
 
 		const result = extractContent(document);
 		// Should filter out high cookie ratio content if it's short
 		// But if it's long enough (>5000 chars), it will be accepted
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should return last resort body text', () => {
@@ -975,12 +1013,14 @@ describe('extractContent', () => {
 			'Last resort body text with enough content to meet the minimum length requirement of 100 characters for extraction.';
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should filter code ratio in raw body text', () => {
-		// Create content with high code ratio but exactly 100 chars to trigger the check
-		document.body.textContent = '{}();=;'.repeat(14); // ~98 chars, high code ratio
+		/**
+		 * Create content with high code ratio but exactly 100 chars to trigger the check.
+		 */
+		document.body.textContent = '{}();=;'.repeat(COUNT_14);
 
 		const result = extractContent(document);
 		// Code ratio check applies if text length >= 100 and code ratio < 0.1
@@ -1020,7 +1060,7 @@ describe('extractContent', () => {
 		const div = document.createElement('div');
 		div.textContent =
 			'This is a div with substantial text content that is longer than 200 characters. '.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(div);
 
@@ -1033,12 +1073,12 @@ describe('extractContent', () => {
 		const shadowRoot = docXmlContent.attachShadow({ mode: 'open' });
 		const container = document.createElement('div');
 		container.setAttribute('data-name', 'content');
-		container.textContent = 'Container with substantial text. '.repeat(20);
+		container.textContent = 'Container with substantial text. '.repeat(COUNT_20);
 		shadowRoot.appendChild(container);
 		document.body.appendChild(docXmlContent);
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should handle body with cookie ratio check and return body text', () => {
@@ -1050,11 +1090,11 @@ describe('extractContent', () => {
 		}
 
 		document.body.textContent =
-			'This is body text with enough content to meet the minimum length requirement of 500 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '.repeat(
-				10,
+			'This is body text with enough content to meet the minimum length requirement of 500 characters for extraction. This paragraph continues to add more content to ensure we exceed the threshold. '			.repeat(
+				COUNT_10,
 			);
 
 		const result = extractContent(document);
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 });

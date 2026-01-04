@@ -12,7 +12,9 @@ import {
 
 vi.mock('../../src/sources/salesforce.js');
 
-// Mock process.exit and console methods
+/**
+ * Mock process.exit and console methods.
+ */
 const originalExit = process.exit;
 const originalError = console.error;
 const originalLog = console.log;
@@ -20,7 +22,7 @@ const originalLog = console.log;
 describe('CLI command handlers', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		process.exit = originalExit;
+		process.exit = originalExit.bind(process);
 		console.error = originalError;
 		console.log = originalLog;
 		vi.spyOn(console, 'error').mockImplementation(() => {
@@ -31,15 +33,15 @@ describe('CLI command handlers', () => {
 		});
 		vi.spyOn(process, 'exit').mockImplementation((() => {
 			// Intentionally empty for test mocking
-		}) as typeof process.exit);
+		}) as (code?: number) => never);
 	});
 
 	describe('handleSearchCommand', () => {
 		it('should handle successful search', async () => {
-			const mockResult = {
-				folderPath: '/tmp/test',
-				fileCount: 3,
-				todoFilePath: '/tmp/test/TODO.md',
+		const mockResult = {
+			fileCount: 3,
+			folderPath: '/tmp/test',
+			todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(
@@ -63,10 +65,10 @@ describe('CLI command handlers', () => {
 		});
 
 		it('should handle search with all options', async () => {
-			const mockResult = {
-				folderPath: '/tmp/test',
-				fileCount: 5,
-				todoFilePath: '/tmp/test/TODO.md',
+		const mockResult = {
+			fileCount: 5,
+			folderPath: '/tmp/test',
+			todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(
@@ -99,16 +101,17 @@ describe('CLI command handlers', () => {
 				'Error searching Salesforce Help:',
 				expect.any(Error),
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
 
 	describe('handleGetCommand', () => {
 		it('should handle successful get', async () => {
-			const mockResult = {
-				folderPath: '/tmp/test',
-				fileCount: 1,
-				todoFilePath: '/tmp/test/TODO.md',
+		const mockResult = {
+			fileCount: 1,
+			folderPath: '/tmp/test',
+			todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(
@@ -129,10 +132,10 @@ describe('CLI command handlers', () => {
 		});
 
 		it('should handle get with verbose option', async () => {
-			const mockResult = {
-				folderPath: '/tmp/test',
-				fileCount: 1,
-				todoFilePath: '/tmp/test/TODO.md',
+		const mockResult = {
+			fileCount: 1,
+			folderPath: '/tmp/test',
+			todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(
@@ -160,7 +163,8 @@ describe('CLI command handlers', () => {
 				'Error getting Salesforce Help URL:',
 				expect.any(Error),
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
 
@@ -213,7 +217,8 @@ describe('CLI command handlers', () => {
 				'Error dumping Salesforce Help:',
 				expect.any(Error),
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
 
@@ -225,26 +230,31 @@ describe('CLI command handlers', () => {
 		expect(typeof handleDumpCommand).toBe('function');
 	});
 
-	it('should execute program.parse when run as main module', async () => {
+	it('should execute program.parse when run as main module', () => {
 		// Mock process.argv to simulate running as main module
 		const originalArgv = process.argv;
-		const originalImportMeta = import.meta.url;
 
-		// Create a mock program that tracks if parse was called
+		/**
+		 * Create a mock program that tracks if parse was called.
+		 */
 		let parseCalled = false;
 		const mockProgram = {
-			parse: () => {
+			parse: (): void => {
 				parseCalled = true;
 			},
 		};
 
-		// Mock process.argv to include 'index.ts' or 'sf-docs-helper'
+		/**
+		 * Mock process.argv to include 'index.ts' or 'sf-docs-helper'.
+		 */
 		process.argv = ['node', '/path/to/index.ts'];
 
-		// Dynamically import the module to trigger the entry point code
-		// Note: This test verifies the entry point logic works
-		// The actual program.parse() call is tested via the mock
-		expect(parseCalled || true).toBe(true); // Entry point logic exists
+		/**
+		 * Dynamically import the module to trigger the entry point code.
+		 * Note: This test verifies the entry point logic works.
+		 * The actual program.parse() call is tested via the mock.
+		 */
+		expect(parseCalled).toBe(true); // Entry point logic exists
 
 		// Restore
 		process.argv = originalArgv;

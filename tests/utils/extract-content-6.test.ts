@@ -9,31 +9,25 @@ import { JSDOM } from 'jsdom';
 import { extractContent } from '../../src/utils/extract-content.js';
 
 // Constants for test values
+const COUNT_3 = 3;
 const REPEAT_COUNT_15 = 15;
 const REPEAT_COUNT_20 = 20;
 const REPEAT_COUNT_10 = 10;
 const REPEAT_COUNT_30 = 30;
-const REPEAT_COUNT_3 = 3;
 const REPEAT_COUNT_100 = 100;
 const REPEAT_COUNT_50 = 50;
 const MIN_LENGTH_200 = 200;
 const MIN_LENGTH_500 = 500;
 const MIN_LENGTH_100 = 100;
-const MIN_LENGTH_50 = 50;
-const MIN_LENGTH_1000 = 1000;
 const ZERO = 0;
 
 describe('extractContent', () => {
-	let dom: JSDOM = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
 		url: 'https://test.example.com',
 	});
-	let document: Document = dom.window.document;
+	const { document } = dom.window;
 
 	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		({ document } = dom.window);
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -264,7 +258,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
-		selectorsElements.forEach((el) => el.remove());
+		selectorsElements.forEach((el) => {
+			(el as Element).remove();
+		});
 
 		// To prevent fallback loop from returning, we need body to have cookieTextCount >= 3 AND text.length <= 2000
 		// Add cookie keywords to make cookieTextCount >= 3
@@ -356,7 +352,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
-		selectorsElements.forEach((el) => el.remove());
+		selectorsElements.forEach((el) => {
+			(el as Element).remove();
+		});
 
 		// To prevent tryFallbackContentExtraction from returning:
 		// - Add cookie keywords (cookieTextCount = 3) AND keep text.length <= 2000
@@ -409,7 +407,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
-		selectorsElements.forEach((el) => el.remove());
+		selectorsElements.forEach((el) => {
+			(el as Element).remove();
+		});
 
 		// To prevent tryFallbackContentExtraction from returning:
 		// - Add cookie keywords (cookieTextCount = 3) AND keep text.length <= 2000
@@ -501,7 +501,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
-		selectorsElements.forEach((el) => el.remove());
+		selectorsElements.forEach((el) => {
+			(el as Element).remove();
+		});
 
 		// To prevent tryFallbackContentExtraction from returning:
 		// - Add cookie keywords (cookieTextCount = 3) AND keep text.length <= 2000
@@ -515,12 +517,18 @@ describe('extractContent', () => {
 		// - tryLastResortBodyText return null (codeRatio >= 0.1 in cloned body)
 		// - tryRawBodyText return non-null (rawBodyText.length > 100 AND codeRatio < 0.1 in raw body)
 
-		// First, create body text with high cookie ratio to make tryBodyTextContent return null
-		// Don't use textContent assignment as it removes all elements - append text nodes instead
+		/**
+		 * First, create body text with high cookie ratio to make tryBodyTextContent return null.
+		 * Don't use textContent assignment as it removes all elements - append text nodes instead.
+		 */
 		const cookieText = 'cookie consent accept all. '.repeat(
 			REPEAT_COUNT_100,
-		); // High cookie ratio
-		const normalText = 'Short normal text. '.repeat(REPEAT_COUNT_50); // Normal text
+		);
+
+		/**
+		 * Normal text content.
+		 */
+		const normalText = 'Short normal text. '.repeat(REPEAT_COUNT_50);
 		document.body.appendChild(
 			document.createTextNode(cookieText + normalText),
 		); // Total > 500, cookieRatio >= 0.2, length <= 5000
@@ -533,10 +541,12 @@ describe('extractContent', () => {
 		// - Raw body.textContent = code (from div) + normal text (from nav) = codeRatio is low (lots of normal text)
 		// - Cloned body.textContent = code (from div) only = codeRatio is high (only code)
 
-		// Add code in a regular div (not removed by tryLastResortBodyText)
+		/**
+		 * Add code in a regular div (not removed by tryLastResortBodyText).
+		 */
 		const codeDiv = document.createElement('div');
 		codeDiv.textContent =
-			'function test() { const x = {}; x(); x = () => {}; } '.repeat(3); // Code chars: ~35 per repeat = ~105
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(COUNT_3);
 		document.body.appendChild(codeDiv);
 
 		// Add normal text in a nav element (removed by tryLastResortBodyText's removeElements)

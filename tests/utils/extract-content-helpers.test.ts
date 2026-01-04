@@ -18,16 +18,20 @@ import {
 	processMainSelectors,
 } from '../../src/utils/extract-content-fallbacks.js';
 
-describe('findInShadowDOM', () => {
-	let dom: JSDOM;
-	let document: Document;
+const COUNT_2 = 2;
+const COUNT_10 = 10;
+const COUNT_100 = 100;
+const SHADOW_DOM_DEPTH_15 = 15;
+const ZERO = 0;
+const REPEAT_COUNT_10 = 10;
+const REPEAT_COUNT_100 = 100;
+const REPEAT_COUNT_250 = 250;
 
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
+describe('findInShadowDOM', () => {
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
 
 	it('should return null for null element', () => {
 		expect(findInShadowDOM(null, '.test')).toBeNull();
@@ -104,7 +108,7 @@ describe('findInShadowDOM', () => {
 		const element = document.createElement('div');
 		let current = element;
 		// Create 15 levels of shadow DOM
-		for (let i = 0; i < 15; i++) {
+		for (let i = ZERO; i < SHADOW_DOM_DEPTH_15; i++) {
 			const shadowRoot = current.attachShadow({ mode: 'open' });
 			const next = document.createElement('div');
 			shadowRoot.appendChild(next);
@@ -157,8 +161,12 @@ describe('findInShadowDOM', () => {
 		const invalid = document.createElement('div');
 		shadowRoot.appendChild(invalid);
 
-		// Mock querySelector to throw an error
+		/**
+		 * Mock querySelector to throw an error.
+		 */
+		// eslint-disable-next-line @typescript-eslint/unbound-method, @typescript-eslint/no-deprecated
 		const originalQuerySelector = shadowRoot.querySelector;
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelector = vi.fn(() => {
 			throw new Error('Invalid selector');
 		});
@@ -166,7 +174,10 @@ describe('findInShadowDOM', () => {
 		const result = findInShadowDOM(element, '.test');
 		expect(result).toBeNull();
 
-		// Restore
+		/**
+		 * Restore.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelector = originalQuerySelector;
 	});
 
@@ -177,27 +188,28 @@ describe('findInShadowDOM', () => {
 		target.className = 'test';
 		shadowRoot.appendChild(target);
 
+		// eslint-disable-next-line @typescript-eslint/unbound-method, @typescript-eslint/no-deprecated
 		const originalQuerySelectorAll = shadowRoot.querySelectorAll;
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelectorAll = vi.fn(() => {
 			throw new Error('Invalid selectorAll');
 		});
 
 		const result = findInShadowDOM(element, '.test');
-		expect(result).toBe(target); // Should still find the direct match
+		/**
+		 * Should still find the direct match.
+		 */
+		expect(result).toBe(target);
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelectorAll = originalQuerySelectorAll;
 	});
 });
 
 describe('removeElements', () => {
-	let dom: JSDOM;
-	let document: Document;
-
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
 
 	it('should remove elements matching selector from document', () => {
 		const script = document.createElement('script');
@@ -225,7 +237,7 @@ describe('removeElements', () => {
 		document.body.appendChild(script2);
 
 		removeElements(document, 'script');
-		expect(document.querySelectorAll('script').length).toBe(0);
+		expect(document.querySelectorAll('script').length).toBe(ZERO);
 	});
 
 	it('should handle empty selector gracefully', () => {
@@ -233,24 +245,22 @@ describe('removeElements', () => {
 		document.body.appendChild(div);
 
 		removeElements(document, 'nonexistent');
+		/**
+		 * Element should still exist.
+		 */
 		expect(document.querySelector('div')).toBeTruthy();
 	});
 });
 
 describe('filterBodyTextDocParagraphs', () => {
-	let dom: JSDOM;
-	let document: Document;
-
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
-		document.body.innerHTML = '';
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
+	document.body.innerHTML = '';
 
 	it('should return null when jsPatternCount <= 2', () => {
-		const bodyClone = document.body.cloneNode(true) as Element;
+		const bodyClone = document.body.cloneNode(true) as unknown as Element;
 		const bodyText = 'const x = 5;'; // Only 1 JS pattern
 
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
@@ -277,7 +287,7 @@ describe('filterBodyTextDocParagraphs', () => {
 		shortP.textContent = 'Short.';
 		bodyClone.appendChild(shortP);
 
-		const bodyText = bodyClone.textContent?.trim() ?? '';
+		const bodyText = bodyClone.textContent.trim();
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
 		expect(result).toBeNull();
 	});
@@ -300,7 +310,7 @@ describe('filterBodyTextDocParagraphs', () => {
 			'This is valid documentation paragraph two with enough text to meet the minimum length requirement of 50 characters for documentation filtering and extraction.';
 		bodyClone.appendChild(p2);
 
-		const bodyText = bodyClone.textContent?.trim() ?? '';
+		const bodyText = bodyClone.textContent.trim();
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
 		expect(result).not.toBeNull();
 		expect(result).toContain('This is valid documentation paragraph one');
@@ -326,7 +336,7 @@ describe('filterBodyTextDocParagraphs', () => {
 			'function test() { return x => x; } This paragraph has a JavaScript pattern and should be filtered out.';
 		bodyClone.appendChild(jsP);
 
-		const bodyText = bodyClone.textContent?.trim() ?? '';
+		const bodyText = bodyClone.textContent.trim();
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
 		expect(result).not.toBeNull();
 		expect(result).toContain('This is valid documentation paragraph');
@@ -352,7 +362,7 @@ describe('filterBodyTextDocParagraphs', () => {
 			'const x = document.getElementById("test"); This paragraph has both const and = document and should be filtered out because it includes both patterns.';
 		bodyClone.appendChild(constDocP);
 
-		const bodyText = bodyClone.textContent?.trim() ?? '';
+		const bodyText = bodyClone.textContent.trim();
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
 		expect(result).not.toBeNull();
 		expect(result).toContain('This is valid documentation paragraph');
@@ -361,11 +371,7 @@ describe('filterBodyTextDocParagraphs', () => {
 });
 
 describe('tryBodyTextContent', () => {
-	let debugInfo: Record<string, unknown>;
-
-	beforeEach(() => {
-		debugInfo = {};
-	});
+	const debugInfo: Record<string, unknown> = {};
 
 	it('should return null when bodyText.length <= 500', () => {
 		const bodyText = 'Short text';
@@ -376,7 +382,7 @@ describe('tryBodyTextContent', () => {
 	it('should return content when cookieRatio < 0.2', () => {
 		const bodyText =
 			'This is valid documentation content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
-				10,
+				REPEAT_COUNT_10,
 			);
 		const result = tryBodyTextContent(bodyText, debugInfo);
 		expect(result).not.toBeNull();
@@ -384,8 +390,8 @@ describe('tryBodyTextContent', () => {
 	});
 
 	it('should return content when bodyText.length > 5000', () => {
-		const cookieText = 'cookie consent accept all. '.repeat(100);
-		const bodyText = 'This is very long content. '.repeat(250);
+		const cookieText = 'cookie consent accept all. '.repeat(REPEAT_COUNT_100);
+		const bodyText = 'This is very long content. '.repeat(REPEAT_COUNT_250);
 		const fullText = cookieText + bodyText; // > 5000 chars
 		const result = tryBodyTextContent(fullText, debugInfo);
 		expect(result).not.toBeNull();
@@ -400,26 +406,19 @@ describe('tryBodyTextContent', () => {
 		// Need cookieRatio >= 0.2, so cookie matches / wordCount >= 0.2
 		// If we repeat 100 times: 300 cookie matches, ~100 words, ratio = 3.0 > 0.2 ✓
 		// But we also need length <= 5000: 26 * 100 = 2600 chars ✓
-		const fullText = cookieText.repeat(100); // ~2600 chars, cookieRatio > 0.2
+		const fullText = cookieText.repeat(COUNT_100); // ~2600 chars, cookieRatio > 0.2
 		const result = tryBodyTextContent(fullText, debugInfo);
 		expect(result).toBeNull();
 	});
 });
 
 describe('tryLastResortBodyText', () => {
-	let dom: JSDOM;
-	let document: Document;
-	let body: HTMLBodyElement;
-	let debugInfo: Record<string, unknown>;
-
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
-		body = document.body;
-		debugInfo = {};
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
+	const { body } = document;
+	const debugInfo: Record<string, unknown> = {};
 
 	it('should return null when text.length <= 100', () => {
 		body.textContent = 'Short text';
@@ -430,7 +429,7 @@ describe('tryLastResortBodyText', () => {
 	it('should return content when codeRatio < 0.1', () => {
 		body.textContent =
 			'This is valid documentation content with enough text to meet the minimum length requirement of 100 characters. '.repeat(
-				2,
+				COUNT_2,
 			);
 		const result = tryLastResortBodyText(body, debugInfo);
 		expect(result).not.toBeNull();
@@ -439,26 +438,19 @@ describe('tryLastResortBodyText', () => {
 
 	it('should return null when codeRatio >= 0.1', () => {
 		body.textContent =
-			'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(COUNT_10); // High code ratio
 		const result = tryLastResortBodyText(body, debugInfo);
 		expect(result).toBeNull();
 	});
 });
 
 describe('tryRawBodyText', () => {
-	let dom: JSDOM;
-	let document: Document;
-	let body: HTMLBodyElement;
-	let debugInfo: Record<string, unknown>;
-
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
-		body = document.body;
-		debugInfo = {};
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
+	const { body } = document;
+	const debugInfo: Record<string, unknown> = {};
 
 	it('should return null when text.length <= 100', () => {
 		body.textContent = 'Short text';
@@ -469,7 +461,7 @@ describe('tryRawBodyText', () => {
 	it('should return content when codeRatio < 0.1', () => {
 		body.textContent =
 			'This is valid documentation content with enough text to meet the minimum length requirement of 100 characters. '.repeat(
-				2,
+				COUNT_2,
 			);
 		const result = tryRawBodyText(body, debugInfo);
 		expect(result).not.toBeNull();
@@ -478,26 +470,19 @@ describe('tryRawBodyText', () => {
 
 	it('should return null when codeRatio >= 0.1', () => {
 		body.textContent =
-			'function test() { const x = {}; x(); x = () => {}; } '.repeat(10); // High code ratio
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(COUNT_10); // High code ratio
 		const result = tryRawBodyText(body, debugInfo);
 		expect(result).toBeNull();
 	});
 });
 
 describe('processMainSelectors', () => {
-	let dom: JSDOM;
-	let document: Document;
-	let body: HTMLBodyElement;
-	let debugInfo: Record<string, unknown>;
-
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
-		body = document.body;
-		debugInfo = {};
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
+	const { body } = document;
+	const debugInfo: Record<string, unknown> = {};
 
 	it('should handle match() returning null (line 171 branch)', () => {
 		// Create article with > 1000 chars but NO cookie keywords to make match() return null

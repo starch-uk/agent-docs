@@ -39,11 +39,14 @@ describe('CLI entry point', () => {
 		process.argv = ['node', '/path/to/index.ts'];
 		const parseSpy = vi.spyOn(program, 'parse').mockImplementation(() => {
 			// Mock implementation to avoid actual parsing
+			return undefined;
 		});
 
 		// Test that the function can be called (entry point execution happens at module load)
 		// The actual execution is tested via the isMainEntryPoint() tests
-		expect(() => executeIfMainEntryPoint()).not.toThrow();
+		expect(() => {
+			executeIfMainEntryPoint();
+		}).not.toThrow();
 
 		parseSpy.mockRestore();
 	});

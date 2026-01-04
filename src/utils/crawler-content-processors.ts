@@ -21,7 +21,7 @@ import {
  * @param debugInfo - Debug info object to update.
  * @returns Object with bestText and bestLength, or null if no suitable content found.
  */
-export function processMainElementContent(
+function processMainElementContent(
 	mainElement: Element,
 	debugInfo: Record<string, unknown>,
 ): { bestText: string; bestLength: number } | null {
@@ -199,7 +199,7 @@ export function processMainElementContent(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not sufficient.
  */
-export function extractShadowDOMContent(
+function extractShadowDOMContent(
 	element: Element,
 	debugInfo: Record<string, unknown>,
 ): string | null {
@@ -228,3 +228,6 @@ export function extractShadowDOMContent(
 	}
 	return null;
 }
+
+// Export all functions together
+export { extractShadowDOMContent, processMainElementContent };

@@ -15,7 +15,13 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for lengths and DOM operations */
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- DOM API types require assertions */
 
-// Inline helper functions (must be in same scope for stringification)
+/**
+ * Inline helper functions (must be in same scope for stringification).
+ * Searches for an element within Shadow DOM trees.
+ * @param element - Root element to search from.
+ * @param selector - CSS selector to find.
+ * @returns Found element or null.
+ */
 function findInShadowDOM(
 	element: Element | null,
 	selector: Readonly<string>,
@@ -54,6 +60,11 @@ function findInShadowDOM(
 	return traverse(element, 0);
 }
 
+/**
+ * Removes elements matching the given selectors.
+ * @param element - Document or element to search within.
+ * @param selectors - CSS selectors for elements to remove.
+ */
 function removeElements(
 	element: Document | Element,
 	selectors: Readonly<string>,
@@ -64,6 +75,11 @@ function removeElements(
 	});
 }
 
+/**
+ * Extracts title attributes from links.
+ * @param element - Element to search within.
+ * @returns Array of title texts.
+ */
 function extractLinkTitles(element: Element): string[] {
 	const linksWithTitles = element.querySelectorAll('a[title]');
 	const titleTexts: string[] = [];
@@ -82,7 +98,13 @@ function extractLinkTitles(element: Element): string[] {
 	return titleTexts;
 }
 
-// Inline processor functions (must be in same scope for stringification)
+/**
+ * Inline processor functions (must be in same scope for stringification).
+ * Processes main element content to extract text.
+ * @param mainElement - Main element to process.
+ * @param debugInfo - Debug information object.
+ * @returns Best text and length or null.
+ */
 function processMainElementContent(
 	mainElement: Element,
 	debugInfo: Record<string, unknown>,
@@ -229,6 +251,12 @@ function processMainElementContent(
 	return null;
 }
 
+/**
+ * Extracts content from Shadow DOM elements.
+ * @param element - Element with Shadow DOM.
+ * @param debugInfo - Debug information object.
+ * @returns Extracted content or null.
+ */
 function extractShadowDOMContent(
 	element: Element,
 	debugInfo: Record<string, unknown>,
@@ -256,6 +284,12 @@ function extractShadowDOMContent(
 	return null;
 }
 
+/**
+ * Tries to extract content from fallback elements.
+ * @param doc - Document to search.
+ * @param debugInfo - Debug information object.
+ * @returns Content and debug info or null.
+ */
 function tryFallbackElementExtraction(
 	doc: Document,
 	debugInfo: Record<string, unknown>,
@@ -295,12 +329,18 @@ function tryFallbackElementExtraction(
 	return null;
 }
 
+/**
+ * Tries to extract text from document body.
+ * @param doc - Document to extract from.
+ * @param debugInfo - Debug information object.
+ * @returns Content and debug info or null.
+ */
 function tryBodyTextExtraction(
 	doc: Document,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
 	const { body } = doc;
-	if (body) {
+	if (body !== null && body !== undefined) {
 		removeElements(
 			body,
 			'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"], [class*="banner"], [id*="banner"], iframe, noscript, [role="dialog"], [class*="modal"], [class*="overlay"], [class*="dialog"]',
@@ -433,7 +473,7 @@ function tryBodyTextExtraction(
 			}
 		}
 	}
-	if (doc.body) {
+	if (doc.body !== null && doc.body !== undefined) {
 		const bodyClone = doc.body.cloneNode(true) as Element;
 		removeElements(
 			bodyClone,
@@ -453,7 +493,7 @@ function tryBodyTextExtraction(
 			return { content: lastResortText, debugInfo };
 		}
 	}
-	if (doc.body) {
+	if (doc.body !== null && doc.body !== undefined) {
 		const rawBodyText = doc.body.textContent?.trim() ?? '';
 		const codeCharCount = (rawBodyText.match(/[{}();=]/g) ?? []).length;
 		const totalChars = rawBodyText.length;
@@ -711,8 +751,9 @@ export function extractContentInBrowser(): {
 	if (mainElement) {
 		const result = processMainElementContent(mainElement, debugInfo);
 		if (result !== null) {
-			bestText = result.bestText;
-			bestLength = result.bestLength;
+			const { bestLength: resultLength, bestText: resultText } = result;
+			bestText = resultText;
+			bestLength = resultLength;
 		}
 	}
 

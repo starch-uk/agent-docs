@@ -6,20 +6,32 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
-import {
-	extractContent,
-	findInShadowDOM,
-} from '../../src/utils/extract-content.js';
+import { extractContent } from '../../src/utils/extract-content.js';
+
+const COUNT_3 = 3;
+const COUNT_5 = 5;
+const COUNT_8 = 8;
+const COUNT_10 = 10;
+const COUNT_15 = 15;
+const COUNT_20 = 20;
+const COUNT_30 = 30;
+const COUNT_40 = 40;
+const COUNT_50 = 50;
+const COUNT_100 = 100;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_500 = 500;
+const MIN_LENGTH_1000 = 1000;
+const MIN_LENGTH_2000 = 2000;
+const MIN_LENGTH_3000 = 3000;
+const ZERO = 0;
 
 describe('extractContent', () => {
-	let dom: JSDOM;
-	let document: Document;
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
+	});
+	const { document } = dom.window;
 
 	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -36,7 +48,7 @@ describe('extractContent', () => {
 		main.appendChild(scrollElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -53,7 +65,7 @@ describe('extractContent', () => {
 		main.appendChild(labelerElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -70,7 +82,7 @@ describe('extractContent', () => {
 		main.appendChild(headerElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -87,7 +99,7 @@ describe('extractContent', () => {
 		main.appendChild(xmlElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -99,7 +111,7 @@ describe('extractContent', () => {
 
 	it('should not include title when title is null', () => {
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(COUNT_10);
 
 		// Add link with null title (getAttribute returns null)
 		const link = document.createElement('a');
@@ -116,7 +128,7 @@ describe('extractContent', () => {
 
 	it('should not include title when title is undefined', () => {
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(COUNT_10);
 
 		// Add link - title attribute not set, so getAttribute returns null
 		// But we test the undefined check in the condition
@@ -133,7 +145,7 @@ describe('extractContent', () => {
 
 	it('should not include title when title is empty string', () => {
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(COUNT_10);
 
 		// Add link with empty title
 		const link = document.createElement('a');
@@ -150,7 +162,7 @@ describe('extractContent', () => {
 
 	it('should not include title when title.length <= minTitleLength', () => {
 		const main = document.createElement('main');
-		main.textContent = 'Main content with enough text. '.repeat(10);
+		main.textContent = 'Main content with enough text. '.repeat(COUNT_10);
 
 		// Add link with short title (<= 10 chars)
 		const link = document.createElement('a');
@@ -175,7 +187,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -184,13 +196,13 @@ describe('extractContent', () => {
 		// Create minimal content that won't set bestText
 		// But will allow fallback strategies to work
 		const div = document.createElement('div');
-		div.textContent = 'Fallback content. '.repeat(30);
+		div.textContent = 'Fallback content. '.repeat(COUNT_30);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
 		// Should continue to fallback when bestText.length === 0 (line 729 condition fails)
 		expect(result.content).toBeDefined();
-		expect(result.content.length).toBeGreaterThan(0);
+		expect(result.content.length).toBeGreaterThan(ZERO);
 	});
 
 	it('should return bestText when bestText.length > 0', () => {
@@ -205,14 +217,17 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'Best text content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				COUNT_3,
 			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
-		// Should return bestText when bestText.length > 0 (line 729-730)
+
+		/**
+		 * Should return bestText when bestText.length > 0 (line 729-730).
+		 */
 		expect(result.content).toContain('Best text content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should iterate through allElementsFallback when bestText is empty', () => {
@@ -225,7 +240,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -235,13 +250,16 @@ describe('extractContent', () => {
 		const div = document.createElement('div');
 		div.textContent =
 			'Fallback element content with enough text to meet the minimum length requirement of 500 characters for fallback extraction. '.repeat(
-				8,
+				COUNT_8,
 			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
-		// Should iterate through allElementsFallback (line 736)
-		expect(result.content.length).toBeGreaterThan(500);
+
+		/**
+		 * Should iterate through allElementsFallback (line 736).
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('Fallback element content');
 	});
 
@@ -255,7 +273,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -263,21 +281,26 @@ describe('extractContent', () => {
 
 		// Create element with text <= 500 chars (should be skipped)
 		const shortDiv = document.createElement('div');
-		shortDiv.textContent = 'Short content. '.repeat(20); // ~300 chars, <= 500
+		shortDiv.textContent = 'Short content. '.repeat(COUNT_20);
 		document.body.appendChild(shortDiv);
 
-		// Create element with text > 500 chars (should be used)
+		/**
+		 * Create element with text > 500 chars (should be used).
+		 */
 		const longDiv = document.createElement('div');
 		longDiv.textContent = 'Long fallback content with enough text. '.repeat(
-			20,
-		); // > 500 chars
+			COUNT_20,
+		);
 		document.body.appendChild(longDiv);
 
 		const result = extractContent(document);
-		// Should skip short element (line 738 condition fails)
-		// Should use long element
+
+		/**
+		 * Should skip short element (line 738 condition fails).
+		 * Should use long element.
+		 */
 		expect(result.content).toContain('Long fallback content');
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 	});
 
 	it('should handle fallback element when cookieTextCount >= maxCookieKeywordsForAccept and text.length <= minTextLengthForAccept', () => {
@@ -290,7 +313,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -299,12 +322,15 @@ describe('extractContent', () => {
 		// Create element with >= 3 cookie keywords and <= 2000 chars
 		const cookieDiv = document.createElement('div');
 		cookieDiv.textContent =
-			'cookie consent accept all do not accept. '.repeat(40); // >= 3 keywords, <= 2000 chars
+			'cookie consent accept all do not accept. '.repeat(COUNT_40);
 		document.body.appendChild(cookieDiv);
 
 		const result = extractContent(document);
-		// Should not use fallback element (line 754-755 condition fails)
-		// Will fall back to other strategies
+
+		/**
+		 * Should not use fallback element (line 754-755 condition fails).
+		 * Will fall back to other strategies.
+		 */
 		expect(result.content).toBeDefined();
 	});
 
@@ -318,7 +344,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -327,12 +353,15 @@ describe('extractContent', () => {
 		// Create element with >= 3 cookie keywords but > 2000 chars
 		const cookieDiv = document.createElement('div');
 		cookieDiv.textContent =
-			'cookie consent accept all do not accept. '.repeat(100); // >= 3 keywords, > 2000 chars
+			'cookie consent accept all do not accept. '.repeat(COUNT_100);
 		document.body.appendChild(cookieDiv);
 
 		const result = extractContent(document);
-		// Should use fallback element (line 755 condition passes)
-		expect(result.content.length).toBeGreaterThan(2000);
+
+		/**
+		 * Should use fallback element (line 755 condition passes).
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_2000);
 		expect(result.content).toContain('cookie consent');
 	});
 
@@ -346,7 +375,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -355,9 +384,9 @@ describe('extractContent', () => {
 		// Create element with substantial text (> 500 chars) but after removing unwanted elements, it's <= 500
 		const div = document.createElement('div');
 		const script = document.createElement('script');
-		script.textContent = 'Script content that will be removed. '.repeat(20); // ~600 chars
+		script.textContent = 'Script content that will be removed. '.repeat(COUNT_20);
 		div.appendChild(script);
-		div.textContent = 'Small remaining text. '; // < 500 chars after script removal
+		div.textContent = 'Small remaining text. ';
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -376,7 +405,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -386,13 +415,15 @@ describe('extractContent', () => {
 		const article = document.createElement('article');
 		article.textContent =
 			'Article content with enough text to meet the minimum length requirement of 1000 characters for bestMainText extraction. '.repeat(
-				20,
+				COUNT_20,
 			);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
-		// Should iterate through mainSelectors (line 772)
-		expect(result.content.length).toBeGreaterThan(1000);
+		/**
+		 * Should iterate through mainSelectors (line 772).
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 		expect(result.content).toContain('Article content');
 	});
 
@@ -406,7 +437,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -414,12 +445,14 @@ describe('extractContent', () => {
 
 		// Create article element with text <= 1000 chars
 		const article = document.createElement('article');
-		article.textContent = 'Article content. '.repeat(50); // ~900 chars, <= 1000
+		article.textContent = 'Article content. '.repeat(COUNT_50);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
-		// Should skip article (line 804 condition fails)
-		// Will fall back to other strategies
+		/**
+		 * Should skip article (line 804 condition fails).
+		 * Will fall back to other strategies.
+		 */
 		expect(result.content).toBeDefined();
 	});
 
@@ -433,7 +466,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -442,19 +475,24 @@ describe('extractContent', () => {
 		// Create article element with text > 1000 but <= 5000 chars and cookieRatio >= 0.05
 		// Also ensure match() returns null to cover the : 0 branch at line 169
 		const article = document.createElement('article');
-		// Use text with NO cookie keywords to make match() return null
+		/**
+		 * Use text with NO cookie keywords to make match() return null.
+		 */
 		article.textContent =
 			'This is article content with enough text to meet the minimum length requirement. '.repeat(
-				20,
-			); // > 1000, <= 5000, no cookie keywords
+				COUNT_20,
+			);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
-		// Should process article (line 165 condition passes)
-		// match() returns null, so cookieMatches = 0 (covers : 0 branch at line 169)
-		// cookieRatio = 0 < 0.05, so article is used
+
+		/**
+		 * Should process article (line 165 condition passes).
+		 * Match() returns null, so cookieMatches = 0 (covers : 0 branch at line 169).
+		 * cookieRatio = 0 < 0.05, so article is used.
+		 */
 		expect(result.content).toContain('article content');
-		expect(result.content.length).toBeGreaterThan(1000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
 	});
 
 	it('should not update bestMainText when mainText.length <= bestMainLength in mainSelectors loop', () => {
@@ -467,7 +505,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -476,20 +514,22 @@ describe('extractContent', () => {
 		// Create article element (longer, will be set first)
 		const article = document.createElement('article');
 		article.textContent = 'Article content with substantial text. '.repeat(
-			100,
-		); // ~3500 chars
+			COUNT_100,
+		);
 		document.body.appendChild(article);
 
-		// Create main element (shorter, won't update bestMainText)
+		/**
+		 * Create main element (shorter, won't update bestMainText).
+		 */
 		const main = document.createElement('main');
-		main.textContent = 'Main content. '.repeat(100); // ~1500 chars, shorter
+		main.textContent = 'Main content. '.repeat(COUNT_100);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
 		// Should not update bestMainText (line 820 condition fails for main)
 		// Should use article content
 		expect(result.content).toContain('Article content');
-		expect(result.content.length).toBeGreaterThan(3000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_3000);
 	});
 
 	it('should not return bestMainText when bestMainText.length === 0', () => {
@@ -502,7 +542,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText is empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -510,7 +550,7 @@ describe('extractContent', () => {
 
 		// Create article element with text <= 1000 chars (won't set bestMainText)
 		const article = document.createElement('article');
-		article.textContent = 'Article content. '.repeat(50); // ~900 chars, <= 1000
+		article.textContent = 'Article content. '.repeat(COUNT_50);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
@@ -529,7 +569,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements to ensure bestText and bestMainText are empty
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -545,7 +585,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should iterate through allBodyElements (line 845)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('Body text content');
 	});
 
@@ -559,7 +599,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -572,13 +612,13 @@ describe('extractContent', () => {
 
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent =
-			'Normal body text content with enough text. '.repeat(15);
+			'Normal body text content with enough text. '.repeat(COUNT_15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
 		// Should remove element with document.querySelector (line 857)
 		expect(result.content).toContain('Normal body text');
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 	});
 
 	it('should remove elements with addEventListener pattern in body text', () => {
@@ -591,7 +631,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -604,13 +644,13 @@ describe('extractContent', () => {
 
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent =
-			'Normal body text content with enough text. '.repeat(15);
+			'Normal body text content with enough text. '.repeat(COUNT_15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
 		// Should remove element with addEventListener (line 858)
 		expect(result.content).toContain('Normal body text');
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 	});
 
 	it('should remove elements with fetch( pattern in body text', () => {
@@ -623,7 +663,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -636,13 +676,13 @@ describe('extractContent', () => {
 
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent =
-			'Normal body text content with enough text. '.repeat(15);
+			'Normal body text content with enough text. '.repeat(COUNT_15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
 		// Should remove element with fetch( (line 859)
 		expect(result.content).toContain('Normal body text');
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 	});
 
 	it('should remove elements with const and = document pattern in body text', () => {
@@ -655,7 +695,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -668,13 +708,13 @@ describe('extractContent', () => {
 
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent =
-			'Normal body text content with enough text. '.repeat(15);
+			'Normal body text content with enough text. '.repeat(COUNT_15);
 		document.body.appendChild(normalDiv);
 
 		const result = extractContent(document);
 		// Should remove element with const and = document (line 860-861)
 		expect(result.content).toContain('Normal body text');
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 	});
 
 	it('should filter body text when jsPatternCount > maxJsPatternCountForFilter', () => {
@@ -687,7 +727,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -708,7 +748,7 @@ describe('extractContent', () => {
 		document.body.appendChild(p1);
 
 		const p2 = document.createElement('p');
-		p2.textContent = 'More documentation content here. '.repeat(5);
+		p2.textContent = 'More documentation content here. '.repeat(COUNT_5);
 		document.body.appendChild(p2);
 
 		const result = extractContent(document);
@@ -728,7 +768,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -769,7 +809,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -806,7 +846,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -833,7 +873,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -860,14 +900,14 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
 
 		// Create body text > 500 but <= 5000 chars with high cookie ratio (>= 0.2)
-		const cookieText = 'cookie consent accept all '.repeat(50);
+		const cookieText = 'cookie consent accept all '.repeat(COUNT_50);
 		const normalText = 'This is body text. '.repeat(10);
 		document.body.textContent = cookieText + normalText; // > 500, <= 5000, high cookie ratio
 
@@ -887,7 +927,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -902,7 +942,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should return bodyText (line 939 condition passes)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('substantial body text');
 	});
 });

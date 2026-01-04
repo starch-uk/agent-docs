@@ -7,17 +7,17 @@
 
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types -- DOM API types cannot be made readonly */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
-/* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for lengths and DOM operations */
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- DOM API types require assertions */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- page.evaluate returns any type from browser context */
 
 /**
  * Fallback content extraction function that runs in browser context.
  * This function is stringified and injected into page.evaluate().
  * @returns Extracted content string.
  */
-export function extractFallbackContent(): string {
+function extractFallbackContent(): string {
 	const { body } = document;
-	if (body) {
+	if (body !== null && body !== undefined) {
 		// Clone body to avoid modifying original
 		const clone = body.cloneNode(true) as Element;
 		// Remove unwanted elements
@@ -39,8 +39,8 @@ export function extractFallbackContent(): string {
  * This function is stringified and injected into page.evaluate().
  * @returns Extracted content string.
  */
-export function extractRetryContent(): string {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-type-assertion -- DOM API in browser context
+function extractRetryContent(): string {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- DOM API in browser context
 	const doc = (globalThis as any).document;
 
 	// Try to get all text content, filtering out cookie content
@@ -97,3 +97,5 @@ export function extractRetryContent(): string {
 
 	return '';
 }
+
+export { extractFallbackContent, extractRetryContent };

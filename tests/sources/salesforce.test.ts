@@ -32,6 +32,7 @@ const SECOND_INDEX = 1;
 const FIRST_FILE_COUNT = 1;
 const MINIMUM_WRITE_CALLS = 2;
 const DEDUPLICATED_COUNT = 2;
+const ZERO = 0;
 
 describe('searchAndDownloadSalesforceHelp', () => {
 	beforeEach(() => {
@@ -186,8 +187,8 @@ describe('searchAndDownloadSalesforceHelp', () => {
 		});
 
 		const result = await searchAndDownloadSalesforceHelp('test', {
-			verbose: true,
 			limit: 3,
+			verbose: true,
 		});
 
 		// Verify verbose logging occurred
@@ -384,8 +385,11 @@ describe('getSalesforceUrl', () => {
 		expect(crawler.crawlSalesforcePage).toHaveBeenCalledWith(url);
 		// Verify the filename uses pathnameLast
 		const writeFileCalls = vi.mocked(writeFile).mock.calls;
-		expect(writeFileCalls.length).toBeGreaterThan(0);
-		const filename = writeFileCalls[0]?.[0] as string;
+		expect(writeFileCalls.length).toBeGreaterThan(ZERO);
+		const filename = writeFileCalls[FIRST_INDEX]?.[FIRST_INDEX];
+		if (typeof filename !== 'string') {
+			throw new Error('Expected filename to be a string');
+		}
 		expect(filename).toContain('apex-annotations');
 		// Ensure the pathnameLast branch is explicitly covered by verifying the filename pattern
 		expect(filename).toMatch(/apex-annotations\.html$/);
@@ -395,7 +399,7 @@ describe('getSalesforceUrl', () => {
 		const url = 'https://help.salesforce.com/s/articleView?id=test';
 		const mockFolderPath = '/tmp/sf-docs-helper-get-123';
 		// Create a non-Error object to test line 104: error instanceof Error ? error.message : String(error)
-		const nonError = { message: 'Not an Error', code: 'TEST_ERROR' };
+		const nonError = { code: 'TEST_ERROR', message: 'Not an Error' };
 
 		vi.mocked(crawler.crawlSalesforcePage).mockRejectedValue(nonError);
 		vi.mocked(mkdtemp).mockResolvedValue(mockFolderPath);

@@ -2,14 +2,13 @@
  * @file Tests for repo-todos CLI entry point execution.
  */
 
+import { readdir } from 'fs/promises';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
 	isMainEntryPoint,
 	executeIfMainEntryPoint,
 } from '../../src/cli/repo-todos.js';
-import * as repoTodosModule from '../../src/cli/repo-todos.js';
 import * as repoTodosUtils from '../../src/utils/repo-todos.js';
-import { readdir } from 'fs/promises';
 
 vi.mock('../../src/utils/repo-todos.js');
 vi.mock('fs/promises');
@@ -37,21 +36,29 @@ describe('repo-todos CLI entry point', () => {
 
 	it('should call executeIfMainEntryPoint without errors', async () => {
 		process.argv = ['node', '/path/to/repo-todos', '/tmp/test-repo'];
-		// Mock process.exit to prevent actual exit
+
+		/**
+		 * Mock process.exit to prevent actual exit.
+		 */
 		const originalExit = process.exit;
 		const exitSpy = vi.fn() as typeof process.exit;
-		process.exit = exitSpy;
+		process.exit = exitSpy.bind(process);
 
-		// Mock file system operations to avoid actual file access
-		vi.mocked(readdir).mockResolvedValue([] as any);
+		/**
+		 * Mock file system operations to avoid actual file access.
+		 */
+		vi.mocked(readdir).mockResolvedValue([] as Awaited<ReturnType<typeof readdir>>);
 		vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue([]);
 
 		// Test that the function can be called (entry point execution happens at module load)
 		// The actual execution is tested via the isMainEntryPoint() tests
-		expect(() => executeIfMainEntryPoint()).not.toThrow();
+		expect(() => {
+			executeIfMainEntryPoint();
+		}).not.toThrow();
 
 		// Give async operations time to complete
-		await new Promise((resolve) => setTimeout(resolve, 10));
+		const TIMEOUT_DELAY_10 = 10;
+		await new Promise((resolve) => setTimeout(resolve, TIMEOUT_DELAY_10));
 
 		process.exit = originalExit;
 	});

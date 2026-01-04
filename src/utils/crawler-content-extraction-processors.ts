@@ -11,9 +11,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- DOM API types require assertions */
 
 import {
-	findInShadowDOM,
-	removeElements,
 	extractLinkTitles,
+	removeElements,
 } from './crawler-content-extraction-helpers.js';
 
 /**
@@ -22,7 +21,7 @@ import {
  * @param debugInfo - Debug info object to update.
  * @returns Object with bestText and bestLength, or null if no suitable content found.
  */
-export function processMainElementContent(
+function processMainElementContent(
 	mainElement: Element,
 	debugInfo: Record<string, unknown>,
 ): { bestText: string; bestLength: number } | null {
@@ -200,7 +199,7 @@ export function processMainElementContent(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not sufficient.
  */
-export function extractShadowDOMContent(
+function extractShadowDOMContent(
 	element: Element,
 	debugInfo: Record<string, unknown>,
 ): string | null {
@@ -236,7 +235,7 @@ export function extractShadowDOMContent(
  * @param debugInfo - Debug info object.
  * @returns Extracted content or null if not found.
  */
-export function tryFallbackElementExtraction(
+function tryFallbackElementExtraction(
 	doc: Document,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
@@ -286,12 +285,12 @@ export function tryFallbackElementExtraction(
  * @param debugInfo - Debug info object.
  * @returns Extracted content or null if not found.
  */
-export function tryBodyTextExtraction(
+function tryBodyTextExtraction(
 	doc: Document,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
 	const { body } = doc;
-	if (body) {
+	if (body !== null && body !== undefined) {
 		// Remove all unwanted elements more aggressively
 		removeElements(
 			body,
@@ -465,7 +464,7 @@ export function tryBodyTextExtraction(
 	}
 
 	// Last resort: return whatever body text we have
-	if (doc.body) {
+	if (doc.body !== null && doc.body !== undefined) {
 		// Clone body and remove scripts/styles, then get text
 		const bodyClone = doc.body.cloneNode(true) as Element;
 		// Remove non-content elements but be less aggressive
@@ -491,7 +490,7 @@ export function tryBodyTextExtraction(
 	}
 
 	// Absolute last resort: return body text as-is (might include scripts but better than nothing)
-	if (doc.body) {
+	if (doc.body !== null && doc.body !== undefined) {
 		// Try to get text from body, but filter out obvious script content
 		const rawBodyText = doc.body.textContent?.trim() ?? '';
 		// Check if it looks like mostly code/scripts (high ratio of special chars)
@@ -515,3 +514,11 @@ export function tryBodyTextExtraction(
 
 	return null;
 }
+
+// Export all functions together
+export {
+	extractShadowDOMContent,
+	processMainElementContent,
+	tryBodyTextExtraction,
+	tryFallbackElementExtraction,
+};

@@ -7,17 +7,28 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { extractContent } from '../../src/utils/extract-content.js';
-import { findInShadowDOM } from '../../src/utils/extract-content-helpers.js';
+
+const COUNT_2 = 2;
+const COUNT_3 = 3;
+const COUNT_5 = 5;
+const COUNT_20 = 20;
+const COUNT_30 = 30;
+const COUNT_50 = 50;
+const COUNT_60 = 60;
+const COUNT_100 = 100;
+const COUNT_200 = 200;
+const COUNT_350 = 350;
+const MIN_LENGTH_200 = 200;
+const MIN_LENGTH_500 = 500;
+const MIN_LENGTH_3000 = 3000;
 
 describe('extractContent', () => {
-	let dom: JSDOM;
-	let document: Document;
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
+	});
+	const { document } = dom.window;
 
 	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
 		// Ensure body is completely empty and no shadow DOM elements exist
 		document.body.innerHTML = '';
 		// Remove any doc-xml-content elements that might exist
@@ -37,7 +48,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -47,21 +58,21 @@ describe('extractContent', () => {
 		const p = document.createElement('p');
 		p.textContent =
 			'Paragraph text with enough content to meet the minimum length requirement of 100 characters for text element collection. '.repeat(
-				2,
+				COUNT_2,
 			);
 		document.body.appendChild(p);
 
 		const div = document.createElement('div');
-		div.textContent = 'Div text with enough content. '.repeat(5);
+		div.textContent = 'Div text with enough content. '.repeat(COUNT_5);
 		document.body.appendChild(div);
 
 		const span = document.createElement('span');
-		span.textContent = 'Span text with enough content. '.repeat(5);
+		span.textContent = 'Span text with enough content. '.repeat(COUNT_5);
 		document.body.appendChild(span);
 
 		const result = extractContent(document);
 		// Should collect text from text elements (lines 604-648)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		// Should contain at least one of the text elements
 		expect(
 			result.content.includes('Paragraph text') ||
@@ -80,7 +91,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -88,7 +99,7 @@ describe('extractContent', () => {
 
 		// Create text element with high code ratio (>= 0.1)
 		const div = document.createElement('div');
-		div.textContent = '{}();=;{}();=;{}();=;'.repeat(20); // High code ratio, > 100 chars
+		div.textContent = '{}();=;{}();=;{}();=;'.repeat(COUNT_20); // High code ratio, > 100 chars
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -107,7 +118,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -115,12 +126,12 @@ describe('extractContent', () => {
 
 		// Create text element with content that's already in bestText
 		const main = document.createElement('main');
-		main.textContent = 'Main content with substantial text. '.repeat(50);
+		main.textContent = 'Main content with substantial text. '.repeat(COUNT_50);
 		document.body.appendChild(main);
 
 		// Create div with same content (duplicate)
 		const div = document.createElement('div');
-		div.textContent = 'Main content with substantial text. '.repeat(50);
+		div.textContent = 'Main content with substantial text. '.repeat(COUNT_50);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -139,7 +150,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -148,19 +159,19 @@ describe('extractContent', () => {
 		// Create multiple text elements that when combined are longer than any single one
 		const p1 = document.createElement('p');
 		p1.textContent = 'First paragraph with substantial content. '.repeat(
-			30,
+			COUNT_30,
 		);
 		document.body.appendChild(p1);
 
 		const p2 = document.createElement('p');
 		p2.textContent = 'Second paragraph with substantial content. '.repeat(
-			30,
+			COUNT_30,
 		);
 		document.body.appendChild(p2);
 
 		const result = extractContent(document);
 		// Should update bestText with combinedText (line 644-647)
-		expect(result.content.length).toBeGreaterThan(500);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_500);
 		expect(result.content).toContain('First paragraph');
 		expect(result.content).toContain('Second paragraph');
 	});
@@ -173,25 +184,32 @@ describe('extractContent', () => {
 			existingDocXml.remove();
 		}
 
-		// Create main element with substantial text (sets bestText)
+		/**
+		 * Create main element with substantial text (sets bestText).
+		 */
 		const main = document.createElement('main');
-		main.textContent = 'Main content with substantial text. '.repeat(100); // ~3500 chars
+		main.textContent = 'Main content with substantial text. '.repeat(COUNT_100);
 		document.body.appendChild(main);
 
-		// Create text elements that when combined are shorter than main
+		/**
+		 * Create text elements that when combined are shorter than main.
+		 */
 		const p1 = document.createElement('p');
-		p1.textContent = 'First paragraph. '.repeat(50); // ~900 chars
+		p1.textContent = 'First paragraph. '.repeat(COUNT_50);
 		document.body.appendChild(p1);
 
 		const p2 = document.createElement('p');
-		p2.textContent = 'Second paragraph. '.repeat(50); // ~1000 chars
+		p2.textContent = 'Second paragraph. '.repeat(COUNT_50);
 		document.body.appendChild(p2);
 
 		const result = extractContent(document);
-		// Should not update bestText (line 644 condition fails)
-		// Should use main content instead
+
+		/**
+		 * Should not update bestText (line 644 condition fails).
+		 * Should use main content instead.
+		 */
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(3000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_3000);
 	});
 
 	it('should limit paragraph collection to maxParagraphs', () => {
@@ -204,25 +222,31 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
 
-		// Create more than 50 paragraphs (maxParagraphs)
-		for (let i = 0; i < 60; i++) {
+		/**
+		 * Create more than 50 paragraphs (maxParagraphs).
+		 */
+		const ZERO = 0;
+		for (let i = ZERO; i < COUNT_60; i++) {
 			const p = document.createElement('p');
 			p.textContent =
-				`Paragraph ${i} with enough content to meet the minimum length requirement of 100 characters. `.repeat(
-					2,
+				`Paragraph ${String(i)} with enough content to meet the minimum length requirement of 100 characters. `.repeat(
+					COUNT_2,
 				);
 			document.body.appendChild(p);
 		}
 
 		const result = extractContent(document);
-		// Should limit to 50 paragraphs (line 581)
-		expect(result.content.length).toBeGreaterThan(200);
+
+		/**
+		 * Should limit to 50 paragraphs (line 581).
+		 */
+		expect(result.content.length).toBeGreaterThan(COUNT_200);
 	});
 
 	it('should limit text element collection to maxTextElementsCollect', () => {
@@ -235,24 +259,30 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
 		}
 
-		// Create more than 300 text elements (maxTextElementsCollect)
-		for (let i = 0; i < 350; i++) {
+		/**
+		 * Create more than 300 text elements (maxTextElementsCollect).
+		 */
+		const ZERO = 0;
+		for (let i = ZERO; i < COUNT_350; i++) {
 			const div = document.createElement('div');
-			div.textContent = `Text element ${i} with enough content. `.repeat(
-				3,
+			div.textContent = `Text element ${String(i)} with enough content. `.repeat(
+				COUNT_3,
 			);
 			document.body.appendChild(div);
 		}
 
 		const result = extractContent(document);
-		// Should limit to 300 text elements (line 612)
-		expect(result.content.length).toBeGreaterThan(200);
+
+		/**
+		 * Should limit to 300 text elements (line 612).
+		 */
+		expect(result.content.length).toBeGreaterThan(COUNT_200);
 	});
 
 	it('should not collect text when text is not unique (substring match)', () => {
@@ -265,7 +295,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -275,7 +305,7 @@ describe('extractContent', () => {
 		const p1 = document.createElement('p');
 		p1.textContent =
 			'This is a long text with enough content to meet the minimum length requirement of 50 characters for text element collection. '.repeat(
-				3,
+				COUNT_3,
 			);
 		document.body.appendChild(p1);
 
@@ -289,7 +319,7 @@ describe('extractContent', () => {
 		// Should not collect duplicate text (line 632-634 condition)
 		// Should contain the longer text
 		expect(result.content).toContain('This is a long text');
-		expect(result.content.length).toBeGreaterThan(100);
+		expect(result.content.length).toBeGreaterThan(COUNT_100);
 	});
 
 	it('should return filteredText from processMainElement when docTexts.length > 0 and filteredText.length > minFilteredTextLength', () => {
@@ -302,14 +332,14 @@ describe('extractContent', () => {
 		const p1 = document.createElement('p');
 		p1.textContent =
 			'This is valid documentation content that should be extracted from paragraphs. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p1);
 
 		const p2 = document.createElement('p');
 		p2.textContent =
 			'More documentation content here that meets the minimum length requirement. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p2);
 
@@ -319,7 +349,7 @@ describe('extractContent', () => {
 		// Should return filteredText from processMainElement (line 287-290)
 		expect(result.content).toContain('valid documentation content');
 		expect(result.content).toContain('More documentation content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should not return filteredText from processMainElement when filteredText.length <= minFilteredTextLength', () => {
@@ -352,7 +382,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should return mainText from processMainElement (line 320-324)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('substantial main content');
 	});
 
@@ -366,7 +396,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -378,13 +408,13 @@ describe('extractContent', () => {
 		sldsDiv.className = 'slds-text-longform';
 		sldsDiv.textContent =
 			'SLDS text longform content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				COUNT_3,
 			);
 		document.body.appendChild(sldsDiv);
 
 		const result = extractContent(document);
 		// Should find content from selector (line 651-702)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('SLDS text longform');
 	});
 
@@ -398,7 +428,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -408,13 +438,13 @@ describe('extractContent', () => {
 		const article = document.createElement('article');
 		article.textContent =
 			'Article content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				COUNT_3,
 			);
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
 		// Should find content from article selector (line 651-702)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('Article content');
 	});
 
@@ -428,7 +458,7 @@ describe('extractContent', () => {
 
 		// Remove any main elements
 		const mainEl =
-			document.querySelector('main') ||
+			document.querySelector('main') ??
 			document.querySelector('[role="main"]');
 		if (mainEl) {
 			mainEl.remove();
@@ -439,13 +469,13 @@ describe('extractContent', () => {
 		docDiv.className = 'documentation-content';
 		docDiv.textContent =
 			'Documentation content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				COUNT_3,
 			);
 		document.body.appendChild(docDiv);
 
 		const result = extractContent(document);
 		// Should find content from selector (line 651-702)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('Documentation content');
 	});
 
@@ -454,7 +484,7 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'Main content with enough text to meet the minimum length requirement of 200 characters for extraction. '.repeat(
-				3,
+				COUNT_3,
 			);
 
 		// Add links with title attributes
@@ -488,7 +518,7 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'Main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				COUNT_3,
 			);
 
 		// Add link without title attribute
@@ -529,7 +559,7 @@ describe('extractContent', () => {
 		const p = document.createElement('p');
 		p.textContent =
 			'This is valid documentation content that should be extracted. '.repeat(
-				5,
+				COUNT_5,
 			);
 		main.appendChild(p);
 
@@ -540,7 +570,7 @@ describe('extractContent', () => {
 		// The title text should be included even when filtering JS patterns
 		expect(result.content).toContain('valid documentation content');
 		// Title text might be included depending on the filtering logic
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should not include paragraphs with text.length <= minTextLengthForDoc when filtering JS patterns', () => {
@@ -569,7 +599,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// Should include valid documentation (line 277)
 		expect(result.content).toContain('valid documentation content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		// Short paragraph should be excluded from docTexts (line 267 condition fails)
 		// But might appear in mainText if filtering path isn't taken - that's okay
 		// The key is that the valid documentation is extracted via docTexts
@@ -587,15 +617,17 @@ describe('extractContent', () => {
 		const p1 = document.createElement('p');
 		p1.textContent =
 			'This paragraph contains function keyword and should be excluded from extraction. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p1);
 
-		// Add paragraph with '=>' pattern (should be excluded)
+		/**
+		 * Add paragraph with '=>' pattern (should be excluded).
+		 */
 		const p2 = document.createElement('p');
 		p2.textContent =
 			'This paragraph contains => arrow function and should be excluded. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p2);
 
@@ -659,7 +691,7 @@ describe('extractContent', () => {
 		// Should include valid documentation but exclude paragraphs with JS patterns (lines 268-275 conditions)
 		expect(result.content).toContain('valid documentation content');
 		// The filtered text should primarily contain the valid documentation
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		// The JS pattern paragraphs should be filtered out in the docTexts extraction
 		// But they might appear in mainText if the filtering path isn't taken
 		// The key is that the valid documentation is extracted
@@ -696,11 +728,11 @@ describe('extractContent', () => {
 
 		// Add valid documentation paragraphs but combined length <= 200
 		const p1 = document.createElement('p');
-		p1.textContent = 'Valid doc. '.repeat(5); // ~50 chars
+		p1.textContent = 'Valid doc. '.repeat(COUNT_5);
 		main.appendChild(p1);
 
 		const p2 = document.createElement('p');
-		p2.textContent = 'More valid doc. '.repeat(5); // ~75 chars
+		p2.textContent = 'More valid doc. '.repeat(COUNT_5);
 		main.appendChild(p2);
 
 		document.body.appendChild(main);
@@ -779,7 +811,7 @@ describe('extractContent', () => {
 
 		const result = extractContent(document);
 		// Should return mainText (line 328-330)
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('substantial main content');
 	});
 
@@ -808,7 +840,7 @@ describe('extractContent', () => {
 		// The code path for onclick check should be executed (line 183)
 		// Even if JSDOM doesn't fully support it, the check is covered
 		expect(result.content).toContain('Normal content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should attempt to remove elements with onload handler', () => {
@@ -832,7 +864,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// The code path for onload check should be executed (line 184)
 		expect(result.content).toContain('Normal content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should attempt to remove elements with onerror handler', () => {
@@ -856,7 +888,7 @@ describe('extractContent', () => {
 		const result = extractContent(document);
 		// The code path for onerror check should be executed (line 185)
 		expect(result.content).toContain('Normal content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should remove elements with global-nav class', () => {

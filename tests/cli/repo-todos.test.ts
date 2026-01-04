@@ -2,16 +2,18 @@
  * @file Tests for repo-todos CLI script.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { writeFile } from 'fs/promises';
-import { resolve } from 'node:path';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { main, parseArgs } from '../../src/cli/repo-todos.js';
 import * as repoTodosUtils from '../../src/utils/repo-todos.js';
 
 vi.mock('fs/promises');
 vi.mock('../../src/utils/repo-todos.js');
 
-// Mock process.exit and console methods
+/**
+ * Mock process.exit and console methods.
+ */
+// eslint-disable-next-line @typescript-eslint/unbound-method
 const originalExit = process.exit;
 const originalError = console.error;
 const originalLog = console.log;
@@ -19,7 +21,7 @@ const originalLog = console.log;
 describe('repo-todos CLI', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		process.exit = originalExit;
+		process.exit = originalExit.bind(process);
 		console.error = originalError;
 		console.log = originalLog;
 		vi.spyOn(console, 'error').mockImplementation(() => {
@@ -30,7 +32,7 @@ describe('repo-todos CLI', () => {
 		});
 		vi.spyOn(process, 'exit').mockImplementation((() => {
 			// Intentionally empty for test mocking
-		}) as typeof process.exit);
+		}) as (code?: number) => never);
 	});
 
 	describe('parseArgs', () => {
@@ -59,42 +61,46 @@ describe('repo-todos CLI', () => {
 	});
 
 	describe('main', () => {
+		/**
+		 * Ensure process.exit is mocked before calling main.
+		 */
 		it('should handle missing repo path', async () => {
-			// Ensure process.exit is mocked before calling main
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
-			}) as typeof process.exit);
+			}) as (code?: number) => never);
 
 			await main([]);
 
 			expect(console.error).toHaveBeenCalledWith(
 				'Usage: pnpm repo-todos <repo-path> [--output <file>]',
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should handle empty repo path', async () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
-			}) as typeof process.exit);
+			}) as (code?: number) => never);
 
 			await main(['']);
 
 			expect(console.error).toHaveBeenCalled();
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should generate todos and output to stdout', async () => {
 			const mockTodos = [
 				{
+					content: 'Inspect file1.ts',
 					id: 'file-1',
 					status: 'pending' as const,
-					content: 'Inspect file1.ts',
 				},
 				{
+					content: 'Inspect file2.ts',
 					id: 'file-2',
 					status: 'pending' as const,
-					content: 'Inspect file2.ts',
 				},
 			];
 
@@ -110,16 +116,19 @@ describe('repo-todos CLI', () => {
 				repoPath: expect.stringContaining('/tmp/test-repo'),
 			});
 			expect(console.log).toHaveBeenCalled();
-			const logCall = vi.mocked(console.log).mock.calls[0]?.[0];
-			expect(logCall).toContain('file-1');
+			const ZERO = 0;
+			const logCall = vi.mocked(console.log).mock.calls[ZERO]?.[ZERO] as string | undefined;
+			if (logCall) {
+				expect(logCall).toContain('file-1');
+			}
 		});
 
 		it('should generate todos and write to file with --output', async () => {
 			const mockTodos = [
 				{
+					content: 'Inspect file1.ts',
 					id: 'file-1',
 					status: 'pending' as const,
-					content: 'Inspect file1.ts',
 				},
 			];
 
@@ -145,13 +154,13 @@ describe('repo-todos CLI', () => {
 		it('should exit with error if todo count validation fails', async () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
-			}) as typeof process.exit);
+			}) as (code?: number) => never);
 
 			const mockTodos = [
 				{
+					content: 'Inspect file1.ts',
 					id: 'file-1',
 					status: 'pending' as const,
-					content: 'Inspect file1.ts',
 				},
 			];
 
@@ -166,19 +175,20 @@ describe('repo-todos CLI', () => {
 			expect(console.error).toHaveBeenCalledWith(
 				'ERROR: Todo count does not match file count!',
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should exit with error if duplicate IDs found', async () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
-			}) as typeof process.exit);
+			}) as (code?: number) => never);
 
 			const mockTodos = [
 				{
+					content: 'Inspect file1.ts',
 					id: 'file-1',
 					status: 'pending' as const,
-					content: 'Inspect file1.ts',
 				},
 			];
 
@@ -195,13 +205,14 @@ describe('repo-todos CLI', () => {
 			expect(console.error).toHaveBeenCalledWith(
 				expect.stringContaining('ERROR: Found'),
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should handle errors during todo generation', async () => {
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
-			}) as typeof process.exit);
+			}) as (code?: number) => never);
 
 			vi.mocked(repoTodosUtils.generateRepoTodos).mockRejectedValue(
 				new Error('Test error'),
@@ -213,7 +224,8 @@ describe('repo-todos CLI', () => {
 				'Error generating todos:',
 				expect.any(Error),
 			);
-			expect(process.exit).toHaveBeenCalledWith(1);
+			const EXIT_CODE_ERROR = 1;
+			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
 });

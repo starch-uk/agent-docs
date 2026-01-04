@@ -4,7 +4,6 @@
  */
 
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types -- DOM API types cannot be made readonly */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
 /* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for lengths and DOM operations */
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- DOM API types require assertions */
 
@@ -16,7 +15,7 @@ import { removeElements } from './extract-content-helpers.js';
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not found.
  */
-export function tryFallbackContentExtraction(
+function tryFallbackContentExtraction(
 	doc: Document,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
@@ -68,7 +67,7 @@ export function tryFallbackContentExtraction(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not suitable.
  */
-export function tryBodyTextContent(
+function tryBodyTextContent(
 	bodyText: string,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
@@ -102,7 +101,7 @@ export function tryBodyTextContent(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not suitable.
  */
-export function tryLastResortBodyText(
+function tryLastResortBodyText(
 	body: HTMLBodyElement,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
@@ -134,7 +133,7 @@ export function tryLastResortBodyText(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not found.
  */
-export function processMainSelectors(
+function processMainSelectors(
 	body: HTMLBodyElement,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
@@ -198,7 +197,7 @@ export function processMainSelectors(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not suitable.
  */
-export function tryRawBodyText(
+function tryRawBodyText(
 	body: HTMLBodyElement,
 	debugInfo: Record<string, unknown>,
 ): { content: string; debugInfo: Record<string, unknown> } | null {
@@ -220,3 +219,11 @@ export function tryRawBodyText(
 	}
 	return null;
 }
+
+export {
+	processMainSelectors,
+	tryBodyTextContent,
+	tryFallbackContentExtraction,
+	tryLastResortBodyText,
+	tryRawBodyText,
+};

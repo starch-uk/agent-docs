@@ -6,26 +6,11 @@
 
 /* eslint-disable @typescript-eslint/prefer-readonly-parameter-types -- DOM API types and Playwright types cannot be made readonly */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
-/* eslint-disable @typescript-eslint/no-magic-numbers -- Magic numbers are used for timeouts, lengths, and DOM operations */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access -- page.evaluate returns any type from browser context */
 
 /**
  * Page type for cookie handling and content waiting.
  */
-type Page = {
-	goto: (
-		url: Readonly<string>,
-		options?: Readonly<{
-			timeout?: number;
-			waitUntil?: 'commit' | 'domcontentloaded' | 'load' | 'networkidle';
-		}>,
-	) => Promise<unknown>;
-	waitForSelector: (
-		selector: Readonly<string>,
-		options?: Readonly<{ timeout?: number }>,
-	) => Promise<unknown>;
-	evaluate: (...args: any[]) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- page.evaluate has overloaded signatures that TypeScript can't express cleanly
-	isClosed: () => boolean;
+interface Page {
 	$: (selector: Readonly<string>) => Promise<{
 		click: (options?: Readonly<{ timeout?: number }>) => Promise<unknown>;
 	} | null>;
@@ -36,16 +21,29 @@ type Page = {
 			) => Promise<unknown>;
 		}[]
 	>;
+	evaluate: (...args: any[]) => Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- page.evaluate has overloaded signatures that TypeScript can't express cleanly
+	goto: (
+		url: Readonly<string>,
+		options?: Readonly<{
+			timeout?: number;
+			waitUntil?: 'commit' | 'domcontentloaded' | 'load' | 'networkidle';
+		}>,
+	) => Promise<unknown>;
+	isClosed: () => boolean;
 	waitForFunction: (
 		fn: () => boolean,
 		options?: Readonly<{ timeout?: number }>,
 	) => Promise<unknown>;
-};
+	waitForSelector: (
+		selector: Readonly<string>,
+		options?: Readonly<{ timeout?: number }>,
+	) => Promise<unknown>;
+}
 
 /**
  * Timeout constants for page setup.
  */
-type TimeoutConstants = Readonly<{
+interface TimeoutConstants {
 	buttonClickTimeoutMs: number;
 	buttonClickWaitMs: number;
 	clickTimeoutMs: number;
@@ -61,7 +59,7 @@ type TimeoutConstants = Readonly<{
 	scrollCount: number;
 	scrollDivisor: number;
 	scrollWaitMs: number;
-}>;
+}
 
 /**
  * Handle cookie consent banner if present.

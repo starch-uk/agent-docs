@@ -13,24 +13,27 @@ vi.spyOn(console, 'warn').mockImplementation(() => {
 });
 
 vi.mock('crawlee', () => ({
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	PlaywrightCrawler: vi.fn(),
 }));
 
 const MIN_PARAM_COUNT = 1;
 
 describe('searchSalesforceHelp', () => {
-	let storedRequestHandler: (context: {
-		page: {
+	let storedRequestHandler: (context: Readonly<{
+		page: Readonly<{
 			waitForSelector: (
-				selector: string,
-				options?: { timeout?: number },
+				selector: Readonly<string>,
+				options?: Readonly<{ timeout?: number }>,
 			) => Promise<unknown>;
 			evaluate: <T>(
-				fn: (maxResults: Readonly<number>) => T,
-				...args: unknown[]
+				fn: Readonly<(maxResults: Readonly<number>) => T>,
+				...args: Readonly<unknown[]>
 			) => Promise<T>;
-		};
-	}) => Promise<void>;
+		}>;
+	}>) => Promise<void> = async (): Promise<void> => {
+		// Handler will be set by test
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -39,7 +42,9 @@ describe('searchSalesforceHelp', () => {
 		vi.useFakeTimers();
 
 		// Reset handler for each test
-		storedRequestHandler = undefined as any;
+		storedRequestHandler = async (): Promise<void> => {
+			// Handler will be set by test
+		};
 
 		// Create a default mock run that uses the current handler
 		const defaultMockRun = vi.fn().mockImplementation(async () => {
@@ -47,8 +52,8 @@ describe('searchSalesforceHelp', () => {
 			const handler = storedRequestHandler;
 			if (handler) {
 				const mockPage = {
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					evaluate: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = handler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -56,13 +61,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				storedRequestHandler = config.requestHandler;
 			}
 			return {
 				run: defaultMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 	});
 
@@ -71,12 +76,13 @@ describe('searchSalesforceHelp', () => {
 		try {
 			await vi.runAllTimersAsync();
 			await vi.runAllTimersAsync();
-		} catch (e) {
+		} catch {
 			// Fake timers not active, ignore
 		}
 		vi.useRealTimers();
 		// Wait a bit for any remaining promises to settle
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		const ZERO = 0;
+		await new Promise((resolve) => setTimeout(resolve, ZERO));
 	});
 
 	it('should have correct function signature', () => {
@@ -92,18 +98,18 @@ describe('searchSalesforceHelp', () => {
 	it('should normalize query by removing leading @ symbols', async () => {
 		const mockResults = [
 			{
-				url: 'https://help.salesforce.com/s/articleView?id=test',
 				title: 'Test Article',
+				url: 'https://help.salesforce.com/s/articleView?id=test',
 			},
 		];
 
 		// Create isolated mock for this test with handler captured in closure
-		let testHandler: typeof storedRequestHandler;
+		let testHandler: typeof storedRequestHandler = storedRequestHandler;
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					evaluate: vi.fn().mockResolvedValue(mockResults),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -111,16 +117,17 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
-		const resultPromise = searchSalesforceHelp('@test query', 10);
+		const COUNT_10 = 10;
+		const resultPromise = searchSalesforceHelp('@test query', COUNT_10);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toEqual(mockResults);
@@ -131,17 +138,17 @@ describe('searchSalesforceHelp', () => {
 	it('should return search results when found', async () => {
 		const mockResults = [
 			{
-				url: 'https://help.salesforce.com/s/articleView?id=test',
 				title: 'Test Article',
+				url: 'https://help.salesforce.com/s/articleView?id=test',
 			},
 		];
 
-		let testHandler: typeof storedRequestHandler;
+		let testHandler: typeof storedRequestHandler = storedRequestHandler;
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					evaluate: vi.fn().mockResolvedValue(mockResults),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -149,16 +156,17 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
-		const resultPromise = searchSalesforceHelp('test query', 10);
+		const COUNT_10 = 10;
+		const resultPromise = searchSalesforceHelp('test query', COUNT_10);
 		await vi.runAllTimersAsync();
 		const result = await resultPromise;
 		expect(result).toEqual(mockResults);
@@ -167,18 +175,19 @@ describe('searchSalesforceHelp', () => {
 
 	it('should handle search errors gracefully and try fallback', async () => {
 		let callCount = 0;
-		let testHandler: typeof storedRequestHandler;
+		const COUNT_1 = 1;
+		let testHandler: typeof storedRequestHandler = storedRequestHandler;
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			callCount++;
-			if (callCount === 1) {
+			if (callCount === COUNT_1) {
 				// First call (primary search) fails
 				throw new Error('Network error');
 			}
 			// Second call (fallback) succeeds but returns empty
 			if (testHandler) {
 				const mockPage = {
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					evaluate: vi.fn().mockResolvedValue([]),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
@@ -186,13 +195,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -227,13 +236,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test');
@@ -271,13 +280,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -302,13 +311,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('nonexistent query', 10);
@@ -346,13 +355,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -385,13 +394,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -426,13 +435,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -460,13 +469,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -503,13 +512,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -539,13 +548,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);
@@ -577,13 +586,13 @@ describe('searchSalesforceHelp', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
 			if (config.requestHandler) {
 				testHandler = config.requestHandler;
 			}
 			return {
 				run: testMockRun,
-			} as unknown as PlaywrightCrawler;
+			} as PlaywrightCrawler;
 		});
 
 		const resultPromise = searchSalesforceHelp('test', 10);

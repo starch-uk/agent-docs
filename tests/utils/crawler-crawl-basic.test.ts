@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { PlaywrightCrawler } from 'crawlee';
+import type { PlaywrightCrawler } from 'crawlee';
 import { crawlSalesforcePage } from '../../src/utils/crawler.js';
 
 // Mock console.warn to avoid noise in tests
@@ -14,37 +14,47 @@ vi.spyOn(console, 'warn').mockImplementation(() => {
 });
 
 vi.mock('crawlee', () => ({
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	PlaywrightCrawler: vi.fn(),
 }));
 
-const MIN_PARAM_COUNT = 1;
-const SINGLE_PARAM_COUNT = 1;
+const EVALUATE_CALL_COUNT_FIRST = 1;
+const REPEAT_COUNT_20 = 20;
+const TIMEOUT_DELAY_0 = 0;
 
 describe('crawlSalesforcePage', () => {
-	// Helper to create evaluate mock that executes function with jsdom
-	const createEvaluateMock = (createDOM: () => JSDOM) => {
-		return vi.fn().mockImplementation(async (fn: any) => {
+	/**
+	 * Helper to create evaluate mock that executes function with jsdom.
+	 * @param createDOM - Function that creates a JSDOM instance.
+	 * @returns A mock function that executes the provided function with jsdom.
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const createEvaluateMock = (createDOM: Readonly<() => JSDOM>): ReturnType<typeof vi.fn<[() => unknown], Promise<unknown>>> => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+		return vi.fn().mockImplementation(async (fn: Readonly<() => unknown>): Promise<unknown> => {
 			const dom = createDOM();
 			const { window } = dom;
-			const fnString = fn.toString();
+			const fnString = String(fn);
 			const isRetryEvaluate =
 				fnString.includes('createTreeWalker') ||
 				fnString.includes('textParts');
 			try {
+				// eslint-disable-next-line @typescript-eslint/no-implied-eval, @typescript-eslint/no-unsafe-type-assertion
 				const wrappedFn = new Function(
 					'globalThis',
 					`const window = arguments[0];
 					window.globalThis = window;
 					const document = window.document;
 					return (${fnString}).call(window);`,
-				);
+				) as (window: Readonly<typeof dom.window>) => unknown;
 				return await wrappedFn(window);
 			} catch {
 				if (isRetryEvaluate) {
-					return 'Documentation content. '.repeat(200);
+					return 'Documentation content. '.repeat(REPEAT_COUNT_20);
 				}
+				const REPEAT_COUNT_100 = 100;
 				return {
-					content: 'Documentation content. '.repeat(100),
+					content: 'Documentation content. '.repeat(REPEAT_COUNT_100),
 					debugInfo: {},
 				};
 			}
@@ -64,12 +74,12 @@ describe('crawlSalesforcePage', () => {
 		try {
 			await vi.runAllTimersAsync();
 			await vi.runAllTimersAsync();
-		} catch (e) {
+		} catch {
 			// Fake timers not active, ignore
 		}
 		vi.useRealTimers();
 		// Wait a bit for any remaining promises to settle
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, TIMEOUT_DELAY_0));
 	});
 
 	it('should have correct function signature', () => {
@@ -77,35 +87,43 @@ describe('crawlSalesforcePage', () => {
 	});
 
 	it('should accept URL parameter', () => {
+		const SINGLE_PARAM_COUNT = 1;
 		expect(crawlSalesforcePage.length).toBe(SINGLE_PARAM_COUNT);
 	});
 
 	it('should crawl page and return content', async () => {
 		// Content must be at least 100 chars (minimum requirement in code)
 		const mockContent =
-			'<html><body>' + 'Test Content '.repeat(20) + '</body></html>';
-		let testHandler: (context: { page: any }) => Promise<void>;
+			'<html><body>' + 'Test Content '.repeat(REPEAT_COUNT_20) + '</body></html>';
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
+					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -121,26 +139,37 @@ describe('crawlSalesforcePage', () => {
 	});
 
 	it('should handle page navigation errors', async () => {
-		// When crawler.run() itself throws, it's caught and re-thrown with a message
-		let testHandler: (context: { page: any }) => Promise<void>;
+		/**
+		 * When crawler.run() itself throws, it's caught and re-thrown with a message.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 		const testMockRun = vi
 			.fn()
 			.mockRejectedValue(new Error('Crawler run failed'));
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
 		});
 
-		// Use a promise that we can properly await and catch
-		let caughtError: Error | undefined;
+		/**
+		 * Use a promise that we can properly await and catch.
+		 */
+		let caughtError: Error | undefined = undefined;
 		try {
 			await crawlSalesforcePage('https://help.salesforce.com/test');
 		} catch (error) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			caughtError = error as Error;
 		}
 
@@ -154,35 +183,44 @@ describe('crawlSalesforcePage', () => {
 	});
 
 	it('should handle cookie banner clicks', async () => {
-		// Content must be at least 100 chars
+		/**
+		 * Content must be at least 100 chars.
+		 */
 		const mockContent =
-			'<html><body>' + 'Content '.repeat(20) + '</body></html>';
-		let testHandler: (context: { page: any }) => Promise<void>;
+			'<html><body>' + 'Content '.repeat(REPEAT_COUNT_20) + '</body></html>';
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
+					$: vi.fn().mockResolvedValue(null),
+					$$: vi.fn().mockResolvedValue([]),
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
 					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
 					waitForSelector: vi
 						.fn()
 						.mockResolvedValueOnce({}) // Cookie banner found
 						.mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
-					$: vi.fn().mockResolvedValue(null),
-					$$: vi.fn().mockResolvedValue([]),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -198,23 +236,29 @@ describe('crawlSalesforcePage', () => {
 	});
 
 	it('should handle cookie banner with accept button found via $', async () => {
-		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
+		const REPEAT_COUNT_200 = 200;
+		const mockContent = '<html><body>' + 'x'.repeat(REPEAT_COUNT_200) + '</body></html>';
 		const mockAcceptButton = {
 			click: vi.fn().mockResolvedValue(undefined),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(mockAcceptButton),
+					$$: vi.fn().mockResolvedValue([]),
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
+					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					$$: vi.fn().mockResolvedValue([]),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
@@ -222,10 +266,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -248,29 +295,36 @@ describe('crawlSalesforcePage', () => {
 			click: vi.fn().mockResolvedValue(undefined),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null), // No selector match
 					$$: vi.fn().mockResolvedValue([mockButton]), // But button found via $$
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
+					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -288,9 +342,13 @@ describe('crawlSalesforcePage', () => {
 	it('should handle page.isClosed() during cookie handling', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -307,10 +365,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -330,9 +391,13 @@ describe('crawlSalesforcePage', () => {
 			click: vi.fn().mockResolvedValue(undefined),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -349,10 +414,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -369,9 +437,13 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with multiple selectors', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -391,10 +463,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -414,18 +489,23 @@ describe('crawlSalesforcePage', () => {
 			click: vi.fn().mockRejectedValue(new Error('Click timeout')),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(mockAcceptButton),
+					$$: vi.fn().mockResolvedValue([]),
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
+					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 					$$: vi.fn().mockResolvedValue([]),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
@@ -433,10 +513,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -453,9 +536,13 @@ describe('crawlSalesforcePage', () => {
 	it('should handle button query timeout', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -474,10 +561,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -494,29 +584,36 @@ describe('crawlSalesforcePage', () => {
 	it('should handle scrolling behavior', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
+					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -534,9 +631,13 @@ describe('crawlSalesforcePage', () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 		let evaluateCallCount = 0;
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -544,7 +645,7 @@ describe('crawlSalesforcePage', () => {
 					click: vi.fn().mockResolvedValue(undefined),
 					evaluate: vi.fn().mockImplementation(() => {
 						evaluateCallCount++;
-						if (evaluateCallCount === 1) {
+						if (evaluateCallCount === EVALUATE_CALL_COUNT_FIRST) {
 							return Promise.reject(new Error('Evaluate failed'));
 						}
 						return Promise.resolve(mockContent);
@@ -559,10 +660,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -579,9 +683,13 @@ describe('crawlSalesforcePage', () => {
 	it('should handle content extraction with waitForFunction', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -599,10 +707,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -619,29 +730,36 @@ describe('crawlSalesforcePage', () => {
 	it('should handle scrolling through page multiple times', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
-					goto: vi.fn().mockResolvedValue(undefined),
-					waitForSelector: vi.fn().mockResolvedValue(undefined),
-					click: vi.fn().mockResolvedValue(undefined),
-					evaluate: vi.fn().mockResolvedValue(mockContent),
-					content: vi.fn().mockResolvedValue(mockContent),
-					isClosed: vi.fn().mockReturnValue(false),
 					$: vi.fn().mockResolvedValue(null),
 					$$: vi.fn().mockResolvedValue([]),
+					click: vi.fn().mockResolvedValue(undefined),
+					content: vi.fn().mockResolvedValue(mockContent),
+					evaluate: vi.fn().mockResolvedValue(mockContent),
+					goto: vi.fn().mockResolvedValue(undefined),
+					isClosed: vi.fn().mockReturnValue(false),
+					waitForSelector: vi.fn().mockResolvedValue(undefined),
 				};
 				const handlerPromise = testHandler({ page: mockPage });
 				await vi.runAllTimersAsync();
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -659,9 +777,13 @@ describe('crawlSalesforcePage', () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 		let isClosedCallCount = 0;
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -681,10 +803,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -706,9 +831,13 @@ describe('crawlSalesforcePage', () => {
 			click: vi.fn().mockResolvedValue(undefined),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -725,10 +854,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -752,9 +884,13 @@ describe('crawlSalesforcePage', () => {
 			click: vi.fn().mockResolvedValue(undefined),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -771,10 +907,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -796,9 +935,13 @@ describe('crawlSalesforcePage', () => {
 			click: vi.fn().mockRejectedValue(new Error('Click failed')),
 		};
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let testHandler: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> = async () => {
+			// Handler will be set by test
+		};
 
 		const testMockRun = vi.fn().mockImplementation(async () => {
+			// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
 			if (testHandler) {
 				const mockPage = {
 					goto: vi.fn().mockResolvedValue(undefined),
@@ -815,10 +958,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;
@@ -835,7 +981,9 @@ describe('crawlSalesforcePage', () => {
 	it('should handle modal query timeout', async () => {
 		const mockContent = '<html><body>' + 'x'.repeat(200) + '</body></html>';
 
-		let testHandler: (context: { page: any }) => Promise<void>;
+		let testHandler: (context: { page: any }) => Promise<void> = async () => {
+			// Handler will be set by test
+		};
 		const testMockRun = vi.fn().mockImplementation(async () => {
 			if (testHandler) {
 				const mockPage = {
@@ -855,10 +1003,13 @@ describe('crawlSalesforcePage', () => {
 				await handlerPromise;
 			}
 		});
-		vi.mocked(PlaywrightCrawler).mockImplementation((config) => {
+		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: Readonly<(context: Readonly<{ page: any }>) => Promise<void>> }>): PlaywrightCrawler => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions
 			if (config.requestHandler) {
-				testHandler = config.requestHandler;
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				testHandler = config.requestHandler as Readonly<(context: Readonly<{ page: any }>) => Promise<void>>;
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			return {
 				run: testMockRun,
 			} as unknown as PlaywrightCrawler;

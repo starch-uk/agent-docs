@@ -15,11 +15,11 @@ import {
 } from '../sources/salesforce.ts';
 
 /**
- * Handle search command.
- * @param item - Salesforce item to search for.
- * @param options - Command options.
+ * Handles the search command for finding and downloading Salesforce Help documentation.
+ * @param item - The Salesforce item or topic to search for in help documentation.
+ * @param options - Configuration options including concurrency, limit, and verbosity.
  */
-export async function handleSearchCommand(
+async function handleSearchCommand(
 	item: string,
 	options: Readonly<{
 		concurrency?: number;
@@ -43,17 +43,17 @@ export async function handleSearchCommand(
 		);
 	} catch (error) {
 		console.error('Error searching Salesforce Help:', error);
-		const exitCode = 1;
-		process.exit(exitCode);
+		const EXIT_CODE_ERROR = 1;
+		process.exit(EXIT_CODE_ERROR);
 	}
 }
 
 /**
- * Handle get command.
- * @param url - Salesforce Help URL.
- * @param options - Command options.
+ * Handles the get command for downloading content from a specific Salesforce Help URL.
+ * @param url - The complete URL to the Salesforce Help documentation page.
+ * @param options - Configuration options including verbosity settings.
  */
-export async function handleGetCommand(
+async function handleGetCommand(
 	url: string,
 	options: Readonly<{ verbose?: boolean }>,
 ): Promise<void> {
@@ -70,17 +70,17 @@ export async function handleGetCommand(
 		);
 	} catch (error) {
 		console.error('Error getting Salesforce Help URL:', error);
-		const exitCode = 1;
-		process.exit(exitCode);
+		const EXIT_CODE_ERROR = 1;
+		process.exit(EXIT_CODE_ERROR);
 	}
 }
 
 /**
- * Handle dump command.
- * @param item - Salesforce item to search for.
- * @param options - Command options.
+ * Handles the dump command for searching and outputting Salesforce Help content as markdown.
+ * @param item - The Salesforce item or topic to search for in help documentation.
+ * @param options - Configuration options including concurrency, limit, and verbosity.
  */
-export async function handleDumpCommand(
+async function handleDumpCommand(
 	item: string,
 	options: Readonly<{
 		concurrency?: number;
@@ -96,12 +96,12 @@ export async function handleDumpCommand(
 		});
 	} catch (error) {
 		console.error('Error dumping Salesforce Help:', error);
-		const exitCode = 1;
-		process.exit(exitCode);
+		const EXIT_CODE_ERROR = 1;
+		process.exit(EXIT_CODE_ERROR);
 	}
 }
 
-export const program = new Command();
+const program = new Command();
 
 program
 	.name('sf-docs-helper')
@@ -153,26 +153,38 @@ program
 	.action(handleDumpCommand);
 
 /**
- * Check if this module is being run as the main entry point.
- * @returns True if this module is being executed directly.
+ * Checks if this module is being run as the main entry point of the application.
+ * @returns True if this module is being executed directly, false otherwise.
  */
-export function isMainEntryPoint(): boolean {
+function isMainEntryPoint(): boolean {
+	const FIRST_ARG_INDEX = 1;
 	return (
-		(process.argv[1] && import.meta.url.endsWith(process.argv[1])) ||
-		process.argv[1]?.includes('index.ts') === true ||
-		process.argv[1]?.includes('sf-docs-helper') === true
+		(process.argv[FIRST_ARG_INDEX] &&
+			import.meta.url.endsWith(process.argv[FIRST_ARG_INDEX])) ||
+		(process.argv[FIRST_ARG_INDEX]?.includes('index.ts') ?? false) ||
+		(process.argv[FIRST_ARG_INDEX]?.includes('sf-docs-helper') ?? false)
 	);
 }
 
 /**
- * Execute the CLI program if this is the main entry point.
+ * Executes the CLI program if this is the main entry point.
  * This function is exported for testing purposes.
  */
-export function executeIfMainEntryPoint(): void {
+function executeIfMainEntryPoint(): void {
 	if (isMainEntryPoint()) {
 		program.parse();
 	}
 }
+
+// Export all functions and constants together
+export {
+	executeIfMainEntryPoint,
+	handleDumpCommand,
+	handleGetCommand,
+	handleSearchCommand,
+	isMainEntryPoint,
+	program,
+};
 
 // Only parse if this file is executed directly (not imported)
 executeIfMainEntryPoint();

@@ -18,11 +18,11 @@ import {
 } from '../utils/repo-todos.ts';
 
 /**
- * Parse command line arguments for repo-todos CLI.
+ * Parses command line arguments for the repo-todos CLI tool.
  * @param args - Command line arguments (typically process.argv.slice(2)).
- * @returns Parsed arguments with repoPath and outputFile.
+ * @returns Parsed arguments containing repoPath and outputFile.
  */
-export function parseArgs(args: readonly string[]): {
+function parseArgs(args: readonly string[]): {
 	repoPath: string | undefined;
 	outputFile: string | undefined;
 } {
@@ -46,11 +46,11 @@ export function parseArgs(args: readonly string[]): {
 }
 
 /**
- * Main function for repo-todos CLI.
+ * Main function for the repo-todos CLI that generates todos for repository files.
  * @param args - Optional command line arguments (defaults to process.argv.slice(2)).
- * @returns Promise that resolves when the CLI completes.
+ * @returns Promise that resolves when the CLI completes execution.
  */
-export async function main(args?: readonly string[]): Promise<void> {
+async function main(args?: readonly string[]): Promise<void> {
 	const argvSkipCount = 2;
 	const cliArgs = args ?? process.argv.slice(argvSkipCount);
 	const { outputFile, repoPath } = parseArgs(cliArgs);
@@ -67,8 +67,8 @@ export async function main(args?: readonly string[]): Promise<void> {
 		console.error(
 			'  --output, -o    Write output to a file instead of stdout',
 		);
-		const exitCode = 1;
-		process.exit(exitCode);
+		const EXIT_CODE_ERROR = 1;
+		process.exit(EXIT_CODE_ERROR);
 		return; // Exit early to satisfy TypeScript
 	}
 
@@ -88,14 +88,14 @@ export async function main(args?: readonly string[]): Promise<void> {
 
 		if (!isValid) {
 			console.error('ERROR: Todo count does not match file count!');
-			const exitCode = 1;
-			process.exit(exitCode);
+			const EXIT_CODE_ERROR = 1;
+			process.exit(EXIT_CODE_ERROR);
 		}
 
 		// Check for duplicates
 		const duplicates = findDuplicateIds(todos);
-		const noDuplicates = 0;
-		if (duplicates.length > noDuplicates) {
+		const ZERO = 0;
+		if (duplicates.length > ZERO) {
 			const duplicateCountStr = String(duplicates.length);
 			console.error(
 				`ERROR: Found ${duplicateCountStr} duplicate todo IDs:`,
@@ -103,8 +103,8 @@ export async function main(args?: readonly string[]): Promise<void> {
 			duplicates.forEach((id) => {
 				console.error(`  - ${id}`);
 			});
-			const exitCode = 1;
-			process.exit(exitCode);
+			const EXIT_CODE_ERROR = 1;
+			process.exit(EXIT_CODE_ERROR);
 		}
 
 		const jsonIndent = 2;
@@ -123,31 +123,41 @@ export async function main(args?: readonly string[]): Promise<void> {
 		}
 	} catch (error) {
 		console.error('Error generating todos:', error);
-		const exitCode = 1;
-		process.exit(exitCode);
+		const EXIT_CODE_ERROR = 1;
+		process.exit(EXIT_CODE_ERROR);
 	}
 }
 
 /**
- * Check if this module is being run as the main entry point.
- * @returns True if this module is being executed directly.
+ * Checks if this module is being run as the main entry point of the application.
+ * @returns True if this module is being executed directly, false otherwise.
  */
-export function isMainEntryPoint(): boolean {
+function isMainEntryPoint(): boolean {
+	const FIRST_ARG_INDEX = 1;
 	return (
-		(process.argv[1] && import.meta.url.endsWith(process.argv[1])) ||
-		process.argv[1]?.includes('repo-todos') === true
+		(process.argv[FIRST_ARG_INDEX] &&
+			import.meta.url.endsWith(process.argv[FIRST_ARG_INDEX])) ||
+		(process.argv[FIRST_ARG_INDEX]?.includes('repo-todos') ?? false)
 	);
 }
 
 /**
- * Execute main if this is the main entry point.
+ * Executes the main function if this is the main entry point.
  * This function is exported for testing purposes.
  */
-export function executeIfMainEntryPoint(): void {
+function executeIfMainEntryPoint(): void {
 	if (isMainEntryPoint()) {
 		void main();
 	}
 }
+
+// Export all functions together
+export {
+	executeIfMainEntryPoint,
+	isMainEntryPoint,
+	main,
+	parseArgs,
+};
 
 // Only run main if this file is executed directly (not imported)
 executeIfMainEntryPoint();

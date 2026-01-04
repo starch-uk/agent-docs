@@ -8,7 +8,7 @@
  * @param ms - Number of milliseconds to wait.
  * @returns Promise that resolves after the delay.
  */
-export function delay(ms: Readonly<number>): Promise<void> {
+export async function delay(ms: Readonly<number>): Promise<void> {
 	return new Promise((resolve) => {
 		setTimeout(resolve, ms);
 	});

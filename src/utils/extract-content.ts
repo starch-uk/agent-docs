@@ -18,8 +18,6 @@ import {
 	tryFallbackContentExtraction,
 	tryBodyTextContent,
 	tryLastResortBodyText,
-	tryRawBodyText,
-	processMainSelectors,
 } from './extract-content-fallbacks.js';
 
 /**
@@ -58,7 +56,7 @@ export function extractContent(doc: Document): {
 		debugInfo.mainElements = [
 			{
 				children: mainEl.children.length,
-				className: String(mainEl.className), // className is always a string in DOM
+				className: mainEl.className, // className is always a string in DOM
 				tag: mainEl.tagName,
 				textLength: mainElTextLength,
 			},
@@ -67,14 +65,14 @@ export function extractContent(doc: Document): {
 
 	// Try to find elements with substantial text
 	const allElements = doc.querySelectorAll('*');
-	const textElements: Array<{
+	const textElements: {
 		tag: string;
 		text: string;
 		length: number;
 		className?: string;
 		textLength?: number;
 		textPreview?: string;
-	}> = [];
+	}[] = [];
 	const maxElements = 100;
 	for (let i = 0; i < Math.min(allElements.length, maxElements); i++) {
 		const el = allElements[i];
@@ -92,7 +90,7 @@ export function extractContent(doc: Document): {
 		) {
 			const classNameValue = el.className;
 			// className is always a string in DOM, so simplify
-			const classNameStr = String(classNameValue);
+			const classNameStr = classNameValue;
 			const textPreviewLength = 100;
 			textElements.push({
 				className: classNameStr,
@@ -176,7 +174,7 @@ export function extractContent(doc: Document): {
 
 	debugInfo.contentContainerFound = !!contentContainer;
 	debugInfo.contentContainerClasses = contentContainer
-		? String(contentContainer.className) // className is always a string in DOM
+		? contentContainer.className // className is always a string in DOM
 		: null;
 
 	const contentContainerTextLength = contentContainer
@@ -186,7 +184,7 @@ export function extractContent(doc: Document): {
 
 	debugInfo.bodyContentFound = !!bodyContent;
 	debugInfo.bodyContentClasses = bodyContent
-		? String(bodyContent.className) // className is always a string in DOM
+		? bodyContent.className // className is always a string in DOM
 		: null;
 
 	const bodyContentTextLength = bodyContent
@@ -241,15 +239,16 @@ export function extractContent(doc: Document): {
 	debugInfo.mainElementFound = !!mainElement;
 	debugInfo.mainElementTag = mainElement ? mainElement.tagName : null;
 	debugInfo.mainElementClasses = mainElement
-		? String(mainElement.className) // className is always a string in DOM
+		? mainElement.className // className is always a string in DOM
 		: null;
 
 	// First, try to get comprehensive content from main area
 	if (mainElement) {
 		const result = processMainElement(mainElement, debugInfo);
 		if (result !== null) {
-			bestText = result.bestText;
-			bestLength = result.bestLength;
+			const { bestLength: resultLength, bestText: resultText } = result;
+			bestText = resultText;
+			bestLength = resultLength;
 		}
 	}
 
@@ -425,22 +424,13 @@ export function extractContent(doc: Document): {
 	}
 
 	// Last resort: get body text but filter cookie content more aggressively
-	if (doc.body) {
-		const body = doc.body;
+	if (doc.body !== null && doc.body !== undefined) {
+		const { body } = doc;
 		// Remove all unwanted elements more aggressively
 		removeElements(
 			body,
 			'script, style, nav, footer, header, .cookie-consent, [class*="cookie"], [id*="cookie"], [class*="banner"], [id*="banner"], iframe, noscript, [role="dialog"], [class*="modal"], [class*="overlay"], [class*="dialog"]',
 		);
-
-		// Try to find and extract from main content areas
-		const mainSelectorsResult = processMainSelectors(
-			body as HTMLBodyElement,
-			debugInfo,
-		);
-		if (mainSelectorsResult !== null) {
-			return mainSelectorsResult;
-		}
 
 		// Get all body text - be less aggressive with filtering
 		// Just remove unwanted elements and return the text
@@ -487,7 +477,7 @@ export function extractContent(doc: Document): {
 	}
 
 	// Last resort: return whatever body text we have
-	if (doc.body) {
+	if (doc.body !== null && doc.body !== undefined) {
 		const lastResortResult = tryLastResortBodyText(
 			doc.body as HTMLBodyElement,
 			debugInfo,

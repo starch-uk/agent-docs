@@ -15,7 +15,7 @@
  * @param maxDepth - Maximum depth to traverse (default: 10).
  * @returns Found element or null.
  */
-export function findInShadowDOM(
+function findInShadowDOM(
 	element: Element | null,
 	selector: Readonly<string>,
 	maxDepth: Readonly<number> = 10,
@@ -47,8 +47,7 @@ export function findInShadowDOM(
 			// Recursively traverse all children in the shadow root
 			try {
 				const shadowChildren = el.shadowRoot.querySelectorAll('*');
-				for (let i = 0; i < shadowChildren.length; i++) {
-					const child = shadowChildren[i];
+				for (const child of shadowChildren) {
 					const result = traverse(child, depth + 1);
 					if (result !== null) return result;
 				}
@@ -76,7 +75,7 @@ export function findInShadowDOM(
  * @param element - Document or Element to remove from.
  * @param selectors - CSS selectors for elements to remove.
  */
-export function removeElements(
+function removeElements(
 	element: Document | Element,
 	selectors: Readonly<string>,
 ): void {
@@ -92,7 +91,7 @@ export function removeElements(
  * @param debugInfo - Debug info object to update.
  * @returns Extracted content or null if not sufficient.
  */
-export function extractShadowDOMElementContent(
+function extractShadowDOMElementContent(
 	element: Element,
 	debugInfo: Record<string, unknown>,
 ): string | null {
@@ -145,7 +144,7 @@ export function extractShadowDOMElementContent(
  * @param bodyText - Full body text content.
  * @returns Filtered documentation paragraphs joined by newlines, or null if none found.
  */
-export function filterBodyTextDocParagraphs(
+function filterBodyTextDocParagraphs(
 	bodyClone: Element,
 	bodyText: string,
 ): string | null {
@@ -204,7 +203,7 @@ export function filterBodyTextDocParagraphs(
  * @param debugInfo - Debug info object to update.
  * @returns Object with bestText and bestLength, or null if no suitable content found.
  */
-export function processMainElement(
+function processMainElement(
 	mainElement: Element,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	debugInfo: Record<string, unknown>,
@@ -241,9 +240,9 @@ export function processMainElement(
 	allElementsClone.forEach((el: Element) => {
 		// Remove elements with event handlers or script-like content
 		// className is always a string in DOM (never DOMTokenList in jsdom/real DOM)
-		const className = el.className;
+		const { className } = el;
 		// className is always a string, so no need for typeof check
-		const classStr = className as string;
+		const classStr = className;
 		const htmlEl = el as HTMLElement;
 		if (
 			htmlEl.onclick ||
@@ -409,3 +408,11 @@ export function processMainElement(
 
 	return null;
 }
+
+export {
+	extractShadowDOMElementContent,
+	filterBodyTextDocParagraphs,
+	findInShadowDOM,
+	processMainElement,
+	removeElements,
+};
