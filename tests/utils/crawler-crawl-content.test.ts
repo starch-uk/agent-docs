@@ -1182,17 +1182,12 @@ describe('crawlSalesforcePage', () => {
 			'https://help.salesforce.com/test',
 		);
 		await vi.runAllTimersAsync();
-		// Should throw error because both content and retry are insufficient
-		await expect(resultPromise).rejects.toThrow(
-			'Insufficient content extracted',
-		);
-		// Ensure promise is fully settled to prevent unhandled rejection
-		await resultPromise.catch(() => {
-			// Expected error, ignore
-		});
+		// Should return empty string when content extraction fails (instead of throwing)
+		const result = await resultPromise;
+		expect(result).toBe('');
 	});
 
-	it('should throw error when both content and retry are insufficient', async () => {
+	it('should return empty string when both content and retry are insufficient', async () => {
 		const shortContent = 'x'.repeat(REPEAT_COUNT_30);
 		const shortRetryContent = 'x'.repeat(REPEAT_COUNT_30);
 		let evaluateCallCount = 0;
@@ -1259,17 +1254,12 @@ describe('crawlSalesforcePage', () => {
 			'https://help.salesforce.com/test',
 		);
 		await vi.runAllTimersAsync();
-		// Should throw error because both content and retry are insufficient (lines 1261-1278)
-		await expect(resultPromise).rejects.toThrow(
-			'Insufficient content extracted from https://help.salesforce.com/test (got 30 chars, retry got 30 chars)',
-		);
-		// Ensure promise is fully settled to prevent unhandled rejection
-		await resultPromise.catch(() => {
-			// Expected error, ignore
-		});
+		// Should return empty string when content extraction fails (instead of throwing)
+		const result = await resultPromise;
+		expect(result).toBe('');
 	});
 
-	it('should handle fallback evaluation when document.body is null', async () => {
+	it('should return empty string when fallback evaluation fails with null body', async () => {
 		const shortContent = 'x'.repeat(REPEAT_COUNT_30);
 		let evaluateCallCount = 0;
 
@@ -1356,11 +1346,9 @@ describe('crawlSalesforcePage', () => {
 			'https://help.salesforce.com/test',
 		);
 		await vi.runAllTimersAsync();
-		// Should throw error because content is insufficient
-		await expect(resultPromise).rejects.toThrow('Insufficient content');
-		await resultPromise.catch(() => {
-			// Expected error, ignore
-		});
+		// Should return empty string when content extraction fails (instead of throwing)
+		const result = await resultPromise;
+		expect(result).toBe('');
 	});
 
 	it('should handle retry content extraction with TreeWalker', async () => {

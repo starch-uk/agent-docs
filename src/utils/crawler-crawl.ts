@@ -72,6 +72,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 
 	const crawler = new PlaywrightCrawler({
 		headless: true,
+		maxRequestRetries: 0,
 		navigationTimeoutSecs: 60,
 
 		async requestHandler({
@@ -191,6 +192,8 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- retryContent is any from page.evaluate
 					content = retryContent;
 				} else {
+					// If all extraction attempts failed, return empty content
+					// instead of throwing - let the caller handle empty content gracefully
 					const minContentLengthForError = 50;
 
 					if (
@@ -199,14 +202,9 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 						content === '' ||
 						content.length < minContentLengthForError
 					) {
-						const contentLength = content?.length ?? 0;
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- retryContent is any from page.evaluate, can be null, 0 is default
-						const retryLength = retryContent?.length ?? 0;
-						const contentLengthStr = String(contentLength);
-						const retryLengthStr = String(retryLength);
-						throw new Error(
-							`Insufficient content extracted from ${url} (got ${contentLengthStr} chars, retry got ${retryLengthStr} chars)`,
-						);
+						// Set content to empty string instead of throwing
+						// This prevents PlaywrightCrawler from retrying and logging errors
+						content = '';
 					}
 				}
 			}
