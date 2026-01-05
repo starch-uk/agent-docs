@@ -42,8 +42,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 	// Timeout constants
 	const navigationTimeoutMs = 60000;
 	const pageInitWaitMs = 2000;
-	const cookieBannerWaitMs = 3000;
-	const cookieClickWaitMs = 2000;
 	const buttonClickWaitMs = 1000;
 	const scrollWaitMs = 2000;
 	const scrollBackWaitMs = 1500;
@@ -62,8 +60,6 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 		clickTimeoutMs,
 		closeButtonTimeoutMs,
 		contentWaitMs,
-		cookieBannerWaitMs,
-		cookieClickWaitMs,
 		finalWaitMs,
 		longWaitMs,
 		navigationTimeoutMs,
@@ -83,7 +79,7 @@ async function crawlSalesforcePage(url: Readonly<string>): Promise<string> {
 		}: Readonly<{
 			page: Page;
 		}>): Promise<void> {
-			// Setup page: navigate, handle cookies, and wait for content
+			// Setup page: navigate and wait for content
 			await setupPage(page, url, timeouts);
 
 			// Extract content using page.evaluate

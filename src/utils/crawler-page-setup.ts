@@ -1,5 +1,5 @@
 /**
- * @file Page setup utilities for Salesforce Help pages (cookie handling, content waiting).
+ * @file Page setup utilities for Salesforce Help pages (content waiting).
  */
 
 /* v8 ignore file -- Browser-side code in page.evaluate() cannot be unit tested in Node.js */
@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition -- Runtime checks needed for DOM API nullability */
 
 /**
- * Page type for cookie handling and content waiting.
+ * Page type for content waiting.
  */
 interface Page {
 	$: (selector: Readonly<string>) => Promise<{
@@ -49,8 +49,6 @@ interface TimeoutConstants {
 	clickTimeoutMs: number;
 	closeButtonTimeoutMs: number;
 	contentWaitMs: number;
-	cookieBannerWaitMs: number;
-	cookieClickWaitMs: number;
 	finalWaitMs: number;
 	longWaitMs: number;
 	navigationTimeoutMs: number;
@@ -59,290 +57,6 @@ interface TimeoutConstants {
 	scrollCount: number;
 	scrollDivisor: number;
 	scrollWaitMs: number;
-}
-
-/**
- * Handle cookie consent banner if present.
- * @param page - Playwright page object.
- * @param timeouts - Timeout constants.
- */
-async function handleCookieConsent(
-	page: Page,
-	timeouts: TimeoutConstants,
-): Promise<void> {
-	// Handle cookie consent if present - try multiple strategies
-	try {
-		// Wait a bit for cookie banner to appear - use setTimeout instead of page.waitForTimeout
-		await new Promise((resolve) =>
-			setTimeout(resolve, timeouts.cookieBannerWaitMs),
-		);
-
-		// Try multiple selectors for accept button - use more specific selectors
-		const acceptSelectors = [
-			'button:has-text("Accept All Cookies")',
-			'button:has-text("Accept All")',
-			'button:has-text("Accept")',
-			'[aria-label*="Accept All"]',
-			'[aria-label*="Accept"]',
-			'button[id*="accept"]',
-			'button[class*="accept"]',
-			'.cookie-consent button',
-			'[data-testid*="accept"]',
-			'button[type="button"]:has-text("Accept")',
-		];
-
-		let cookieHandled = false;
-		const acceptLoopStart = 0;
-		for (let i = acceptLoopStart; i < acceptSelectors.length; i++) {
-			const selector = acceptSelectors[i];
-			try {
-				if (page.isClosed()) {
-					break;
-				}
-				const acceptButtonTimeoutMs = 2000;
-
-				const acceptButton = await Promise.race([
-					page.$(selector),
-					new Promise<null>((resolve) =>
-						setTimeout(() => {
-							resolve(null);
-						}, acceptButtonTimeoutMs),
-					),
-				]).catch(() => null);
-
-				if (acceptButton !== null && acceptButton !== undefined) {
-					// Add timeout to click to avoid hanging
-					try {
-						await Promise.race([
-							acceptButton.click({
-								timeout: timeouts.clickTimeoutMs,
-							}),
-							new Promise((_, reject) =>
-								setTimeout(() => {
-									reject(new Error('Click timeout'));
-								}, timeouts.clickTimeoutMs),
-							),
-						]);
-						cookieHandled = true;
-					} catch {
-						// Click failed or timed out, continue
-					}
-					if (cookieHandled) {
-						// Use regular setTimeout instead of page.waitForTimeout to avoid hanging
-						// when page context is invalid
-						await new Promise((resolve) =>
-							setTimeout(resolve, timeouts.cookieClickWaitMs),
-						);
-						break;
-					}
-				}
-			} catch {
-				// Try next selector
-			}
-		}
-
-		// Skip button text search if we already handled cookies - this prevents hanging
-		if (!cookieHandled) {
-			try {
-				// Check if page is still valid before querying
-				if (page.isClosed()) {
-					throw new Error('Page closed');
-				}
-				// Limit to first 10 buttons to avoid hanging on many buttons
-				// Add timeout to page.$$ to avoid hanging
-
-				const buttons = await Promise.race([
-					page.$$('button'),
-					new Promise<never>((_, reject) => {
-						const buttonQueryTimeoutMs = 5000;
-						setTimeout(() => {
-							reject(new Error('Button query timeout'));
-						}, buttonQueryTimeoutMs);
-					}),
-				]).catch(() => []);
-				const maxButtonsToCheck = 10;
-
-				const buttonLimit = Math.min(
-					(buttons as { readonly length: number }).length,
-					maxButtonsToCheck,
-				);
-				const buttonLoopStart = 0;
-				for (let i = buttonLoopStart; i < buttonLimit; i++) {
-					try {
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- buttons is array-like from Playwright
-						const button = (buttons as readonly unknown[])[i] as {
-							readonly isVisible: () => Promise<boolean>;
-							readonly textContent: () => Promise<string | null>;
-							readonly click: (options?: {
-								readonly timeout?: number;
-							}) => Promise<unknown>;
-						};
-						// Quick visibility check with timeout
-
-						const isVisible = await Promise.race([
-							button.isVisible(),
-							new Promise<boolean>((resolve) =>
-								setTimeout(() => {
-									resolve(false);
-								}, timeouts.buttonClickWaitMs),
-							),
-						]).catch(() => false);
-
-						if (!isVisible) continue;
-
-						const text = await Promise.race([
-							button.textContent(),
-							new Promise<string | null>((resolve) =>
-								setTimeout(() => {
-									resolve(null);
-								}, timeouts.buttonClickWaitMs),
-							),
-						]).catch(() => null);
-
-						if (
-							text !== null &&
-							text !== '' &&
-							(text.includes('Accept All') ||
-								text.includes('Accept'))
-						) {
-							// Add timeout to click to avoid hanging
-
-							await Promise.race([
-								button.click({
-									timeout: timeouts.buttonClickTimeoutMs,
-								}),
-								new Promise((_, reject) =>
-									setTimeout(() => {
-										reject(new Error('Click timeout'));
-									}, timeouts.buttonClickTimeoutMs),
-								),
-							]).catch(() => {
-								// Intentionally ignore click errors
-							});
-							cookieHandled = true;
-							await new Promise((resolve) =>
-								setTimeout(resolve, timeouts.buttonClickWaitMs),
-							);
-							break;
-						}
-					} catch {
-						// Continue to next button
-					}
-				}
-			} catch {
-				// Continue
-			}
-		}
-
-		// Try to close any modal/dialog that might be blocking content
-		try {
-			if (page.isClosed()) {
-				// Page is closed, skip
-			} else {
-				const closeButtons = await Promise.race([
-					page.$$(
-						'[aria-label*="Close"], [aria-label*="close"], .close, [class*="close"], [data-dismiss]',
-					),
-					new Promise<never>((_, reject) =>
-						setTimeout(() => {
-							reject(new Error('Modal query timeout'));
-						}, timeouts.clickTimeoutMs),
-					),
-				]).catch(() => []);
-				const closeButtonsLoopStart = 0;
-
-				for (
-					let i = closeButtonsLoopStart;
-					i < (closeButtons as { readonly length: number }).length;
-					i++
-				) {
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- closeButtons is array-like from Playwright
-					const btn = (closeButtons as readonly unknown[])[i] as {
-						readonly isVisible: () => Promise<boolean>;
-						readonly click: (options?: {
-							readonly timeout?: number;
-						}) => Promise<unknown>;
-					};
-					try {
-						// Check if page is still valid before clicking
-
-						if (page.isClosed()) {
-							break;
-						}
-						// Check if button is still attached
-
-						const isVisible = await Promise.race([
-							btn.isVisible().catch(() => false),
-							new Promise<boolean>((resolve) =>
-								setTimeout(() => {
-									resolve(false);
-								}, timeouts.buttonClickWaitMs),
-							),
-						]).catch(() => false);
-						if (!isVisible) {
-							continue;
-						}
-						// Wrap click with timeout to prevent hanging
-
-						await Promise.race([
-							btn.click({
-								timeout: timeouts.buttonClickTimeoutMs,
-							}),
-							new Promise((_, reject) =>
-								setTimeout(() => {
-									reject(
-										new Error('Close button click timeout'),
-									);
-								}, timeouts.closeButtonTimeoutMs),
-							),
-						]);
-						await new Promise((resolve) =>
-							setTimeout(resolve, timeouts.buttonClickWaitMs),
-						);
-					} catch {
-						// Continue to next button
-					}
-				}
-			}
-		} catch {
-			// Continue
-		}
-
-		// Scroll to trigger lazy loading
-		try {
-			if (!page.isClosed()) {
-				await page.evaluate(() => {
-					const scrollTopValue = 0;
-					const scrollDivisorValue = 2;
-					window.scrollTo(
-						scrollTopValue,
-						document.body.scrollHeight / scrollDivisorValue,
-					);
-				});
-			}
-		} catch {
-			// Page closed, continue
-		}
-		await new Promise((resolve) =>
-			setTimeout(resolve, timeouts.scrollWaitMs),
-		);
-
-		try {
-			if (!page.isClosed()) {
-				await page.evaluate(() => {
-					const scrollTopValue = 0;
-					window.scrollTo(scrollTopValue, scrollTopValue);
-				});
-			}
-		} catch {
-			// Page closed, continue
-		}
-		await new Promise((resolve) =>
-			setTimeout(resolve, timeouts.buttonClickWaitMs),
-		);
-	} catch {
-		// Cookie consent not present or already handled
-	}
 }
 
 /**
@@ -565,7 +279,7 @@ async function waitForContent(
 }
 
 /**
- * Setup page: navigate, handle cookies, and wait for content.
+ * Setup page: navigate and wait for content.
  * @param page - Playwright page object.
  * @param url - URL to navigate to.
  * @param timeouts - Timeout constants.
@@ -585,9 +299,6 @@ async function setupPage(
 	await new Promise((resolve) =>
 		setTimeout(resolve, timeouts.pageInitWaitMs),
 	);
-
-	// Handle cookie consent
-	await handleCookieConsent(page, timeouts);
 
 	// Wait for content
 	await waitForContent(page, timeouts);
