@@ -10,7 +10,9 @@ import { extractContent } from '../../src/utils/extract-content.js';
 
 const COUNT_2 = 2;
 const COUNT_3 = 3;
+const COUNT_4 = 4;
 const COUNT_5 = 5;
+const COUNT_10 = 10;
 const COUNT_20 = 20;
 const COUNT_30 = 30;
 const COUNT_50 = 50;
@@ -126,12 +128,16 @@ describe('extractContent', () => {
 
 		// Create text element with content that's already in bestText
 		const main = document.createElement('main');
-		main.textContent = 'Main content with substantial text. '.repeat(COUNT_50);
+		main.textContent = 'Main content with substantial text. '.repeat(
+			COUNT_50,
+		);
 		document.body.appendChild(main);
 
 		// Create div with same content (duplicate)
 		const div = document.createElement('div');
-		div.textContent = 'Main content with substantial text. '.repeat(COUNT_50);
+		div.textContent = 'Main content with substantial text. '.repeat(
+			COUNT_50,
+		);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -188,7 +194,9 @@ describe('extractContent', () => {
 		 * Create main element with substantial text (sets bestText).
 		 */
 		const main = document.createElement('main');
-		main.textContent = 'Main content with substantial text. '.repeat(COUNT_100);
+		main.textContent = 'Main content with substantial text. '.repeat(
+			COUNT_100,
+		);
 		document.body.appendChild(main);
 
 		/**
@@ -271,9 +279,10 @@ describe('extractContent', () => {
 		const ZERO = 0;
 		for (let i = ZERO; i < COUNT_350; i++) {
 			const div = document.createElement('div');
-			div.textContent = `Text element ${String(i)} with enough content. `.repeat(
-				COUNT_3,
-			);
+			div.textContent =
+				`Text element ${String(i)} with enough content. `.repeat(
+					COUNT_3,
+				);
 			document.body.appendChild(div);
 		}
 
@@ -376,7 +385,7 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'This is substantial main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(main);
 
@@ -534,7 +543,7 @@ describe('extractContent', () => {
 		expect(result.content).toContain('Main content');
 		expect(result.content).toContain('Link without title attribute');
 		// Should not have the pattern of appended title texts (no double newline followed by title-like text)
-		expect(result.content.split('\n\n').length).toBeLessThan(3);
+		expect(result.content.split('\n\n').length).toBeLessThan(COUNT_3);
 	});
 
 	it('should include titleTexts in docTexts when filtering JavaScript patterns', () => {
@@ -590,7 +599,7 @@ describe('extractContent', () => {
 		const validP = document.createElement('p');
 		validP.textContent =
 			'This is valid documentation content that should be extracted. '.repeat(
-				5,
+				COUNT_5,
 			);
 		main.appendChild(validP);
 
@@ -635,45 +644,57 @@ describe('extractContent', () => {
 		const p3 = document.createElement('p');
 		p3.textContent =
 			'This paragraph contains document.querySelector and should be excluded. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p3);
 
-		// Add paragraph with 'addEventListener' pattern (should be excluded)
+		/**
+		 * Add paragraph with 'addEventListener' pattern (should be excluded).
+		 */
 		const p4 = document.createElement('p');
 		p4.textContent =
 			'This paragraph contains addEventListener and should be excluded. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p4);
 
-		// Add paragraph with 'fetch(' pattern (should be excluded)
+		/**
+		 * Add paragraph with 'fetch(' pattern (should be excluded).
+		 */
 		const p5 = document.createElement('p');
 		p5.textContent =
-			'This paragraph contains fetch( and should be excluded. '.repeat(2);
+			'This paragraph contains fetch( and should be excluded. '.repeat(
+				COUNT_2,
+			);
 		main.appendChild(p5);
 
-		// Add paragraph with 'const ' and '= document' pattern (should be excluded)
+		/**
+		 * Add paragraph with 'const ' and '= document' pattern (should be excluded).
+		 */
 		const p6 = document.createElement('p');
 		p6.textContent =
 			'This paragraph contains const x = document and should be excluded. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p6);
 
-		// Add paragraph with 'console.' pattern (should be excluded)
+		/**
+		 * Add paragraph with 'console.' pattern (should be excluded).
+		 */
 		const p7 = document.createElement('p');
 		p7.textContent =
 			'This paragraph contains console.log and should be excluded. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p7);
 
-		// Add paragraph with 'window.' pattern (should be excluded)
+		/**
+		 * Add paragraph with 'window.' pattern (should be excluded).
+		 */
 		const p8 = document.createElement('p');
 		p8.textContent =
 			'This paragraph contains window.location and should be excluded. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(p8);
 
@@ -681,14 +702,17 @@ describe('extractContent', () => {
 		const validP = document.createElement('p');
 		validP.textContent =
 			'This is valid documentation content that should be extracted. '.repeat(
-				5,
+				COUNT_5,
 			);
 		main.appendChild(validP);
 
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
-		// Should include valid documentation but exclude paragraphs with JS patterns (lines 268-275 conditions)
+
+		/**
+		 * Should include valid documentation but exclude paragraphs with JS patterns (lines 268-275 conditions).
+		 */
 		expect(result.content).toContain('valid documentation content');
 		// The filtered text should primarily contain the valid documentation
 		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
@@ -746,7 +770,7 @@ describe('extractContent', () => {
 	it('should not return mainText when mainText.length <= 200 in else-if path', () => {
 		// Create main element with text <= 200 chars and not enough JS patterns
 		const main = document.createElement('main');
-		main.textContent = 'Short main text. '.repeat(10); // ~170 chars, <= 200
+		main.textContent = 'Short main text. '.repeat(COUNT_10);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -758,7 +782,7 @@ describe('extractContent', () => {
 	it('should not return mainText when codeRatio >= maxCodeRatio in else-if path', () => {
 		// Create main element with high code ratio (>= 0.1) and length > 200
 		const main = document.createElement('main');
-		main.textContent = '{}();=;{}();=;{}();=;'.repeat(20); // High code ratio, > 200 chars
+		main.textContent = '{}();=;{}();=;{}();=;'.repeat(COUNT_20);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -789,8 +813,8 @@ describe('extractContent', () => {
 		// Use text with all 4 keywords: 'cookie consent accept all do not accept cookie consent'
 		main.textContent =
 			'cookie consent accept all do not accept cookie consent. '.repeat(
-				4,
-			); // ~220 chars (200 < length < 500 ✓), ~36 words, cookieRatio = 4/36 = 0.111 > 0.1 ✓
+				COUNT_4,
+			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
@@ -805,12 +829,15 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'This is substantial main content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(main);
 
 		const result = extractContent(document);
-		// Should return mainText (line 328-330)
+
+		/**
+		 * Should return mainText (line 328-330).
+		 */
 		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 		expect(result.content).toContain('substantial main content');
 	});
@@ -820,9 +847,13 @@ describe('extractContent', () => {
 		const divWithOnclick = document.createElement('div');
 		// Try to set onclick property - JSDOM may not fully support this
 		try {
-			divWithOnclick.onclick = () => {};
+			divWithOnclick.onclick = (): void => {
+				// Intentionally empty for test
+			};
 		} catch {
-			// JSDOM might not support this
+			/**
+			 * JSDOM might not support this.
+			 */
 		}
 		divWithOnclick.textContent = 'Content with onclick handler';
 		main.appendChild(divWithOnclick);
@@ -830,7 +861,7 @@ describe('extractContent', () => {
 		const normalDiv = document.createElement('div');
 		normalDiv.textContent =
 			'Normal content with enough text to meet the minimum length requirement of 200 characters. '.repeat(
-				3,
+				COUNT_3,
 			);
 		main.appendChild(normalDiv);
 
@@ -848,7 +879,9 @@ describe('extractContent', () => {
 		const divWithOnload = document.createElement('div');
 		// Try to set onload property
 		try {
-			divWithOnload.onload = () => {};
+			divWithOnload.onload = (): void => {
+				// Intentionally empty for test
+			};
 		} catch {
 			// JSDOM might not support this
 		}
@@ -856,7 +889,9 @@ describe('extractContent', () => {
 		main.appendChild(divWithOnload);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -872,7 +907,9 @@ describe('extractContent', () => {
 		const divWithOnerror = document.createElement('div');
 		// Try to set onerror property
 		try {
-			divWithOnerror.onerror = () => {};
+			divWithOnerror.onerror = (): void => {
+				// Intentionally empty for test mocking
+			};
 		} catch {
 			// JSDOM might not support this
 		}
@@ -880,7 +917,9 @@ describe('extractContent', () => {
 		main.appendChild(divWithOnerror);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -899,7 +938,9 @@ describe('extractContent', () => {
 		main.appendChild(navDiv);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -917,7 +958,9 @@ describe('extractContent', () => {
 		main.appendChild(cookieDiv);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -935,7 +978,9 @@ describe('extractContent', () => {
 		main.appendChild(onetrustDiv);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -952,7 +997,9 @@ describe('extractContent', () => {
 		main.appendChild(navElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -969,7 +1016,9 @@ describe('extractContent', () => {
 		main.appendChild(navElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);

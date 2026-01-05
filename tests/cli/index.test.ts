@@ -5,9 +5,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as salesforce from '../../src/sources/salesforce.js';
 import {
-	handleSearchCommand,
-	handleGetCommand,
+	executeIfMainEntryPoint,
 	handleDumpCommand,
+	handleGetCommand,
+	handleSearchCommand,
+	program,
 } from '../../src/cli/index.js';
 
 vi.mock('../../src/sources/salesforce.js');
@@ -15,7 +17,7 @@ vi.mock('../../src/sources/salesforce.js');
 /**
  * Mock process.exit and console methods.
  */
-const originalExit = process.exit;
+const originalExit = process.exit.bind(process);
 const originalError = console.error;
 const originalLog = console.log;
 
@@ -31,6 +33,7 @@ describe('CLI command handlers', () => {
 		vi.spyOn(console, 'log').mockImplementation(() => {
 			// Intentionally empty for test mocking
 		});
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		vi.spyOn(process, 'exit').mockImplementation((() => {
 			// Intentionally empty for test mocking
 		}) as (code?: number) => never);
@@ -38,10 +41,10 @@ describe('CLI command handlers', () => {
 
 	describe('handleSearchCommand', () => {
 		it('should handle successful search', async () => {
-		const mockResult = {
-			fileCount: 3,
-			folderPath: '/tmp/test',
-			todoFilePath: '/tmp/test/TODO.md',
+			const mockResult = {
+				fileCount: 3,
+				folderPath: '/tmp/test',
+				todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(
@@ -65,10 +68,10 @@ describe('CLI command handlers', () => {
 		});
 
 		it('should handle search with all options', async () => {
-		const mockResult = {
-			fileCount: 5,
-			folderPath: '/tmp/test',
-			todoFilePath: '/tmp/test/TODO.md',
+			const mockResult = {
+				fileCount: 5,
+				folderPath: '/tmp/test',
+				todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(
@@ -102,16 +105,17 @@ describe('CLI command handlers', () => {
 				expect.any(Error),
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
 
 	describe('handleGetCommand', () => {
 		it('should handle successful get', async () => {
-		const mockResult = {
-			fileCount: 1,
-			folderPath: '/tmp/test',
-			todoFilePath: '/tmp/test/TODO.md',
+			const mockResult = {
+				fileCount: 1,
+				folderPath: '/tmp/test',
+				todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(
@@ -132,10 +136,10 @@ describe('CLI command handlers', () => {
 		});
 
 		it('should handle get with verbose option', async () => {
-		const mockResult = {
-			fileCount: 1,
-			folderPath: '/tmp/test',
-			todoFilePath: '/tmp/test/TODO.md',
+			const mockResult = {
+				fileCount: 1,
+				folderPath: '/tmp/test',
+				todoFilePath: '/tmp/test/TODO.md',
 			};
 
 			vi.mocked(salesforce.getSalesforceUrl).mockResolvedValue(
@@ -164,6 +168,7 @@ describe('CLI command handlers', () => {
 				expect.any(Error),
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
@@ -218,6 +223,7 @@ describe('CLI command handlers', () => {
 				expect.any(Error),
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});
@@ -235,14 +241,11 @@ describe('CLI command handlers', () => {
 		const originalArgv = process.argv;
 
 		/**
-		 * Create a mock program that tracks if parse was called.
+		 * Spy on program.parse to track if it was called.
 		 */
-		let parseCalled = false;
-		const mockProgram = {
-			parse: (): void => {
-				parseCalled = true;
-			},
-		};
+		const parseSpy = vi.spyOn(program, 'parse').mockImplementation(() => {
+			// Intentionally empty for test mocking
+		});
 
 		/**
 		 * Mock process.argv to include 'index.ts' or 'sf-docs-helper'.
@@ -250,13 +253,17 @@ describe('CLI command handlers', () => {
 		process.argv = ['node', '/path/to/index.ts'];
 
 		/**
-		 * Dynamically import the module to trigger the entry point code.
-		 * Note: This test verifies the entry point logic works.
-		 * The actual program.parse() call is tested via the mock.
+		 * Call executeIfMainEntryPoint to trigger the entry point code.
 		 */
-		expect(parseCalled).toBe(true); // Entry point logic exists
+		executeIfMainEntryPoint();
+
+		/**
+		 * Verify that program.parse was called.
+		 */
+		expect(parseSpy).toHaveBeenCalled();
 
 		// Restore
 		process.argv = originalArgv;
+		parseSpy.mockRestore();
 	});
 });

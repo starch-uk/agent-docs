@@ -30,6 +30,7 @@ describe('repo-todos CLI', () => {
 		vi.spyOn(console, 'log').mockImplementation(() => {
 			// Intentionally empty for test mocking
 		});
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		vi.spyOn(process, 'exit').mockImplementation((() => {
 			// Intentionally empty for test mocking
 		}) as (code?: number) => never);
@@ -65,6 +66,7 @@ describe('repo-todos CLI', () => {
 		 * Ensure process.exit is mocked before calling main.
 		 */
 		it('should handle missing repo path', async () => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as (code?: number) => never);
@@ -75,10 +77,12 @@ describe('repo-todos CLI', () => {
 				'Usage: pnpm repo-todos <repo-path> [--output <file>]',
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should handle empty repo path', async () => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as (code?: number) => never);
@@ -87,6 +91,7 @@ describe('repo-todos CLI', () => {
 
 			expect(console.error).toHaveBeenCalled();
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
@@ -113,12 +118,17 @@ describe('repo-todos CLI', () => {
 			await main(['/tmp/test-repo']);
 
 			expect(repoTodosUtils.generateRepoTodos).toHaveBeenCalledWith({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				repoPath: expect.stringContaining('/tmp/test-repo'),
 			});
 			expect(console.log).toHaveBeenCalled();
 			const ZERO = 0;
-			const logCall = vi.mocked(console.log).mock.calls[ZERO]?.[ZERO] as string | undefined;
-			if (logCall) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			const logCall = vi.mocked(console.log).mock.calls[ZERO]?.[ZERO] as
+				| string
+				| undefined;
+
+			if (logCall !== undefined && logCall !== '') {
 				expect(logCall).toContain('file-1');
 			}
 		});
@@ -152,6 +162,7 @@ describe('repo-todos CLI', () => {
 		});
 
 		it('should exit with error if todo count validation fails', async () => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as (code?: number) => never);
@@ -176,10 +187,12 @@ describe('repo-todos CLI', () => {
 				'ERROR: Todo count does not match file count!',
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should exit with error if duplicate IDs found', async () => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as (code?: number) => never);
@@ -206,10 +219,12 @@ describe('repo-todos CLI', () => {
 				expect.stringContaining('ERROR: Found'),
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 
 		it('should handle errors during todo generation', async () => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			vi.spyOn(process, 'exit').mockImplementation((() => {
 				// Intentionally empty for test mocking
 			}) as (code?: number) => never);
@@ -225,6 +240,7 @@ describe('repo-todos CLI', () => {
 				expect.any(Error),
 			);
 			const EXIT_CODE_ERROR = 1;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
 			expect(process.exit).toHaveBeenCalledWith(EXIT_CODE_ERROR);
 		});
 	});

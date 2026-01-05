@@ -48,7 +48,9 @@ describe('extractContent', () => {
 		main.appendChild(scrollElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -65,7 +67,9 @@ describe('extractContent', () => {
 		main.appendChild(labelerElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -82,7 +86,9 @@ describe('extractContent', () => {
 		main.appendChild(headerElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -99,7 +105,9 @@ describe('extractContent', () => {
 		main.appendChild(xmlElement);
 
 		const normalDiv = document.createElement('div');
-		normalDiv.textContent = 'Normal content with enough text. '.repeat(COUNT_10);
+		normalDiv.textContent = 'Normal content with enough text. '.repeat(
+			COUNT_10,
+		);
 		main.appendChild(normalDiv);
 
 		document.body.appendChild(main);
@@ -384,7 +392,9 @@ describe('extractContent', () => {
 		// Create element with substantial text (> 500 chars) but after removing unwanted elements, it's <= 500
 		const div = document.createElement('div');
 		const script = document.createElement('script');
-		script.textContent = 'Script content that will be removed. '.repeat(COUNT_20);
+		script.textContent = 'Script content that will be removed. '.repeat(
+			COUNT_20,
+		);
 		div.appendChild(script);
 		div.textContent = 'Small remaining text. ';
 		document.body.appendChild(div);
@@ -420,6 +430,7 @@ describe('extractContent', () => {
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
+
 		/**
 		 * Should iterate through mainSelectors (line 772).
 		 */
@@ -449,6 +460,7 @@ describe('extractContent', () => {
 		document.body.appendChild(article);
 
 		const result = extractContent(document);
+
 		/**
 		 * Should skip article (line 804 condition fails).
 		 * Will fall back to other strategies.
@@ -475,6 +487,7 @@ describe('extractContent', () => {
 		// Create article element with text > 1000 but <= 5000 chars and cookieRatio >= 0.05
 		// Also ensure match() returns null to cover the : 0 branch at line 169
 		const article = document.createElement('article');
+
 		/**
 		 * Use text with NO cookie keywords to make match() return null.
 		 */
@@ -489,7 +502,7 @@ describe('extractContent', () => {
 		/**
 		 * Should process article (line 165 condition passes).
 		 * Match() returns null, so cookieMatches = 0 (covers : 0 branch at line 169).
-		 * cookieRatio = 0 < 0.05, so article is used.
+		 * CookieRatio = 0 < 0.05, so article is used.
 		 */
 		expect(result.content).toContain('article content');
 		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_1000);
@@ -579,7 +592,7 @@ describe('extractContent', () => {
 		const div = document.createElement('div');
 		div.textContent =
 			'Body text content with enough text to meet the minimum length requirement of 500 characters for body text extraction. '.repeat(
-				8,
+				COUNT_8,
 			);
 		document.body.appendChild(div);
 
@@ -743,7 +756,7 @@ describe('extractContent', () => {
 		const p1 = document.createElement('p');
 		p1.textContent =
 			'This is valid documentation content that should be extracted. '.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(p1);
 
@@ -755,7 +768,7 @@ describe('extractContent', () => {
 		// Should filter body text (line 886)
 		expect(result.content).toContain('valid documentation content');
 		expect(result.content).toContain('More documentation content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should not include paragraphs with text.length <= minParagraphTextLengthForDoc in body text filtering', () => {
@@ -789,14 +802,14 @@ describe('extractContent', () => {
 		const validP = document.createElement('p');
 		validP.textContent =
 			'This is valid documentation content that should be extracted. '.repeat(
-				5,
+				COUNT_5,
 			);
 		document.body.appendChild(validP);
 
 		const result = extractContent(document);
 		// Should not include short paragraph (line 898 condition fails)
 		expect(result.content).toContain('valid documentation content');
-		expect(result.content.length).toBeGreaterThan(200);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_200);
 	});
 
 	it('should not return docTexts when docTexts.length === 0 in body text filtering', () => {
@@ -854,7 +867,7 @@ describe('extractContent', () => {
 
 		// Create body text with length <= 500
 		const div = document.createElement('div');
-		div.textContent = 'Short body text. '.repeat(20); // ~300 chars, <= 500
+		div.textContent = 'Short body text. '.repeat(COUNT_20);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
@@ -908,7 +921,7 @@ describe('extractContent', () => {
 
 		// Create body text > 500 but <= 5000 chars with high cookie ratio (>= 0.2)
 		const cookieText = 'cookie consent accept all '.repeat(COUNT_50);
-		const normalText = 'This is body text. '.repeat(10);
+		const normalText = 'This is body text. '.repeat(COUNT_10);
 		document.body.textContent = cookieText + normalText; // > 500, <= 5000, high cookie ratio
 
 		const result = extractContent(document);
@@ -936,7 +949,7 @@ describe('extractContent', () => {
 		// Create body text > 500 chars with low cookie ratio (< 0.2)
 		const normalText =
 			'This is substantial body text content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
-				8,
+				COUNT_8,
 			);
 		document.body.textContent = normalText;
 

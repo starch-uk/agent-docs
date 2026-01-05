@@ -152,12 +152,7 @@ function executeIfMainEntryPoint(): void {
 }
 
 // Export all functions together
-export {
-	executeIfMainEntryPoint,
-	isMainEntryPoint,
-	main,
-	parseArgs,
-};
+export { executeIfMainEntryPoint, isMainEntryPoint, main, parseArgs };
 
 // Only run main if this file is executed directly (not imported)
 executeIfMainEntryPoint();

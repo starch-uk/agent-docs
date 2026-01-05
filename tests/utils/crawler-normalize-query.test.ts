@@ -21,7 +21,7 @@ describe('normalizeQuery', () => {
 					page: Readonly<{
 						evaluate: <T>(
 							fn: Readonly<(maxResults: Readonly<number>) => T>,
-							...args: Readonly<unknown[]>
+							...args: readonly unknown[]
 						) => Promise<T>;
 						waitForSelector: (
 							selector: Readonly<string>,
@@ -42,8 +42,10 @@ describe('normalizeQuery', () => {
 					context: Readonly<{
 						page: Readonly<{
 							evaluate: <T>(
-								fn: (maxResults: Readonly<number>) => T,
-								...args: unknown[]
+								fn: Readonly<
+									(maxResults: Readonly<number>) => T
+								>,
+								...args: readonly unknown[]
 							) => Promise<T>;
 							waitForSelector: (
 								selector: string,
@@ -67,14 +69,21 @@ describe('normalizeQuery', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
-			if (config.requestHandler) {
-				storedRequestHandler = config.requestHandler;
-			}
-			return {
-				run: defaultMockRun,
-			} as PlaywrightCrawler;
-		});
+		vi.mocked(PlaywrightCrawler).mockImplementation(
+			(
+				config: Readonly<{
+					requestHandler?: typeof storedRequestHandler;
+				}>,
+			): PlaywrightCrawler => {
+				if (config.requestHandler) {
+					storedRequestHandler = config.requestHandler;
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				return {
+					run: defaultMockRun,
+				} as PlaywrightCrawler;
+			},
+		);
 	});
 
 	afterEach(async () => {
@@ -112,14 +121,21 @@ describe('normalizeQuery', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as PlaywrightCrawler;
-		});
+		vi.mocked(PlaywrightCrawler).mockImplementation(
+			(
+				config: Readonly<{
+					requestHandler?: typeof storedRequestHandler;
+				}>,
+			): PlaywrightCrawler => {
+				if (config.requestHandler) {
+					testHandler = config.requestHandler;
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				return {
+					run: testMockRun,
+				} as PlaywrightCrawler;
+			},
+		);
 
 		const resultPromise = searchSalesforceHelp('@test', DEFAULT_LIMIT);
 		await vi.runAllTimersAsync();
@@ -150,14 +166,21 @@ describe('normalizeQuery', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as PlaywrightCrawler;
-		});
+		vi.mocked(PlaywrightCrawler).mockImplementation(
+			(
+				config: Readonly<{
+					requestHandler?: typeof storedRequestHandler;
+				}>,
+			): PlaywrightCrawler => {
+				if (config.requestHandler) {
+					testHandler = config.requestHandler;
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				return {
+					run: testMockRun,
+				} as PlaywrightCrawler;
+			},
+		);
 
 		const resultPromise = searchSalesforceHelp('@@@test', DEFAULT_LIMIT);
 		await vi.runAllTimersAsync();
@@ -187,14 +210,21 @@ describe('normalizeQuery', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as PlaywrightCrawler;
-		});
+		vi.mocked(PlaywrightCrawler).mockImplementation(
+			(
+				config: Readonly<{
+					requestHandler?: typeof storedRequestHandler;
+				}>,
+			): PlaywrightCrawler => {
+				if (config.requestHandler) {
+					testHandler = config.requestHandler;
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				return {
+					run: testMockRun,
+				} as PlaywrightCrawler;
+			},
+		);
 
 		const resultPromise = searchSalesforceHelp('test@query', DEFAULT_LIMIT);
 		await vi.runAllTimersAsync();
@@ -224,14 +254,21 @@ describe('normalizeQuery', () => {
 			}
 		});
 
-		vi.mocked(PlaywrightCrawler).mockImplementation((config: Readonly<{ requestHandler?: typeof storedRequestHandler }>) => {
-			if (config.requestHandler) {
-				testHandler = config.requestHandler;
-			}
-			return {
-				run: testMockRun,
-			} as PlaywrightCrawler;
-		});
+		vi.mocked(PlaywrightCrawler).mockImplementation(
+			(
+				config: Readonly<{
+					requestHandler?: typeof storedRequestHandler;
+				}>,
+			): PlaywrightCrawler => {
+				if (config.requestHandler) {
+					testHandler = config.requestHandler;
+				}
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				return {
+					run: testMockRun,
+				} as PlaywrightCrawler;
+			},
+		);
 
 		const resultPromise = searchSalesforceHelp('test query', DEFAULT_LIMIT);
 		await vi.runAllTimersAsync();

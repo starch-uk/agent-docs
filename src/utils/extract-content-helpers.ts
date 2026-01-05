@@ -200,13 +200,13 @@ function filterBodyTextDocParagraphs(
 /**
  * Process main element to extract best text content.
  * @param mainElement - Main element to process.
- * @param debugInfo - Debug info object to update.
+ * @param _debugInfo - Debug info object to update.
  * @returns Object with bestText and bestLength, or null if no suitable content found.
  */
 function processMainElement(
 	mainElement: Element,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	debugInfo: Record<string, unknown>,
+	_debugInfo: Record<string, unknown>,
 ): { bestText: string; bestLength: number } | null {
 	// Clone to avoid modifying original
 	const clone = mainElement.cloneNode(true) as Element;

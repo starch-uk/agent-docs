@@ -258,8 +258,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
+		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
 		selectorsElements.forEach((el) => {
-			(el as Element).remove();
+			el.remove();
 		});
 
 		// To prevent fallback loop from returning, we need body to have cookieTextCount >= 3 AND text.length <= 2000
@@ -352,8 +353,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
+		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
 		selectorsElements.forEach((el) => {
-			(el as Element).remove();
+			el.remove();
 		});
 
 		// To prevent tryFallbackContentExtraction from returning:
@@ -407,8 +409,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
+		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
 		selectorsElements.forEach((el) => {
-			(el as Element).remove();
+			el.remove();
 		});
 
 		// To prevent tryFallbackContentExtraction from returning:
@@ -501,8 +504,9 @@ describe('extractContent', () => {
 		const selectorsElements = document.querySelectorAll(
 			'#main-content, [role="main"], main, article, .main, .content, .main-content, [id*="content"], [class*="content"]',
 		);
+		// eslint-disable-next-line @typescript-eslint/prefer-readonly-parameter-types
 		selectorsElements.forEach((el) => {
-			(el as Element).remove();
+			el.remove();
 		});
 
 		// To prevent tryFallbackContentExtraction from returning:
@@ -546,7 +550,9 @@ describe('extractContent', () => {
 		 */
 		const codeDiv = document.createElement('div');
 		codeDiv.textContent =
-			'function test() { const x = {}; x(); x = () => {}; } '.repeat(COUNT_3);
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(
+				COUNT_3,
+			);
 		document.body.appendChild(codeDiv);
 
 		// Add normal text in a nav element (removed by tryLastResortBodyText's removeElements)

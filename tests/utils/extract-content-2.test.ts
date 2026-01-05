@@ -30,6 +30,7 @@ const MIN_LENGTH_200 = 200;
 const MIN_LENGTH_500 = 500;
 const MIN_LENGTH_1000 = 1000;
 const MIN_LENGTH_2000 = 2000;
+const MIN_LENGTH_3000 = 3000;
 const MIN_LENGTH_5000 = 5000;
 const ZERO = 0;
 
@@ -328,6 +329,7 @@ describe('extractContent', () => {
 		const shadowRoot = element.attachShadow({ mode: 'open' });
 		const child = document.createElement('div');
 		shadowRoot.appendChild(child);
+
 		/**
 		 * Mock querySelectorAll to throw an error.
 		 */
@@ -336,6 +338,7 @@ describe('extractContent', () => {
 		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		shadowRoot.querySelectorAll = vi.fn(() => {
 			throw new Error('Invalid selector');
+			// eslint-disable-next-line @typescript-eslint/no-deprecated
 		}) as typeof shadowRoot.querySelectorAll;
 
 		const result = findInShadowDOM(element, '.test');
@@ -410,7 +413,7 @@ describe('extractContent', () => {
 		const docP1 = document.createElement('p');
 		docP1.textContent =
 			'This is valid documentation content that should be extracted. '.repeat(
-				2,
+				COUNT_2,
 			);
 		main.appendChild(docP1);
 
@@ -457,7 +460,7 @@ describe('extractContent', () => {
 		document.body.appendChild(smallDiv);
 
 		/**
-		 * lastResortText = codeDiv + smallDiv = ~211 chars, codeRatio = ~0.83 >= 0.1, fails at line 965.
+		 * LastResortText = codeDiv + smallDiv = ~211 chars, codeRatio = ~0.83 >= 0.1, fails at line 965.
 		 */
 
 		/**
@@ -465,15 +468,20 @@ describe('extractContent', () => {
 		 */
 		const script = document.createElement('script');
 		script.textContent =
-			'Normal documentation text here with enough content. '.repeat(COUNT_300);
+			'Normal documentation text here with enough content. '.repeat(
+				COUNT_300,
+			);
 		document.body.appendChild(script);
 
 		// rawBodyText = codeDiv + smallDiv + script = ~12211 chars
 		// codeChars = ~175, codeRatio = 175/12211 = ~0.014 < 0.1, passes at line 977
 
 		const result = extractContent(document);
-		// Should return rawBodyText (lines 977-978)
-		expect(result.content.length).toBeGreaterThan(100);
+
+		/**
+		 * Should return rawBodyText (lines 977-978).
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_100);
 		expect(result.content).toContain('Normal documentation');
 	});
 
@@ -508,7 +516,7 @@ describe('extractContent', () => {
 		const main = document.createElement('main');
 		main.textContent =
 			'Main content with enough text to meet the minimum length requirement of 1000 characters for bestMainText extraction. '.repeat(
-				20,
+				COUNT_20,
 			);
 		document.body.appendChild(main);
 
@@ -719,13 +727,16 @@ describe('extractContent', () => {
 		const div = document.createElement('div');
 		div.textContent =
 			'Last resort text with enough content to meet the minimum length requirement of 100 characters for extraction. '.repeat(
-				2,
+				COUNT_2,
 			);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
-		// Should return lastResortText (line 976)
-		expect(result.content.length).toBeGreaterThan(100);
+
+		/**
+		 * Should return lastResortText (line 976).
+		 */
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_100);
 		expect(result.content).toContain('Last resort text');
 	});
 
@@ -779,12 +790,14 @@ describe('extractContent', () => {
 
 		// Add script with normal text (not in lastResortText, but in rawBodyText)
 		const script = document.createElement('script');
-		script.textContent = 'Normal documentation text here. '.repeat(COUNT_200); // ~6000 chars, low code ratio
+		script.textContent = 'Normal documentation text here. '.repeat(
+			COUNT_200,
+		); // ~6000 chars, low code ratio
 		document.body.appendChild(script);
 
 		const result = extractContent(document);
 		// Should return rawBodyText (lines 999-1000)
-		expect(result.content.length).toBeGreaterThan(100);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_100);
 		expect(result.content).toContain('Normal documentation');
 	});
 
@@ -869,7 +882,7 @@ describe('extractContent', () => {
 		div.className = 'content';
 		div.textContent =
 			'This is substantial content from a selector element that is longer than 200 characters to meet the minimum requirement for extraction. '.repeat(
-				3,
+				COUNT_3,
 			);
 		document.body.appendChild(div);
 
@@ -889,19 +902,21 @@ describe('extractContent', () => {
 
 		// Create main element with substantial text (sets bestText)
 		const main = document.createElement('main');
-		main.textContent = 'Main content with substantial text. '.repeat(100); // ~3500 chars
+		main.textContent = 'Main content with substantial text. '.repeat(
+			COUNT_100,
+		); // ~3500 chars
 		document.body.appendChild(main);
 
 		// Create element matching a selector with less text
 		const div = document.createElement('div');
 		div.className = 'content';
-		div.textContent = 'Selector content. '.repeat(50); // ~900 chars, less than main
+		div.textContent = 'Selector content. '.repeat(COUNT_50);
 		document.body.appendChild(div);
 
 		const result = extractContent(document);
 		// Should not update bestText (line 696 condition fails)
 		// Should use main content instead
 		expect(result.content).toContain('Main content');
-		expect(result.content.length).toBeGreaterThan(3000);
+		expect(result.content.length).toBeGreaterThan(MIN_LENGTH_3000);
 	});
 });

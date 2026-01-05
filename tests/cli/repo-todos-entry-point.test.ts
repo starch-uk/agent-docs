@@ -29,6 +29,27 @@ describe('repo-todos CLI entry point', () => {
 		expect(isMainEntryPoint()).toBe(true);
 	});
 
+	it('should return true when process.argv includes repo-todos (fallback condition)', () => {
+		// Force the first condition to be false by using a value that won't match import.meta.url.endsWith()
+		// but contains 'repo-todos', ensuring line 140 is evaluated
+		process.argv = [
+			'node',
+			'/absolutely/different/path/repo-todos',
+			'/tmp/repo',
+		];
+		const result = isMainEntryPoint();
+		expect(result).toBe(true);
+		process.argv = originalArgv;
+	});
+
+	it('should handle undefined process.argv[1] for nullish coalescing coverage', () => {
+		// Test the ?? false branch when process.argv[1] is undefined
+		process.argv = ['node']; // Only one element, so process.argv[1] is undefined
+		const result = isMainEntryPoint();
+		expect(result).toBe(false);
+		process.argv = originalArgv;
+	});
+
 	it('should return false when process.argv does not match entry point conditions', () => {
 		process.argv = ['node', '/path/to/other-script.js'];
 		expect(isMainEntryPoint()).toBe(false);
@@ -40,6 +61,7 @@ describe('repo-todos CLI entry point', () => {
 		/**
 		 * Mock process.exit to prevent actual exit.
 		 */
+		// eslint-disable-next-line @typescript-eslint/unbound-method
 		const originalExit = process.exit;
 		const exitSpy = vi.fn() as typeof process.exit;
 		process.exit = exitSpy.bind(process);
@@ -47,7 +69,9 @@ describe('repo-todos CLI entry point', () => {
 		/**
 		 * Mock file system operations to avoid actual file access.
 		 */
-		vi.mocked(readdir).mockResolvedValue([] as Awaited<ReturnType<typeof readdir>>);
+		vi.mocked(readdir).mockResolvedValue(
+			[] as Awaited<ReturnType<typeof readdir>>,
+		);
 		vi.mocked(repoTodosUtils.generateRepoTodos).mockResolvedValue([]);
 
 		// Test that the function can be called (entry point execution happens at module load)

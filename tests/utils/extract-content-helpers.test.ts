@@ -3,7 +3,7 @@
  * All tests run offline using jsdom - no network access required.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import {
 	findInShadowDOM,
@@ -19,9 +19,13 @@ import {
 } from '../../src/utils/extract-content-fallbacks.js';
 
 const COUNT_2 = 2;
+const COUNT_3 = 3;
 const COUNT_10 = 10;
+const COUNT_15 = 15;
+const COUNT_20 = 20;
 const COUNT_100 = 100;
 const SHADOW_DOM_DEPTH_15 = 15;
+const MIN_LENGTH_1000 = 1000;
 const ZERO = 0;
 const REPEAT_COUNT_10 = 10;
 const REPEAT_COUNT_100 = 100;
@@ -196,6 +200,7 @@ describe('findInShadowDOM', () => {
 		});
 
 		const result = findInShadowDOM(element, '.test');
+
 		/**
 		 * Should still find the direct match.
 		 */
@@ -245,6 +250,7 @@ describe('removeElements', () => {
 		document.body.appendChild(div);
 
 		removeElements(document, 'nonexistent');
+
 		/**
 		 * Element should still exist.
 		 */
@@ -260,22 +266,33 @@ describe('filterBodyTextDocParagraphs', () => {
 	document.body.innerHTML = '';
 
 	it('should return null when jsPatternCount <= 2', () => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const bodyClone = document.body.cloneNode(true) as unknown as Element;
-		const bodyText = 'const x = 5;'; // Only 1 JS pattern
+
+		/**
+		 * Only 1 JS pattern.
+		 */
+		const bodyText = 'const x = 5;';
 
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
 		expect(result).toBeNull();
 	});
 
 	it('should return null when jsPatternCount <= 2 with multiple patterns', () => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const bodyClone = document.body.cloneNode(true) as Element;
-		const bodyText = 'function test() { const x = 5; }'; // 2 JS patterns (function, const)
+
+		/**
+		 * 2 JS patterns (function, const).
+		 */
+		const bodyText = 'function test() { const x = 5; }';
 
 		const result = filterBodyTextDocParagraphs(bodyClone, bodyText);
 		expect(result).toBeNull();
 	});
 
 	it('should return null when no paragraphs meet filtering conditions', () => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
 		jsDiv.textContent =
@@ -293,6 +310,7 @@ describe('filterBodyTextDocParagraphs', () => {
 	});
 
 	it('should return filtered docTexts when jsPatternCount > 2 and paragraphs meet conditions', () => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
 		jsDiv.textContent =
@@ -318,6 +336,7 @@ describe('filterBodyTextDocParagraphs', () => {
 	});
 
 	it('should filter out paragraphs with JavaScript patterns', () => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
 		jsDiv.textContent =
@@ -344,6 +363,7 @@ describe('filterBodyTextDocParagraphs', () => {
 	});
 
 	it('should filter out paragraphs with const = document pattern', () => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const bodyClone = document.body.cloneNode(true) as Element;
 		const jsDiv = document.createElement('div');
 		jsDiv.textContent =
@@ -374,12 +394,18 @@ describe('tryBodyTextContent', () => {
 	const debugInfo: Record<string, unknown> = {};
 
 	it('should return null when bodyText.length <= 500', () => {
+		/**
+		 * Short text that should return null.
+		 */
 		const bodyText = 'Short text';
 		const result = tryBodyTextContent(bodyText, debugInfo);
 		expect(result).toBeNull();
 	});
 
 	it('should return content when cookieRatio < 0.2', () => {
+		/**
+		 * Body text with low cookie ratio.
+		 */
 		const bodyText =
 			'This is valid documentation content with enough text to meet the minimum length requirement of 500 characters. '.repeat(
 				REPEAT_COUNT_10,
@@ -390,9 +416,15 @@ describe('tryBodyTextContent', () => {
 	});
 
 	it('should return content when bodyText.length > 5000', () => {
-		const cookieText = 'cookie consent accept all. '.repeat(REPEAT_COUNT_100);
+		/**
+		 * Body text longer than 5000 characters.
+		 */
+		const cookieText = 'cookie consent accept all. '.repeat(
+			REPEAT_COUNT_100,
+		);
 		const bodyText = 'This is very long content. '.repeat(REPEAT_COUNT_250);
-		const fullText = cookieText + bodyText; // > 5000 chars
+		/** > 5000 chars. */
+		const fullText = cookieText + bodyText;
 		const result = tryBodyTextContent(fullText, debugInfo);
 		expect(result).not.toBeNull();
 		expect(result?.content).toBe(fullText);
@@ -402,11 +434,13 @@ describe('tryBodyTextContent', () => {
 		// Create text with high cookie ratio (>= 0.2) but length <= 5000
 		// 'cookie consent accept all' contains 3 cookie keywords
 		// Repeat enough times to get cookieRatio >= 0.2 but keep total <= 5000
-		const cookieText = 'cookie consent accept all. '; // ~26 chars, 3 keywords
+		/** ~26 chars, 3 keywords. */
+		const cookieText = 'cookie consent accept all. ';
 		// Need cookieRatio >= 0.2, so cookie matches / wordCount >= 0.2
 		// If we repeat 100 times: 300 cookie matches, ~100 words, ratio = 3.0 > 0.2 ✓
 		// But we also need length <= 5000: 26 * 100 = 2600 chars ✓
-		const fullText = cookieText.repeat(COUNT_100); // ~2600 chars, cookieRatio > 0.2
+		/** ~2600 chars, cookieRatio > 0.2. */
+		const fullText = cookieText.repeat(COUNT_100);
 		const result = tryBodyTextContent(fullText, debugInfo);
 		expect(result).toBeNull();
 	});
@@ -438,7 +472,9 @@ describe('tryLastResortBodyText', () => {
 
 	it('should return null when codeRatio >= 0.1', () => {
 		body.textContent =
-			'function test() { const x = {}; x(); x = () => {}; } '.repeat(COUNT_10); // High code ratio
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(
+				COUNT_10,
+			); // High code ratio
 		const result = tryLastResortBodyText(body, debugInfo);
 		expect(result).toBeNull();
 	});
@@ -470,7 +506,9 @@ describe('tryRawBodyText', () => {
 
 	it('should return null when codeRatio >= 0.1', () => {
 		body.textContent =
-			'function test() { const x = {}; x(); x = () => {}; } '.repeat(COUNT_10); // High code ratio
+			'function test() { const x = {}; x(); x = () => {}; } '.repeat(
+				COUNT_10,
+			); // High code ratio
 		const result = tryRawBodyText(body, debugInfo);
 		expect(result).toBeNull();
 	});
@@ -484,39 +522,66 @@ describe('processMainSelectors', () => {
 	const { body } = document;
 	const debugInfo: Record<string, unknown> = {};
 
+	beforeEach(() => {
+		// Clear body completely to ensure no other elements interfere
+		body.innerHTML = '';
+	});
+
 	it('should handle match() returning null (line 171 branch)', () => {
 		// Create article with > 1000 chars but NO cookie keywords to make match() return null
 		const article = document.createElement('article');
 		article.textContent =
 			'This is article content with enough text to meet the minimum length requirement of 1000 characters. '.repeat(
-				15,
-			); // > 1000 chars, no cookie keywords
+				COUNT_15,
+			);
 		body.appendChild(article);
 
 		const result = processMainSelectors(body, debugInfo);
 		expect(result).not.toBeNull();
 		expect(result?.content).toContain('article content');
-		expect(result?.content.length).toBeGreaterThan(1000);
+		expect(result?.content.length).toBeGreaterThan(MIN_LENGTH_1000);
+	});
+
+	it('should return null when bestMainText is empty (lines 191-192)', () => {
+		// Create main element with high cookie ratio (>= 0.05) to ensure bestMainText remains empty
+		// This tests the branch where matchResult is not null (line 170) but cookieRatio >= 0.05
+		const main = document.createElement('main');
+		// Create text with > 1000 chars and high cookie ratio
+		// Use "cookie consent accept all" repeated - each has 3 matches, 4 words
+		// 30 repetitions = 90 matches in 120 words = ratio 0.75 > 0.05
+		const cookiePhrase = 'cookie consent accept all ';
+		const REPEAT_COUNT_30 = 30;
+		const cookieText = cookiePhrase.repeat(REPEAT_COUNT_30);
+		// Add more text to ensure length > 1000 after element removal
+		const additionalText = 'additional text content. '.repeat(COUNT_20);
+		main.textContent = cookieText + additionalText;
+		body.appendChild(main);
+
+		const result = processMainSelectors(body, debugInfo);
+		expect(result).toBeNull();
+	});
+
+	it('should return null when no main selectors match (lines 191-192)', () => {
+		// Ensure body is empty - no elements that match main selectors
+		// This ensures bestMainText remains empty and the function returns null
+		body.innerHTML = '';
+
+		const result = processMainSelectors(body, debugInfo);
+		expect(result).toBeNull();
 	});
 });
 
 describe('processMainElement', () => {
-	let dom: JSDOM;
-	let document: Document;
-	let debugInfo: Record<string, unknown>;
-
-	beforeEach(() => {
-		dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-			url: 'https://test.example.com',
-		});
-		document = dom.window.document;
-		debugInfo = {};
+	const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+		url: 'https://test.example.com',
 	});
+	const { document } = dom.window;
+	const debugInfo: Record<string, unknown> = {};
 
 	it('should remove elements with class names containing script or syntax', () => {
 		const main = document.createElement('main');
 		const validDiv = document.createElement('div');
-		validDiv.textContent = 'Valid content. '.repeat(20);
+		validDiv.textContent = 'Valid content. '.repeat(COUNT_20);
 		main.appendChild(validDiv);
 
 		const scriptDiv = document.createElement('div');
@@ -541,7 +606,9 @@ describe('processMainElement', () => {
 		// Create main with substantial content first to ensure it returns
 		const validDiv = document.createElement('div');
 		validDiv.textContent =
-			'This is valid documentation content with enough text. '.repeat(15);
+			'This is valid documentation content with enough text. '.repeat(
+				COUNT_15,
+			);
 		main.appendChild(validDiv);
 
 		// Add JS patterns in text (not in script elements) to trigger filtering code path
@@ -550,7 +617,7 @@ describe('processMainElement', () => {
 		// This text contains: 'function', 'const', 'document.querySelector', 'addEventListener', 'let', 'var' = 6 patterns
 		jsTextDiv.textContent =
 			'function test() { const x = document.querySelector("div"); x.addEventListener("click", () => {}); let y = 5; var z = 10; } '.repeat(
-				3,
+				COUNT_3,
 			);
 		main.appendChild(jsTextDiv);
 
