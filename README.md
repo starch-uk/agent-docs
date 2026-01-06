@@ -2,8 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A tool for generating reusable, low-token AI agent instruction documents
-("docs") for AI-enabled IDEs.
+A reusable set of low-token AI agent instruction documents ("docs") for
+AI-enabled IDEs.
 
 ## Overview
 
@@ -58,77 +58,6 @@ with any technology.
     - @ESLINT.md for ESLint configuration
     ```
 
-## Usage
-
-The `sf-docs-helper` CLI tool is a helper script for searching and extracting
-details from Salesforce Help. It searches Salesforce Help documentation and
-extracts content that can be used as a starting point for creating documentation
-files.
-
-### Salesforce Help Commands
-
-**Recommended: `dump` command** - Outputs markdown to stdout, automatically
-follows links:
-
-```bash
-# Using dump mode (recommended - outputs markdown to stdout)
-pnpm sf-docs-helper dump "Lightning Web Components"
-pnpm sf-docs-helper dump "AuraEnabled annotation"
-
-# For specific commands/annotations/APIs, use top 5 results:
-pnpm sf-docs-helper dump "@AuraEnabled" --limit 5
-pnpm sf-docs-helper dump "REST API" --limit 5
-```
-
-The `dump` command:
-
-- Searches Salesforce Help (help.salesforce.com)
-- Filters results to Developer Documentation and Product Documentation
-- Retrieves all results via pagination
-- Deduplicates URLs automatically
-- Follows links to help.salesforce.com or developer.salesforce.com only
-- Fetches all pages in parallel
-- Outputs all content as markdown to stdout
-
-**Alternative: `search` command** - Downloads content to temporary folder:
-
-```bash
-pnpm sf-docs-helper search "Lightning Web Components"
-pnpm sf-docs-helper search "AuraEnabled annotation"
-```
-
-The `search` command:
-
-- Searches Salesforce Help and retrieves all results via pagination
-- Deduplicates results
-- Downloads all content to a temporary folder
-- Creates a TODO.md file listing all downloaded documents
-- Outputs the temporary folder location
-
-**Alternative: `get` command** - Downloads single URL:
-
-```bash
-pnpm sf-docs-helper get "https://help.salesforce.com/s/articleView?id=sf.apexcode_annotation_auraenabled.htm"
-```
-
-### Options
-
-- `--verbose` or `-v` - Show progress during processing (outputs to stderr)
-- `--concurrency <n>` - Number of concurrent downloads (default: 5)
-- `--limit <n>` - Maximum number of results to download (default: 20, dump
-  command only)
-
-### AI Agent Guidance
-
-The `.cursor/plans/` directory contains guidance files for AI Agents. These plan
-files provide structured instructions and workflows that AI coding assistants
-(like Cursor's Agent) can reference when helping developers. The plans document
-processes, best practices, and step-by-step workflows for various tasks, making
-them accessible to AI agents through the `.cursor/plans/` directory structure.
-When AI agents need guidance on how to perform specific tasks or follow certain
-workflows, they can reference these plan files to understand the expected
-process and provide accurate assistance.
-
 ## Documentation
 
 The `docs/` directory contains generated documentation files. Each doc follows a
@@ -136,11 +65,14 @@ structured format optimized for AI agent consumption:
 
 - **APEXANNOTATIONS.md** - Apex annotations reference
 - **APEXDOC.md** - ApexDoc documentation tool reference
+- **CML.md** - Constraint Modeling Language (CML) reference for Salesforce Revenue Cloud Product Configurator
 - **CODEANALYZER.md** - Salesforce Code Analyzer configuration (includes CLI
   Commands, CPD Engine, Flow Scanner Engine, Regex Engine, RetireJS Engine, and
   MCP tools)
+- **CONTEXTDEFINITIONS.md** - Salesforce Context Definitions reference for Dynamic Revenue Orchestrator (DRO)
 - **ESLINT.md** - ESLint configuration and rules reference
 - **ESLINTJSDOC.md** - ESLint JSDoc plugin reference
+- **FIELDSERVICE.md** - Salesforce Field Service reference
 - **GRAPHBINARY.md** - Graph Binary format reference
 - **GRAPHENGINE.md** - Graph Engine reference
 - **GRAPHML.md** - GraphML format reference
@@ -156,6 +88,7 @@ structured format optimized for AI agent consumption:
 - **PNPM.md** - pnpm package manager reference
 - **PRETTIER.md** - Prettier code formatter reference
 - **PRETTIERAPEX.md** - Prettier Apex plugin reference
+- **REVENUETRANSACTIONMANAGEMENT.md** - Salesforce Revenue Cloud Transaction Management reference
 - **TINKERPOP.md** - Apache TinkerPop graph computing framework reference
 - **VITEST.md** - Vitest testing framework reference
 - **VSCODE.md** - VS Code editor reference

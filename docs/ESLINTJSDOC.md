@@ -1,6 +1,6 @@
 # ESLint Plugin JSDoc Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 > **Purpose**: JSDoc linting rules for ESLint. Validates syntax, types, params,
 > returns, completeness. **Node**: >=20.11.0 | **ESLint**: ^7.0.0 | ^8.0.0 |

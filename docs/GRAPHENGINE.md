@@ -1,6 +1,6 @@
 # Salesforce Graph Engine (SFGE) Quick Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 Condensed guide for Salesforce Graph Engine (SFGE) data-flow analysis and rules.
 

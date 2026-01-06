@@ -1,6 +1,6 @@
 # VS Code Extension for Code Analyzer
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 ## Overview
 

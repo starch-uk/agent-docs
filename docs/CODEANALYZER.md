@@ -1,6 +1,6 @@
 # Salesforce Code Analyzer Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 > **Purpose**: Static code analysis for Salesforce (PMD, ESLint, CPD, Regex,
 > Flow Scanner, RetireJS, SFGE) **Install**:

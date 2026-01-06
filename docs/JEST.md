@@ -1,6 +1,6 @@
 # Jest 30.0 Quick Reference for AI Agents
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 Concise guide to Jest 30.0 APIs and features for AI coding assistants.
 

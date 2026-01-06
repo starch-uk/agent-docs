@@ -1,6 +1,6 @@
 # VITEST (Vite-native test framework)
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 Requires: Vite≥6.0.0, Node≥20.0.0
 

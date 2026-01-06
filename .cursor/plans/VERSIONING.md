@@ -78,47 +78,6 @@ Changes to docs files should increment the project version based on the
 Project version: minor bump (because ESLINT.md had a minor bump, which is
 greater than PMD.md's patch bump)
 
-## Initializing Existing Docs
-
-The existing documentation files in the `docs/` directory need to be initialized
-with version information when the versioning system is first implemented:
-
-- **APEXDOC.md**
-- **CICD.md**
-- **CODEANALYZERCONFIG.md**
-- **CPD.md**
-- **ESLINT.md**
-- **ESLINTJSDOC.md**
-- **FLOWSCANNER.md**
-- **GRAPHBINARY.md**
-- **GRAPHENGINE.md**
-- **GRAPHML.md**
-- **GRAPHSON.md**
-- **GREMLIN.md**
-- **GRYO.md**
-- **HUSKY.md**
-- **JEST30.md**
-- **JORJE.md**
-- **MCP.md**
-- **PMD.md**
-- **PMDAPEXAST.md**
-- **PMDSUPPRESSWARNINGS.md**
-- **PNPM.md**
-- **PRETTIER.md**
-- **PRETTIERAPEX.md**
-- **REGEX.md**
-- **RETIREJS.md**
-- **SFCLI.md**
-- **TINKERPOP.md**
-- **VITEST.md**
-- **VSCODE.md**
-- **XPATH31.md**
-
-All existing docs should be initialized with version `1.0.0` (or appropriate
-version based on their current state) when the versioning system is first
-implemented. These existing docs will be tracked going forward using the same
-semver system.
-
 ## Version Tracking
 
 Versions can be tracked in several ways:

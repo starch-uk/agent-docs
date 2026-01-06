@@ -1,6 +1,6 @@
 # GraphML Format Specification
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 XML-based format for graph serialization defined by GraphML specification (DTD
 and XSD).

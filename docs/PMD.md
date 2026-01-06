@@ -1,7 +1,7 @@
 ````markdown
 # PMD Quick Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 Condensed PMD guide for Salesforce Code Analyzer integration.
 

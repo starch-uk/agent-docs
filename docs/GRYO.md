@@ -1,6 +1,6 @@
 # Gryo Format Specification
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 Gremlin-Kryo binary format for graph serialization used by Apache TinkerPop.
 

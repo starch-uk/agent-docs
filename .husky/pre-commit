@@ -1,6 +1,0 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Format markdown files, script files, and unit test files before commit
-pnpm format
-

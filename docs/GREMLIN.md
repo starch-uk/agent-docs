@@ -1,7 +1,7 @@
 ````markdown
 # Gremlin Query Language Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 Functional graph traversal lang. Apache TinkerPop/SFGE. Multi-lang
 (Java/Groovy/Python/JS/.NET). OLTP/OLAP.

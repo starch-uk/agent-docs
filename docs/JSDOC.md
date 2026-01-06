@@ -1,6 +1,6 @@
 # JSDoc Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 > **Purpose**: API documentation generator for JavaScript. Extracts `/** ... */`
 > comments → HTML docs. **Node**: ^20.19.0 | ^22.12.0 | >=23.0.0 (JSDoc 5.x)

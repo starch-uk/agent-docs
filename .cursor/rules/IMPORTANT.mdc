@@ -8,12 +8,12 @@
 
 ## Updating Existing Documentation - CRITICAL REQUIREMENT
 
-**MANDATORY:** When updating any file in the `docs/` directory, you **MUST** follow the process documented in [UPDATE.md](.cursor/plans/UPDATE.md). This is **NON-NEGOTIABLE**.
+**MANDATORY:** When updating any file in the `docs/` directory, you **MUST** follow the documented process. This is **NON-NEGOTIABLE**.
 
 **What you MUST do:**
-1. **Read UPDATE.md first** - Before making any changes to a doc file, read and understand the complete workflow in `.cursor/plans/UPDATE.md`
+1. **Understand the workflow first** - Before making any changes to a doc file, understand the complete workflow
 2. **Extract references** - Extract repository URLs, web page URLs, or Salesforce article references from the doc file itself
-3. **Re-research sources** - Use web search to find official pages/repositories OR use `sf-docs-helper` for Salesforce topics. **CRITICAL:** If a repository URL is already present in the existing `docs/*.md` file, **DO NOT** perform a web search for the repository. Extract the repository URL directly from the doc file and proceed to cloning.
+3. **Re-research sources** - Extract repository URLs, web page URLs, or other references from the doc file itself. **CRITICAL:** If a repository URL is already present in the existing `docs/*.md` file, extract the repository URL directly from the doc file and proceed to cloning.
 4. **Clone repository** - Clone repo using full permissions to system's temporary folder (if applicable)
 5. **Systematic review** - Go through every URL on the official page and every file in the repo (verify ALL files inspected)
 6. **Verify all content** - All content in markdown file must be verified or removed/changed
@@ -22,10 +22,9 @@
 9. **Verify ALL todos completed** - Before proceeding, verify ALL file inspection todos are completed (count must match file count exactly)
 10. **Optimize** - Actually execute the OPTIMISE.md plan after updates (ONLY after ALL todos completed, read it, apply techniques, don't just mark as done)
 11. **Version** - Follow VERSIONING.md to determine and update version numbers
-10. **Version** - Follow VERSIONING.md to determine and update version numbers
 
 **What you MUST NOT do:**
-- ❌ Update doc files without reading UPDATE.md first
+- ❌ Update doc files without understanding the workflow first
 - ❌ Make changes without re-researching sources
 - ❌ Skip repository cloning for repository-based docs
 - ❌ Skip the verification process
@@ -36,272 +35,48 @@
 - ❌ Begin optimization before ALL file inspection todos are completed
 - ❌ Cancel or skip remaining todos because "essential review is complete"
 
-**Reason:** UPDATE.md contains the complete, mandatory workflow for updating documentation. Following it ensures accuracy, completeness, and consistency. Skipping steps leads to incomplete or incorrect documentation.
+**Reason:** Following the documented workflow ensures accuracy, completeness, and consistency. Skipping steps leads to incomplete or incorrect documentation.
 
-**Enforcement:** If asked to update a doc file, **STOP** and read UPDATE.md first. Follow the complete workflow before making any changes.
-
-## Salesforce Topics - CRITICAL REQUIREMENT
-
-**🚨 CATASTROPHIC FORGETTING PREVENTION - READ THIS FIRST 🚨**
-
-**ABSOLUTE REQUIREMENT:** When using `sf-docs-helper`, you **MUST** update the document file IMMEDIATELY after EACH command completes. **DO NOT** collect multiple outputs before updating. **DO NOT** say "I'll review results first" or "Performing deep dives..." and then collect all outputs. This causes catastrophic forgetting and information loss.
-
-**MANDATORY:** For any Salesforce-related topic, you **MUST** use `sf-docs-helper` CLI tool. This is **NON-NEGOTIABLE**.
-
-**Salesforce topics include:**
-- Apex (language, annotations, classes, methods, syntax)
-- Lightning (Aura, LWC, Lightning Platform)
-- Salesforce APIs (REST, SOAP, Bulk, Streaming)
-- Salesforce features (Flows, Process Builder, Workflows)
-- Salesforce tools (Salesforce CLI, Code Analyzer, etc.)
-- Any topic found on help.salesforce.com
-
-**What you MUST do:**
-- Use `sf-docs-helper dump "<topic>"` for ALL Salesforce topics
-- **CRITICAL:** Always use `required_permissions: ['all']` when running `sf-docs-helper` commands
-- This automatically searches help.salesforce.com, filters to Developer Documentation and Product Documentation, downloads all results to a temporary folder, and creates a todo file
-
-**Command syntax:**
-```bash
-# Using dump mode (recommended - outputs markdown to stdout)
-# CRITICAL: Must use required_permissions: ['all'] for sf-docs-helper commands
-# The dump command outputs markdown to stdout, following links to help.salesforce.com or developer.salesforce.com only
-# All pages are queried in parallel for faster results
-pnpm sf-docs-helper dump "Lightning Web Components"
-pnpm sf-docs-helper dump "AuraEnabled annotation"
-
-# For specific commands/annotations/APIs in final documentation, use top 5 results:
-pnpm sf-docs-helper dump "@AuraEnabled" --limit 5
-pnpm sf-docs-helper dump "REST API" --limit 5
-
-# Using search command (searches and downloads to temporary folder)
-pnpm sf-docs-helper search "Lightning Web Components"
-
-# Using get command (downloads single URL to temporary folder)
-pnpm sf-docs-helper get "https://help.salesforce.com/s/articleView?id=sf.apexcode_annotation_auraenabled.htm"
-
-# Options for dump:
-# -v, --verbose - Show progress during processing (outputs to stderr)
-# --concurrency <n> - Number of concurrent downloads (default: 5)
-# --limit <n> - Maximum number of results to download (default: 20)
-```
-
-**CRITICAL PERMISSION REQUIREMENT:** When running `sf-docs-helper` commands (including `pnpm sf-docs-helper dump`, `pnpm sf-docs-helper search`, `pnpm sf-docs-helper get`), you **MUST** use `required_permissions: ['all']` to ensure the command has full permissions. The `sf-docs-helper` tool requires full filesystem and network permissions to search Salesforce Help, download content, and create temporary directories. **DO NOT** attempt to run `sf-docs-helper` commands without full permissions - they will fail with permission errors.
-
-**Process for dump command:**
-1. The tool searches Salesforce Help and retrieves results (with pagination)
-2. Deduplicates the results
-3. Limits to specified number of results (default: 20, or use --limit option)
-4. Fetches all pages in parallel
-5. Extracts links from each page (only follows links to help.salesforce.com or developer.salesforce.com)
-6. Fetches additional linked pages in parallel
-7. Outputs all content as markdown to stdout
-
-**Process for search/get commands:**
-1. The tool searches Salesforce Help and retrieves results (with pagination)
-2. Deduplicates the results
-3. Limits to specified number of results (default: 20, or use --limit option)
-4. Downloads all content to a temporary folder
-5. Creates a TODO.md file listing all downloaded documents
-6. Outputs the temporary folder location
-7. Review the TODO.md file to process each document
-
-**CRITICAL WORKFLOW for Salesforce Create/Update:**
-
-**🚨 CATASTROPHIC FORGETTING PREVENTION - ABSOLUTE REQUIREMENT 🚨**
-
-**YOU MUST UPDATE THE DOCUMENT IMMEDIATELY AFTER EACH `sf-docs-helper` COMMAND. DO NOT COLLECT MULTIPLE OUTPUTS BEFORE UPDATING. THIS IS CRITICAL TO PREVENT INFORMATION LOSS.**
-
-**ABSOLUTE REQUIREMENTS:**
-- **DO NOT** run multiple `sf-docs-helper` commands and collect all outputs before updating
-- **DO NOT** say "I'll review the results first" or "I'll process all outputs together"
-- **DO NOT** proceed to the next `sf-docs-helper` command until the document has been updated with the current output
-- **YOU MUST** update the document file IMMEDIATELY after receiving EACH `sf-docs-helper` response
-- **YOU MUST** write the information to the document file before running the next command
-- **YOU MUST** process and integrate information into the document after each command completes
-
-**Why this is critical:** If you collect multiple `sf-docs-helper` outputs before updating the document, you will experience catastrophic forgetting - the context will become too large to process effectively, and important details will be lost. Updating incrementally ensures all information is preserved.
-
-When creating or updating Salesforce documentation, follow this iterative workflow:
-
-1. **Initial search (10 results):**
-   - Start with `pnpm sf-docs-helper dump "<main-topic>" --limit 10`
-   - Example: `pnpm sf-docs-helper dump "Apex Annotations" --limit 10`
-   - The dump command outputs markdown to stdout with all content
-   - The tool automatically follows links to help.salesforce.com or developer.salesforce.com only
-   - All pages are fetched in parallel for faster results
-   - **🚨 CRITICAL - CATASTROPHIC FORGETTING PREVENTION:** After receiving the response, you **MUST IMMEDIATELY UPDATE THE DOCUMENT FILE** with the information. Use the `search_replace` or `write` tool to update the document file. **DO NOT** proceed to step 2 until the document has been updated. **DO NOT** collect multiple outputs before updating.
-
-2. **Discover APIs/commands/annotations:**
-   - As you read the initial output (which should now be in the document), identify specific APIs, commands, or annotations mentioned
-   - Track all discovered items (e.g., `@AuraEnabled`, `@RestResource`, `REST API`, etc.)
-
-3. **Iterative deep dives (5 results each):**
-   - For each discovered API/command/annotation, perform: `pnpm sf-docs-helper dump "<specific-item>" --limit 5`
-   - Example: `pnpm sf-docs-helper dump "@AuraEnabled" --limit 5`
-   - **CRITICAL:** The tool automatically deduplicates URLs - **DO NOT dump the same page twice**
-   - The tool only follows links to help.salesforce.com or developer.salesforce.com
-   - **🚨 CRITICAL - CATASTROPHIC FORGETTING PREVENTION:** After receiving EACH response, you **MUST IMMEDIATELY UPDATE THE DOCUMENT FILE** with the information before running the next `sf-docs-helper` command. Use the `search_replace` or `write` tool to update the document file. **DO NOT** run multiple dump commands in sequence without updating the document between each one. **DO NOT** collect outputs from multiple commands before updating.
-
-4. **Process the output:**
-   - The dump command outputs all content as markdown to stdout
-   - Review the markdown output systematically
-   - Extract information to create/update the final documentation
-   - Cross-reference information across pages for accuracy
-   - **🚨 CRITICAL:** Update the document file IMMEDIATELY after each response before proceeding to the next command
-
-**Deduplication requirement:**
-- The dump command automatically deduplicates URLs
-- The tool only follows links to help.salesforce.com or developer.salesforce.com
-- All pages are fetched in parallel for faster results
-- No need to manually track URLs - the tool handles this automatically
-
-**What you MUST NOT do:**
-- ❌ Use general web search (`web_search` tool) for Salesforce topics
-- ❌ Manually search the web for Salesforce documentation
-
-**Reason:** help.salesforce.com is the authoritative source. Using `sf-docs-helper` ensures accurate, comprehensive, and official documentation coverage. General web search may miss official docs or provide outdated information.
-
-**Enforcement:** If you catch yourself about to search the web for a Salesforce topic, **STOP** and use `sf-docs-helper` instead.
+**Enforcement:** If asked to update a doc file, **STOP** and understand the complete workflow before making any changes.
 
 ## Repository Cloning and File Inspection
 
-**🚨 CRITICAL: ALL FILES ARE EQUALLY IMPORTANT 🚨**
+## Repository File Review (Recommended Approach)
 
-- **There is NO such thing as a "key file" or "important file"** - ALL files are equally important
-- **Do NOT prioritize certain files** - All files must be inspected systematically
-- **Do NOT re-order files for inspection** - Inspect files in the order they appear in the file listing
-- **Do NOT start with "most important files"** - This is a CRITICAL VIOLATION
-- **All files are equal** - Every file must be inspected without exception
+- Aim to treat all files in a repository as potentially relevant, not just the obvious ones.
+- When documenting a repository (GitHub, GitLab, etc.), prefer a **systematic, broad review** over focusing only on a few "key files".
 
-- **MANDATORY for repository-based documentation**: When creating or updating documentation that references a repository (GitHub, GitLab, etc.), you **MUST**:
-  - **Clone the repository** - The repository MUST be cloned using full permissions to the system's temporary folder
-  - **CRITICAL PERMISSION REQUIREMENT:** When cloning repositories, you **MUST** use `required_permissions: ['all']` to ensure git cloning has full permissions. Git cloning requires full filesystem and network permissions to succeed. **DO NOT** attempt git cloning without full permissions - it will fail with permission errors.
-  - **DO NOT create temp folders manually:**
-    - **DO NOT** create `.temp-repo`, `.temp-inspection`, or any other temp folders manually in the workspace
-    - **DO NOT** manually clone repositories to workspace directories
-    - Clone to system's temporary folder (using `tmpdir()` or similar, e.g., `/tmp/agent-docs-*` on Unix)
-    - Creating temp folders in the workspace is erroneous and should never happen
-  - **🚨 ABSOLUTE REQUIREMENT: Complete File Inspection BEFORE Documentation Work 🚨**
-    - **YOU MUST NOT** create, update, or modify documentation files until you have completed the ENTIRE file inspection process
-    - **YOU MUST NOT** say "I'll focus on important files first" or "I'll read key files and proceed" - this is a CRITICAL VIOLATION
-    - **YOU MUST NOT** skip file inspection because there are "too many files" - this is a CRITICAL VIOLATION
-    - **YOU MUST** complete ALL file inspection steps (list files, create todos, inspect all files, verify completion) BEFORE any documentation work
-    - **YOU MUST** inspect EVERY file in the repository, no exceptions
-    - If you find yourself about to create or update documentation before completing file inspection, **STOP** and complete the inspection first
-  - **Systematically inspect ALL repository files** - You MUST examine EVERY file in the repository:
-    - **CRITICAL REQUIREMENT:** When looking through a Git repo, you **MUST** look at:
-      - **Every `**/*.md` file** - All markdown files in the repository, regardless of location
-      - **EVERY file covering the public API** - All files that define or document the public API
-      - **All exported plugins and libraries** - All files that export plugins, libraries, or modules that are part of the public API
-    - **First:** Use a command to get the complete file listing:
-      ```bash
-      find . -type f ! -path './.git/*' ! -path './node_modules/*' ! -path './dist/*' ! -path './coverage/*' | sort
-      ```
-      This ensures you have the complete, accurate list of ALL files to inspect.
-    - **Second:** **CRITICAL: Create a todo for EVERY SINGLE FILE IMMEDIATELY**. This is **MANDATORY** and **NON-NEGOTIABLE**:
-      
-      **🚨 ABSOLUTE REQUIREMENT: ALL TODOs MUST BE CREATED IMMEDIATELY 🚨**
-      - **DO NOT** say "I'll start with the most important files first" - this is a CRITICAL VIOLATION
-      - **DO NOT** create initial todos for "most important ones" - create todos for ALL files immediately
-      - **YOU MUST** create todos for ALL files before inspecting any files
-      - **YOU MUST** use `todo_write` to create todos from the generated JSON file in batches of 20
-      - **YOU MUST** create ALL batches (all todos) before beginning any file inspection
-      - **NO EXCEPTIONS** - Every single file must have a todo created before any file inspection begins
-      - When using `todo_write`, create todos in batches of 20 items per call, but create ALL batches before proceeding
-      
-      **Use the `repo-todos` script (RECOMMENDED):**
-      ```bash
-      # Generate todos and write to a file (recommended)
-      # From the workspace directory
-      # CRITICAL: Must use required_permissions: ['all'] for pnpm repo-todos
-      pnpm repo-todos /path/to/cloned/repo --output .todos-repo-inspection.json
-      # Then read the file and use with todo_write tool to create ALL todos immediately
-      ```
-      
-      **Alternative (output to stdout):**
-      ```bash
-      # From the cloned repository directory
-      cd /path/to/cloned/repo
-      # CRITICAL: Must use required_permissions: ['all'] for pnpm repo-todos
-      pnpm repo-todos . > todos.json
-      # Then use the output with todo_write tool to create ALL todos immediately
-      ```
-      
-      **CRITICAL PERMISSION REQUIREMENT:** When running `pnpm repo-todos`, you **MUST** use `required_permissions: ['all']` to ensure the command has full permissions. The `repo-todos` script requires full filesystem permissions to read repository files and directories. **DO NOT** attempt to run `pnpm repo-todos` without full permissions - it will fail with permission errors.
-      
-      The `repo-todos` script automatically:
-      - Lists all files (excluding .git, node_modules, dist, coverage, etc.)
-      - Generates unique todo IDs for each file
-      - Validates that all files have corresponding todos
-      - Detects duplicate IDs
-      - Outputs JSON format ready for `todo_write` tool
-      - Supports `--output <file>` or `-o <file>` to write todos to a file (recommended for easier file reading)
-      - Without `--output`, writes JSON to stdout for piping/redirection
-      
-      **After generating todos, you MUST:**
-      - Read the JSON file containing all todos
-      - Use `todo_write` to create todos in batches of 20 items per call
-      - Create ALL batches (all todos) before beginning any file inspection
-      - **CRITICAL:** Do NOT start inspecting files until ALL todos have been created across all batches
-      - Verify that the count of todos created matches the count of files exactly
-      - Only AFTER all todos are created (all batches completed) should you begin inspecting files
-      
-      **Manual approach (if script unavailable):**
-      - Use `todo_write` to create a separate todo item for EACH and EVERY file
-      - Create todos in batches of 20 items per `todo_write` call
-      - Create ALL batches (all todos) before beginning any file inspection
-      - **DO NOT** group files into categories or "file groups"
-      - **DO NOT** create high-level todos like "Review source code files" or "Review config files"
-      - **DO NOT** create todos for "most critical files" or "important files" - ALL files are required
-      - **DO NOT** skip any files, even if they seem unimportant
-      - **DO NOT** create initial todos for "most important ones" - create todos for ALL files immediately
-      - **DO NOT** read only a few "key files" and skip the rest - this is a CRITICAL VIOLATION
-      - **DO NOT** assume documentation files (docs/*.md) are less important - they often contain critical details
-      - **EVERY file must have its own individual todo item** with a unique identifier
-      - Example: `file-package.json`, `file-README.md`, `file-src-index.js`, `file-src-rules-checkAccess.js`, `file-docs-rules-checkAccess.md`, etc.
-      - The total number of todos must equal the total number of files exactly
-      - **NO EXCEPTIONS** - Every single file in the repository listing must have a corresponding todo item
-      - Each and every file must have its own todo item. Do NOT skip any files. ALL files in a repository must be gone through.
-      - **VERIFICATION REQUIRED:** After creating todos, verify: `count of files from find command === count of todos created`. If they don't match, you have violated this requirement.
-    - **Third:** Inspect files one by one - Read and inspect EACH file systematically, one at a time:
-      - Read the entire contents of each file
-      - Extract all relevant information from each file
-      - Inspect ALL files systematically without prioritization or re-ordering
-      - Do NOT skip files or assume they're not important
-      - All files are equally important and must be inspected
-    - **Fourth:** Update doc as you go - As you inspect each file, add its details to the documentation before moving on to the next file. Do NOT wait until the end to add information.
-    - **Fifth:** Extract information from EACH file and add it to the documentation immediately.
-    - **Sixth:** Verify nothing is missed by checking off each file (update todo list immediately after each file).
-    - **Seventh:** **MANDATORY VERIFICATION CHECKPOINT** - Before proceeding to ANY documentation work, you MUST verify:
-      - Count the total number of files from step 1
-      - Count the total number of completed todos
-      - These numbers MUST match exactly
-      - **VERIFICATION CHECKPOINT:** If the numbers don't match, you MUST STOP and complete the missing file inspections
-      - **VERIFICATION CHECKPOINT:** If you have not inspected ALL files, you MUST NOT proceed to documentation creation or updates
-      - **VERIFICATION CHECKPOINT:** If you find yourself about to create/update documentation, ask yourself: "Have I inspected ALL files?" If the answer is no, STOP and complete the inspection
-      - Do NOT proceed if any files remain unchecked
-      - Do NOT proceed if the numbers don't match
-      - **CRITICAL:** If you proceed without verifying ALL files are inspected, you have violated this requirement and your work is INCOMPLETE
-      - **CRITICAL:** Reading only "key files" (package.json, README.md, a few source files) and skipping documentation files (docs/*.md) is a CRITICAL VIOLATION
-      - **CRITICAL:** Documentation files in docs/ directories often contain the MOST IMPORTANT details about configuration, options, edge cases, and usage patterns
-      - **CRITICAL:** Saying "I'll focus on important files first" or "I'll read key files and proceed" is a CRITICAL VIOLATION - you MUST inspect ALL files first
-      - **You MUST inspect ALL files, including ALL documentation files, before proceeding**
-    - **Do NOT skip any files** - Every file may contain important information. ALL files must be inspected, not just a few key files.
-  - **Systematically review ALL URLs** - You MUST review every URL on the official documentation page
-  - **Verify against source code** - Compare documentation content against actual repository files and official pages, not just documentation websites
-  - **Do NOT skip this step** - Creating or updating documentation without systematically inspecting ALL repository files and URLs is NOT acceptable
-  - **🚨 CRITICAL: ALL TODOs MUST BE COMPLETED BEFORE OPTIMIZATION 🚨**
-    - **YOU MUST NOT** proceed to optimization until ALL file inspection todos are completed
-    - **YOU MUST NOT** cancel or skip remaining todos because "essential review is complete" - this is a CRITICAL VIOLATION
-    - **YOU MUST NOT** begin optimization before ALL files are inspected - this is a CRITICAL VIOLATION
-    - **YOU MUST** verify that the count of completed todos matches the count of files exactly before proceeding to optimization
-    - **YOU MUST** complete ALL file inspection todos before beginning optimization
-    - **NO EXCEPTIONS** - Every single file must be inspected before optimization can begin
-  - **Cleanup temporary directories** - After inspection is complete, you MUST delete the cloned repository from the system's temporary folder. Do NOT leave temporary directories on the system.
-  - **Actually execute optimization** - When running OPTIMISE.md (ONLY after ALL todos are completed), you MUST actually perform the optimization process (read the file, apply techniques, convert prose to tables, etc.). Do NOT just mark it as "done" without executing it.
+- When cloning repositories for documentation work:
+  - Clone to a temporary location outside the main workspace (for example, using `tmpdir()`).
+  - Avoid creating ad-hoc temp folders inside the project workspace.
 
-- **See [UPDATE.md](.cursor/plans/UPDATE.md) and [CREATE.md](.cursor/plans/CREATE.md)** for complete workflows and requirements.
+- For a thorough review of a repository:
+  - Start by generating a complete file listing, excluding standard build and dependency directories:
+    ```bash
+    find . -type f ! -path './.git/*' ! -path './node_modules/*' ! -path './dist/*' ! -path './coverage/*' | sort
+    ```
+  - Use that listing to drive your review and note-taking process.
+  - Prioritize:
+    - All markdown files (`**/*.md`)
+    - Files that define or document the public API
+    - Exported plugins, libraries, or modules that are part of the public surface
+
+- If you use a todo system (for example via `todo_write` and a helper script like `repo-todos`):
+  - Generate todos based on the full file list rather than hand-picking a few files.
+  - Creating todos in small batches (for example, ~20 at a time) can make the process manageable.
+  - Keep todos granular (ideally one per file) so progress and coverage are easy to track.
+
+- As you review files:
+  - Read each file in full and extract the relevant technical and behavioral details.
+  - Update documentation incrementally as you go instead of waiting until the end.
+  - Keep a simple checkpoint for yourself (for example, “number of files reviewed” vs “number of files in listing”) so you can see whether anything has been skipped.
+
+- Before doing higher-level optimization (like running an OPTIMISE-style pass):
+  - Make sure the underlying documentation work is complete enough for that effort to be worthwhile.
+  - Confirm that all files you decided to cover have actually been reviewed and incorporated where relevant.
+
+- After you finish using a cloned repository for documentation:
+  - Clean up any temporary clones/directories so they don’t accumulate over time.
 
 ## Versioning
 
@@ -311,32 +86,6 @@ When creating or updating Salesforce documentation, follow this iterative workfl
   - See VERSIONING.md for complete rules, examples, and workflow
   - Version changes are **required** and must be completed before finalizing any doc changes
 
-## Running sf-docs-helper CLI Tool (Salesforce Only)
-
-**CRITICAL REQUIREMENTS when running `sf-docs-helper`:**
-
-1. **Do NOT build unnecessarily:**
-   - **DO NOT** run `pnpm build` or create `dist/` folder unless explicitly needed
-   - The `sf-docs-helper` CLI tool should be run directly from source using `node` or via `pnpm` scripts
-   - Only build if the tool specifically requires compiled output
-   - Building creates unnecessary `dist/` folders that should be avoided
-
-2. **Use proper command format:**
-   ```bash
-   # Using pnpm script (recommended)
-   # CRITICAL: Must use required_permissions: ['all'] for sf-docs-helper commands
-   pnpm sf-docs-helper dump "<topic>"
-   pnpm sf-docs-helper dump "<specific-item>" --limit 5  # For specific commands/annotations/APIs
-   pnpm sf-docs-helper search "<topic>"
-   
-   # Or run directly with node
-   node src/cli/index.ts dump "<topic>"
-   node src/cli/index.ts dump "<specific-item>" --limit 5
-   node src/cli/index.ts search "<topic>"
-   ```
-
-3. **CRITICAL PERMISSION REQUIREMENT:** When running `sf-docs-helper` commands (including `pnpm sf-docs-helper dump`, `pnpm sf-docs-helper search`, `pnpm sf-docs-helper get`), you **MUST** use `required_permissions: ['all']` to ensure the command has full permissions. The `sf-docs-helper` tool requires full filesystem and network permissions to search Salesforce Help, download content, and create temporary directories. **DO NOT** attempt to run `sf-docs-helper` commands without full permissions - they will fail with permission errors.
-
 ## Scripts
 
 - **Use scripts via pnpm**: Always run project scripts using `pnpm` as the package manager. For example:
@@ -345,4 +94,4 @@ When creating or updating Salesforce documentation, follow this iterative workfl
   - `pnpm lint` - Run linter
   - `pnpm format` - Format code
 
-- **CRITICAL PERMISSION REQUIREMENT for pnpm commands**: When running `pnpm` commands (including `pnpm install`, `pnpm build`, `pnpm test`, `pnpm sf-docs-helper`, etc.), you **MUST** use `required_permissions: ['network']` or `required_permissions: ['all']` to ensure pnpm commands have network connectivity. pnpm commands require network access to fetch packages from registries. **DO NOT** attempt pnpm commands without network permissions - they will fail with network connectivity errors.
+- **CRITICAL PERMISSION REQUIREMENT for pnpm commands**: When running `pnpm` commands (including `pnpm install`, `pnpm build`, `pnpm test`, etc.), you **MUST** use `required_permissions: ['network']` or `required_permissions: ['all']` to ensure pnpm commands have network connectivity. pnpm commands require network access to fetch packages from registries. **DO NOT** attempt pnpm commands without network permissions - they will fail with network connectivity errors.

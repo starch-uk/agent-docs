@@ -1,6 +1,6 @@
 # Prettier Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 > **Architecture**: Parse → AST → Doc → Format. Plugins extend via
 > parsers/printers. **Philosophy**: Opinionated, correctness over

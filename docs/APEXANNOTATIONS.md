@@ -1,6 +1,6 @@
 # Apex Annotations Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 > **Syntax**: `@AnnotationName` or `@AnnotationName(param='value')` — uses
 > single quotes (not double)

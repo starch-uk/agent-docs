@@ -1,6 +1,6 @@
 # Jorje AST Reference
 
-**Version:** 1.0.0
+> **Version**: 1.0.0
 
 > **Quick Info**: Salesforce's Java-based Apex parser. Consumed via
 > `prettier-plugin-apex`. All nodes have `@class` property as type identifier.
