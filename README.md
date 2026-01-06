@@ -78,39 +78,41 @@ with any technology.
 The `docs/` directory contains generated documentation files. Each doc follows a
 structured format optimized for AI agent consumption:
 
-- **APEXANNOTATIONS.md** - Apex annotations reference
-- **APEXDOC.md** - ApexDoc documentation tool reference
-- **CML.md** - Constraint Modeling Language (CML) reference for Salesforce
-  Revenue Cloud Product Configurator
-- **CODEANALYZER.md** - Salesforce Code Analyzer configuration (includes CLI
-  Commands, CPD Engine, Flow Scanner Engine, Regex Engine, RetireJS Engine, and
-  MCP tools)
-- **CONTEXTDEFINITIONS.md** - Salesforce Context Definitions reference for
-  Dynamic Revenue Orchestrator (DRO)
-- **ESLINT.md** - ESLint configuration and rules reference
-- **ESLINTJSDOC.md** - ESLint JSDoc plugin reference
-- **FIELDSERVICE.md** - Salesforce Field Service reference
-- **GRAPHBINARY.md** - Graph Binary format reference
-- **GRAPHENGINE.md** - Graph Engine reference
-- **GRAPHML.md** - GraphML format reference
-- **GRAPHSON.md** - GraphSON format reference
-- **GREMLIN.md** - Gremlin query language reference
-- **GRYO.md** - Gryo binary format reference
-- **HUSKY.md** - Husky git hooks tool reference
-- **JEST.md** - Jest testing framework reference
-- **JORJE.md** - Jorje Apex parser reference
-- **JSDOC.md** - JSDoc documentation generator reference
-- **PMD.md** - PMD static analysis tool reference (includes Apex AST reference
-  and suppressing warnings)
-- **PNPM.md** - pnpm package manager reference
-- **PRETTIER.md** - Prettier code formatter reference
-- **PRETTIERAPEX.md** - Prettier Apex plugin reference
-- **REVENUETRANSACTIONMANAGEMENT.md** - Salesforce Revenue Cloud Transaction
-  Management reference
-- **TINKERPOP.md** - Apache TinkerPop graph computing framework reference
-- **VITEST.md** - Vitest testing framework reference
-- **VSCODE.md** - VS Code editor reference
-- **XPATH31.md** - XPath 3.1 query language reference
+- **[APEXANNOTATIONS.md](docs/APEXANNOTATIONS.md)** - Apex annotations reference
+- **[APEXDOC.md](docs/APEXDOC.md)** - ApexDoc documentation tool reference
+- **[CML.md](docs/CML.md)** - Constraint Modeling Language (CML) reference for
+  Salesforce Revenue Cloud Product Configurator
+- **[CODEANALYZER.md](docs/CODEANALYZER.md)** - Salesforce Code Analyzer
+  configuration (includes CLI Commands, CPD Engine, Flow Scanner Engine, Regex
+  Engine, RetireJS Engine, and MCP tools)
+- **[CONTEXTDEFINITIONS.md](docs/CONTEXTDEFINITIONS.md)** - Salesforce Context
+  Definitions reference for Dynamic Revenue Orchestrator (DRO)
+- **[ESLINT.md](docs/ESLINT.md)** - ESLint configuration and rules reference
+- **[ESLINTJSDOC.md](docs/ESLINTJSDOC.md)** - ESLint JSDoc plugin reference
+- **[FIELDSERVICE.md](docs/FIELDSERVICE.md)** - Salesforce Field Service
+  reference
+- **[GRAPHBINARY.md](docs/GRAPHBINARY.md)** - Graph Binary format reference
+- **[GRAPHENGINE.md](docs/GRAPHENGINE.md)** - Graph Engine reference
+- **[GRAPHML.md](docs/GRAPHML.md)** - GraphML format reference
+- **[GRAPHSON.md](docs/GRAPHSON.md)** - GraphSON format reference
+- **[GREMLIN.md](docs/GREMLIN.md)** - Gremlin query language reference
+- **[GRYO.md](docs/GRYO.md)** - Gryo binary format reference
+- **[HUSKY.md](docs/HUSKY.md)** - Husky git hooks tool reference
+- **[JEST.md](docs/JEST.md)** - Jest testing framework reference
+- **[JORJE.md](docs/JORJE.md)** - Jorje Apex parser reference
+- **[JSDOC.md](docs/JSDOC.md)** - JSDoc documentation generator reference
+- **[PMD.md](docs/PMD.md)** - PMD static analysis tool reference (includes Apex
+  AST reference and suppressing warnings)
+- **[PNPM.md](docs/PNPM.md)** - pnpm package manager reference
+- **[PRETTIER.md](docs/PRETTIER.md)** - Prettier code formatter reference
+- **[PRETTIERAPEX.md](docs/PRETTIERAPEX.md)** - Prettier Apex plugin reference
+- **[REVENUETRANSACTIONMANAGEMENT.md](docs/REVENUETRANSACTIONMANAGEMENT.md)** -
+  Salesforce Revenue Cloud Transaction Management reference
+- **[TINKERPOP.md](docs/TINKERPOP.md)** - Apache TinkerPop graph computing
+  framework reference
+- **[VITEST.md](docs/VITEST.md)** - Vitest testing framework reference
+- **[VSCODE.md](docs/VSCODE.md)** - VS Code editor reference
+- **[XPATH31.md](docs/XPATH31.md)** - XPath 3.1 query language reference
 
 ## Contributing
 
