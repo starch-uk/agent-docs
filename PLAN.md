@@ -1,7 +1,7 @@
 # Project: agent-docs
 
-Define and maintain the `agent-docs` repository as a reusable set of
-low-token AI agent instruction documents ("docs") for AI-enabled IDEs.
+Define and maintain the `agent-docs` repository as a reusable set of low-token
+AI agent instruction documents ("docs") for AI-enabled IDEs.
 
 ## Repository Setup
 
@@ -22,7 +22,8 @@ other starch-uk repositories:
 The README.md should contain:
 
 - **Project title and description** - Brief overview of agent-docs as the
-  reusable, low-token AI agent instruction documents to be reused in other projects
+  reusable, low-token AI agent instruction documents to be reused in other
+  projects
 - **License badge** - MIT License badge link
 - **Overview section** - Explanation of what docs are, their purpose (low token
   count, comprehensive, reusable), and their use in AI-enabled IDEs. This
@@ -158,7 +159,8 @@ from the community.
     ```
 ````
 
-3. **Make your changes** following the project's documentation style and conventions
+3. **Make your changes** following the project's documentation style and
+   conventions
 4. **Format files**:
     ```bash
     pnpm format
@@ -167,11 +169,11 @@ from the community.
     ```bash
     git commit -m "Add feature: your feature description"
     ```
-7. **Push your changes** to your forked repository:
+6. **Push your changes** to your forked repository:
     ```bash
     git push origin feature/your-feature-name
     ```
-6. **Open a pull request** to the main repository's `main` branch
+7. **Open a pull request** to the main repository's `main` branch
 
 ## Style
 
@@ -601,11 +603,12 @@ The plan should:
 1. Filename generation: Convert to uppercase, remove spaces and dots. Version
    numbers like "XPath 3.1" become "XPATH31.md". Remove redundant words like
    "plugin" when they appear between other words (e.g., "prettier-plugin-apex" →
-   "PRETTIERAPEX.md", "eslint-plugin-jsdoc" → "ESLINTJSDOC.md"). All docs live in
-   the `docs/` folder.
+   "PRETTIERAPEX.md", "eslint-plugin-jsdoc" → "ESLINTJSDOC.md"). All docs live
+   in the `docs/` folder.
 
 ## Deliverables
 
-1. Repository scaffolding with documentation, licensing, security, and GitHub workflow files
+1. Repository scaffolding with documentation, licensing, security, and GitHub
+   workflow files
 2. A stable set of docs in `docs/` following this plan
 3. Versioning system for all docs (including existing docs in `docs/` directory)

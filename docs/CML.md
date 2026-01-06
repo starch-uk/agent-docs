@@ -1,8 +1,11 @@
 # CML Reference (Constraint Modeling Language)
 
-> **Version**: 1.0.0 | **Platform**: Salesforce Revenue Cloud Product Configurator
+> **Version**: 1.0.0 | **Platform**: Salesforce Revenue Cloud Product
+> Configurator
 
-DSL for defining constraint models for product configuration. Compiles to constraint model used by constraint engine to construct compliant configurations.
+DSL for defining constraint models for product configuration. Compiles to
+constraint model used by constraint engine to construct compliant
+configurations.
 
 ---
 
@@ -50,28 +53,28 @@ sum(), count(), min(), max(), avg(), parent()
 
 ### Key Annotations
 
-| Annotation | Target | Purpose |
-|------------|--------|---------|
-| `@displayName` | Type/Var/Rel | UI display name |
-| `@description` | Type | Description text |
-| `@group` | Type | UI grouping |
-| `@hide`/`@hidden` | Type/Var/Rel | Hide from UI |
-| `@sequence` | Type/Var | Resolution order (lower = first) |
-| `@required` | Var/Rel | Mark as required |
-| `@readOnly` | Var | Read-only field |
-| `@defaultValue` | Var | Default value |
-| `@contextPath` | Var | Map to transaction field |
-| `@abort` | Constraint | Stop on first error |
+| Annotation        | Target       | Purpose                          |
+| ----------------- | ------------ | -------------------------------- |
+| `@displayName`    | Type/Var/Rel | UI display name                  |
+| `@description`    | Type         | Description text                 |
+| `@group`          | Type         | UI grouping                      |
+| `@hide`/`@hidden` | Type/Var/Rel | Hide from UI                     |
+| `@sequence`       | Type/Var     | Resolution order (lower = first) |
+| `@required`       | Var/Rel      | Mark as required                 |
+| `@readOnly`       | Var          | Read-only field                  |
+| `@defaultValue`   | Var          | Default value                    |
+| `@contextPath`    | Var          | Map to transaction field         |
+| `@abort`          | Constraint   | Stop on first error              |
 
 Combined syntax: `@(key=value, key2=value2)`
 
 ### Performance Targets
 
-| Metric | Target | Impact |
-|--------|--------|--------|
-| Execution Time | <100ms | UI responsiveness |
-| Backtracks | <1000 | Efficient resolution |
-| Violations | 0 | All constraints satisfied |
+| Metric         | Target | Impact                    |
+| -------------- | ------ | ------------------------- |
+| Execution Time | <100ms | UI responsiveness         |
+| Backtracks     | <1000  | Efficient resolution      |
+| Violations     | 0      | All constraints satisfied |
 
 ---
 
@@ -79,14 +82,16 @@ Combined syntax: `@(key=value, key2=value2)`
 
 ### Prerequisites
 
-- **Edition**: Enterprise/Performance/Unlimited/Developer with Revenue Cloud Growth or Advanced license
+- **Edition**: Enterprise/Performance/Unlimited/Developer with Revenue Cloud
+  Growth or Advanced license
 - **Permission Set**: "Product Configuration Constraints Designer"
 - **Restrictions**: Not available in Government Cloud or EU Operating Zone (OZ)
 
 ### Step 1: Enable in Revenue Settings
 
 1. Setup → **Revenue Settings**
-2. Enable **Set Up Configuration Rules and Constraints with Constraint Rules Engine**
+2. Enable **Set Up Configuration Rules and Constraints with Constraint Rules
+   Engine**
 3. `AdvancedConfigurator` becomes default rule engine
 
 > **Note**: Beta feature—validate in sandbox first.
@@ -94,25 +99,27 @@ Combined syntax: `@(key=value, key2=value2)`
 ### Step 2: Create Transaction Processing Type
 
 Create a Transaction Processing Type record:
+
 - Set **Rule Engine** = `AdvancedConfigurator` (not `StandardConfigurator`)
 - Optionally append "Advanced Configurator" to name for identification
 
-| Rule Engine Value | Uses |
-|-------------------|------|
+| Rule Engine Value      | Uses                          |
+| ---------------------- | ----------------------------- |
 | `AdvancedConfigurator` | Constraint Rules Engine (CML) |
-| `StandardConfigurator` | Business Rules Engine (BRE) |
+| `StandardConfigurator` | Business Rules Engine (BRE)   |
 
 ### Step 3: Create ConstraintEngineNodeStatus Field
 
 **Required field** for CRE to function. Create on each object:
 
-| Object | Field Name | API Name | Type | Length |
-|--------|------------|----------|------|--------|
-| Quote Line Item | Constraint Engine Node Status | `ConstraintEngineNodeStatus__c` | Long Text Area | 5000 |
-| Order Item | Constraint Engine Node Status | `ConstraintEngineNodeStatus__c` | Long Text Area | 5000 |
-| Asset Action Source | Constraint Engine Node Status | `AssetConstraintEngineNodeStatus__c` | Long Text Area | 5000 |
+| Object              | Field Name                    | API Name                             | Type           | Length |
+| ------------------- | ----------------------------- | ------------------------------------ | -------------- | ------ |
+| Quote Line Item     | Constraint Engine Node Status | `ConstraintEngineNodeStatus__c`      | Long Text Area | 5000   |
+| Order Item          | Constraint Engine Node Status | `ConstraintEngineNodeStatus__c`      | Long Text Area | 5000   |
+| Asset Action Source | Constraint Engine Node Status | `AssetConstraintEngineNodeStatus__c` | Long Text Area | 5000   |
 
 **Field setup**:
+
 1. Object Manager → Select object → Fields & Relationships → New
 2. Type: Text Area (Long), Length: 5000
 3. Set field-level security for CRE profiles
@@ -123,62 +130,71 @@ Create a Transaction Processing Type record:
 Context definitions map transaction data to constraint models.
 
 **Standard Contexts**:
+
 - `SalesTransactionContext` — Quotes/orders
 - `InsuranceContext` — Insurance products
 - `AssetContext` — Asset-based config (Summer '25+)
 
 #### Update SalesTransactionContext
 
-1. Setup → Context Service → **Context Definitions** → Find `SalesTransactionContext`
+1. Setup → Context Service → **Context Definitions** → Find
+   `SalesTransactionContext`
 2. **Attributes tab**: Add `ConstraintEngineNodeStatus` attribute
-   - Type: `INPUTOUTPUT`
-   - Data Type: `STRING`
-   - Node: `SalesTransactionItem`
+    - Type: `INPUTOUTPUT`
+    - Data Type: `STRING`
+    - Node: `SalesTransactionItem`
 3. **Map Data tab**: Map attribute to field
-   - `QuoteEntitiesMapping`: Map to `QuoteLineItem.ConstraintEngineNodeStatus__c`
-   - `OrderEntitiesMapping`: Map to `OrderItem.ConstraintEngineNodeStatus__c`
+    - `QuoteEntitiesMapping`: Map to
+      `QuoteLineItem.ConstraintEngineNodeStatus__c`
+    - `OrderEntitiesMapping`: Map to `OrderItem.ConstraintEngineNodeStatus__c`
 4. **Activate** the context definition
 
 **Optional TransactionType mapping** (to switch engines per transaction):
-- Map `TransactionType` attribute on `SalesTransaction` node to `Quote.TransactionType` / `Order.TransactionType`
+
+- Map `TransactionType` attribute on `SalesTransaction` node to
+  `Quote.TransactionType` / `Order.TransactionType`
 
 #### For Insurance (extend InsuranceContext)
 
 1. Extend `InsuranceContext`
-2. Add `ConstraintEngineNodeStatus` to `InsuranceItem` node (INPUTOUTPUT, STRING)
+2. Add `ConstraintEngineNodeStatus` to `InsuranceItem` node (INPUTOUTPUT,
+   STRING)
 3. Map to `QuoteLineItem.ConstraintEngineNodeStatus__c`
 4. Activate
 
 #### For Assets (Summer '25+)
 
 1. Extend `AssetContext__stdctx`
-2. Setup → Revenue Settings → **Set Up Asset Context for Product Configurator** → Select your context
+2. Setup → Revenue Settings → **Set Up Asset Context for Product Configurator**
+   → Select your context
 3. Map `AssetConstraintEngineNodeStatus` attribute
-4. Edit `AssetToSalesTransactionMapping` → Map to `SalesTransactionItem.ConstraintEngineNodeStatus__c`
+4. Edit `AssetToSalesTransactionMapping` → Map to
+   `SalesTransactionItem.ConstraintEngineNodeStatus__c`
 
 ### Step 5: Assign Permission Sets
 
-| Permission Set | Purpose |
-|----------------|---------|
-| Product Configuration Constraints Designer | Create/manage constraint models |
-| Product Configurator | Configure products at runtime |
-| Constraint Rules Engine Licenseless | CRE access to standard objects for table constraints |
+| Permission Set                             | Purpose                                              |
+| ------------------------------------------ | ---------------------------------------------------- |
+| Product Configuration Constraints Designer | Create/manage constraint models                      |
+| Product Configurator                       | Configure products at runtime                        |
+| Constraint Rules Engine Licenseless        | CRE access to standard objects for table constraints |
 
 ### Rule Engine Selection Logic
 
-| CRE Enabled | BRE Enabled | TPT Value | Engine Used |
-|-------------|-------------|-----------|-------------|
-| Yes | No | — | CRE |
-| No | Yes | StandardConfigurator | BRE |
-| Yes | Yes | StandardConfigurator | BRE |
-| Yes | Yes | Other/None | CRE |
+| CRE Enabled | BRE Enabled | TPT Value            | Engine Used |
+| ----------- | ----------- | -------------------- | ----------- |
+| Yes         | No          | —                    | CRE         |
+| No          | Yes         | StandardConfigurator | BRE         |
+| Yes         | Yes         | StandardConfigurator | BRE         |
+| Yes         | Yes         | Other/None           | CRE         |
 
 ### Impact on Existing Quotes
 
 - Pre-CRE quotes don't run CRE rules unless migrated to CML
 - New quotes with Advanced Configurator TPT use CRE automatically
 - Quotes with Standard Configurator TPT continue using BRE
-- **Best practice**: Migrate existing rules to CML before enabling CRE in production
+- **Best practice**: Migrate existing rules to CML before enabling CRE in
+  production
 
 ---
 
@@ -187,20 +203,26 @@ Context definitions map transaction data to constraint models.
 ### Workflow
 
 1. **Create Model**: App Launcher → Constraint Models → New
-   - Enter name, API name
-   - Specify context definition (e.g., `InsuranceContext`, `SalesTransactionContext`)
-2. **Select Version**: Constraint models support versioning (one active at a time)
+    - Enter name, API name
+    - Specify context definition (e.g., `InsuranceContext`,
+      `SalesTransactionContext`)
+2. **Select Version**: Constraint models support versioning (one active at a
+   time)
 3. **Add Products**: Click Add Item → Product → Select items
-   - Bundles auto-import product component groups and cardinality from PCM
-4. **Define Constraints/Rules**: Select item → Add constraint/rule → Configure expressions
-5. **Create Associations**: Connect CML types to product records (see [Associations](#associations))
+    - Bundles auto-import product component groups and cardinality from PCM
+4. **Define Constraints/Rules**: Select item → Add constraint/rule → Configure
+   expressions
+5. **Create Associations**: Connect CML types to product records (see
+   [Associations](#associations))
 6. **Activate**: Save → Activate for production use
 
 ### Visual Builder vs CML Editor
 
 - **Bidirectional**: Switch between interfaces; changes sync automatically
-- **Visual Builder**: Point-and-click rule definition; constraint names appear as comments in CML
-- **CML Editor**: Full code access; some features only available here (labeled "not editable" in Visual Builder)
+- **Visual Builder**: Point-and-click rule definition; constraint names appear
+  as comments in CML
+- **CML Editor**: Full code access; some features only available here (labeled
+  "not editable" in Visual Builder)
 
 ---
 
@@ -248,24 +270,26 @@ type Laptop { ... }
 
 ### Variables
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `int` | Integer | `int qty = [1..10];` |
-| `decimal(n)` | Decimal with n precision | `decimal(2) price;` |
-| `string` | String | `string color = COLORS;` |
-| `bool` | Boolean | `bool active;` |
-| `date` | Date | `date orderDate;` |
-| `datetime` | Date and time | `datetime timestamp;` |
+| Type         | Description              | Example                  |
+| ------------ | ------------------------ | ------------------------ |
+| `int`        | Integer                  | `int qty = [1..10];`     |
+| `decimal(n)` | Decimal with n precision | `decimal(2) price;`      |
+| `string`     | String                   | `string color = COLORS;` |
+| `bool`       | Boolean                  | `bool active;`           |
+| `date`       | Date                     | `date orderDate;`        |
+| `datetime`   | Date and time            | `datetime timestamp;`    |
 
 **Domains**:
+
 ```c
 int quantity = [1..10];                // Range
-string color = COLORS;                 // List reference  
+string color = COLORS;                 // List reference
 string status = ["Active", "Inactive"];// Inline list
 decimal(2) price = [0..1000.00];       // Decimal range
 ```
 
 **Functions**:
+
 ```c
 totalArea = rooms.sum(area);           // Sum across relationship
 roomCount = rooms.count();             // Count items
@@ -276,6 +300,7 @@ houseArea = parent(totalArea);         // Access parent variable
 ```
 
 **Calculated & Proxy Variables**:
+
 ```c
 type Bundle {
     relation products : Product[1..*];
@@ -295,15 +320,13 @@ relation rooms : Room[1..MAX_ROOM];                  // Basic
 relation items : Item[1..*] order (TypeA, TypeB);    // With creation order
 ```
 
-**Cardinality**:
-| Syntax | Meaning |
-|--------|---------|
-| `[1..5]` | Min 1, max 5 |
-| `[0..*]` | Zero to unlimited |
-| `[1..*]` | At least one, unlimited |
+**Cardinality**: | Syntax | Meaning | |--------|---------| | `[1..5]` | Min 1,
+max 5 | | `[0..*]` | Zero to unlimited | | `[1..*]` | At least one, unlimited |
 
 **Importing from PCM**:
-- **With Product Component Groups**: Imports full PCM structure, enables group-level constraints
+
+- **With Product Component Groups**: Imports full PCM structure, enables
+  group-level constraints
 - **Without**: Imports relationships only, simpler model
 
 ### Constraints
@@ -326,6 +349,7 @@ constraint(price > maxBudget, "Price exceeds maximum budget");
 ```
 
 **Table Constraints** (valid combinations):
+
 ```c
 table constraint validConfigurations {
     (Display, Size, Processor)
@@ -343,15 +367,15 @@ table constraint activeConfigs {
 
 ### Rules
 
-| Rule | Syntax | Description |
-|------|--------|-------------|
-| Message | `message(cond, "text", "Info\|Warning\|Error")` | Display message |
-| Preference | `preference(expr)` | Suggest preferred value (soft) |
-| Require | `require(condA, condB)` | Auto-add when condition met |
-| Exclude | `exclude(condA, condB)` | Prevent combination |
-| Hide | `hide(cond, target)` | Hide element |
-| Disable | `disable(cond, target)` | Disable element |
-| Action | `action(cond, action())` | Execute action |
+| Rule       | Syntax                                          | Description                    |
+| ---------- | ----------------------------------------------- | ------------------------------ |
+| Message    | `message(cond, "text", "Info\|Warning\|Error")` | Display message                |
+| Preference | `preference(expr)`                              | Suggest preferred value (soft) |
+| Require    | `require(condA, condB)`                         | Auto-add when condition met    |
+| Exclude    | `exclude(condA, condB)`                         | Prevent combination            |
+| Hide       | `hide(cond, target)`                            | Hide element                   |
+| Disable    | `disable(cond, target)`                         | Disable element                |
+| Action     | `action(cond, action())`                        | Execute action                 |
 
 ```c
 // Dynamic message with severity
@@ -424,13 +448,16 @@ Connect CML types to product catalog records.
 ### Type Associations
 
 Connect type to product, classification, or component group:
-1. Select Object Category (Product/Product Classification/Product Component Group)
+
+1. Select Object Category (Product/Product Classification/Product Component
+   Group)
 2. Select specific record to connect
 3. Association table displays type ID and product record ID
 
 ### Relationship Associations
 
 Connect relationship to bundle components:
+
 1. Select Type Relationship (relationship defined in CML)
 2. Select Bundle from catalog
 3. Select Product or Classification from bundle
@@ -441,7 +468,9 @@ Connect relationship to bundle components:
 
 ### Understanding Backtracking
 
-Backtracking occurs when the constraint engine makes a choice leading to conflict, then backs up to try another. High backtracking (>1000) indicates:
+Backtracking occurs when the constraint engine makes a choice leading to
+conflict, then backs up to try another. High backtracking (>1000) indicates:
+
 - Conflicting constraints
 - Poor sequence ordering
 - Overly restrictive domains
@@ -475,7 +504,8 @@ type Desktop {
 }
 ```
 
-**Strategy**: Independent variables first (low sequence) → Dependent variables next → Most constrained last.
+**Strategy**: Independent variables first (low sequence) → Dependent variables
+next → Most constrained last.
 
 #### 3. Separate Complex Constraints
 
@@ -503,11 +533,11 @@ relation accessories : Accessory[0..*];
 
 #### 5. Optimize Table Constraints
 
-| Size | Performance | Action |
-|------|-------------|--------|
-| <100 rows | Fast | OK |
-| 100-1000 | Acceptable | Monitor |
-| >1000 | Consider alternatives | Split, filter with SOQL, or use constraints |
+| Size      | Performance           | Action                                      |
+| --------- | --------------------- | ------------------------------------------- |
+| <100 rows | Fast                  | OK                                          |
+| 100-1000  | Acceptable            | Monitor                                     |
+| >1000     | Consider alternatives | Split, filter with SOQL, or use constraints |
 
 ```c
 // Use SOQL filter to reduce rows
@@ -528,15 +558,15 @@ extern string customerTier = "Standard";
 
 ### Best Practices Summary
 
-| Practice | Avoid | Prefer |
-|----------|-------|--------|
-| Domains | `[0..500]` with `constraint(v > 110)` | `[110..500]` |
-| Constraints | `constraint(A, B && B.attr == "X")` | Separate constraints |
-| Relationships | Multiple separate relations | Combined relation |
-| Sequence | No annotations | `@(sequence=N)` by dependency |
-| Logic | Complex nested | Simple, separated |
-| Tables | >1000 rows | Filtered or split |
-| Externals | Many lookups | Batched, with defaults |
+| Practice      | Avoid                                 | Prefer                        |
+| ------------- | ------------------------------------- | ----------------------------- |
+| Domains       | `[0..500]` with `constraint(v > 110)` | `[110..500]`                  |
+| Constraints   | `constraint(A, B && B.attr == "X")`   | Separate constraints          |
+| Relationships | Multiple separate relations           | Combined relation             |
+| Sequence      | No annotations                        | `@(sequence=N)` by dependency |
+| Logic         | Complex nested                        | Simple, separated             |
+| Tables        | >1000 rows                            | Filtered or split             |
+| Externals     | Many lookups                          | Batched, with defaults        |
 
 ---
 
@@ -554,27 +584,30 @@ extern string customerTier = "Standard";
 #### RLM_CONFIGURATOR_BEGIN
 
 Request payload to `ExecuteConstraintsRESTService`:
+
 - `contextProperties`: Context mappings
 - `rootLineItems`: Root items with attributes, properties, domains, child items
 - `orgId`: Organization ID
 
-**Check**: Required attributes present, domains correct, line item structure matches model.
+**Check**: Required attributes present, domains correct, line item structure
+matches model.
 
 #### RLM_CONFIGURATOR_STATS
 
 Execution statistics:
 
-| Metric | Target | Meaning |
-|--------|--------|---------|
-| `Total Execution Time` | <100ms | Higher = performance issue |
-| `Number of Backtracks` | <1000 | Higher = constraint conflicts |
-| `Constraints Violation Stats` | 0 | Most violated constraints |
-| `ChoicePoint Backtracking Stats` | — | Problematic decision points |
-| `Constraints Execution Stats` | — | "Distinct: X Total: Y" |
+| Metric                           | Target | Meaning                       |
+| -------------------------------- | ------ | ----------------------------- |
+| `Total Execution Time`           | <100ms | Higher = performance issue    |
+| `Number of Backtracks`           | <1000  | Higher = constraint conflicts |
+| `Constraints Violation Stats`    | 0      | Most violated constraints     |
+| `ChoicePoint Backtracking Stats` | —      | Problematic decision points   |
+| `Constraints Execution Stats`    | —      | "Distinct: X Total: Y"        |
 
 #### RLM_CONFIGURATOR_END
 
 Response payload:
+
 - `cfgStatus`: SUCCESS/FAILURE
 - `attributes`: Final values after resolution
 - `attributeDomains`: Final domains (may be narrowed)
@@ -583,12 +616,12 @@ Response payload:
 
 ### Common Scenarios
 
-| Scenario | Symptoms | Debug Steps |
-|----------|----------|-------------|
+| Scenario              | Symptoms                             | Debug Steps                                                                         |
+| --------------------- | ------------------------------------ | ----------------------------------------------------------------------------------- |
 | Constraint Violations | FAILURE status, high violation count | Check Violation Stats → Review constraint logic → Verify domains allow valid combos |
-| Performance Issues | >100ms time, >1000 backtracks | Check ChoicePoint Stats → Narrow domains → Simplify constraints → Fix sequences |
-| Unexpected Behavior | Wrong values, rules not triggering | Verify model activated → Check associations → Review BEGIN/END payloads |
-| Missing Attributes | NullPointerException | Verify attributes in BEGIN → Check associations → Remove/use unused attributes |
+| Performance Issues    | >100ms time, >1000 backtracks        | Check ChoicePoint Stats → Narrow domains → Simplify constraints → Fix sequences     |
+| Unexpected Behavior   | Wrong values, rules not triggering   | Verify model activated → Check associations → Review BEGIN/END payloads             |
+| Missing Attributes    | NullPointerException                 | Verify attributes in BEGIN → Check associations → Remove/use unused attributes      |
 
 ### Debugging Checklist
 
@@ -609,6 +642,7 @@ Response payload:
 ### Custom Variables
 
 **Standalone** (intermediate calculations):
+
 ```c
 type Laptop {
     string Processor;
@@ -618,7 +652,8 @@ type Laptop {
 }
 ```
 
-**Reference Library Variables**: Apply pre-configured variables from reference libraries in Constraint Builder.
+**Reference Library Variables**: Apply pre-configured variables from reference
+libraries in Constraint Builder.
 
 ### External Variables with ContextPath
 
@@ -643,12 +678,12 @@ extern string customValue = "Default";  // Default if not mapped
 
 **Common Mappings**:
 
-| Context Path | Context Node | Salesforce Field |
-|--------------|--------------|------------------|
-| `Order.AccountId` | SalesTransaction | Order.AccountId |
-| `OrderLineItem.Quantity` | SalesTransactionItem | QuoteLineItem.Quantity |
-| `Quote.TotalPrice` | SalesTransaction | Quote.TotalPrice |
-| `InsuranceItem.PolicyType` | InsuranceItem | PolicyType__c |
+| Context Path               | Context Node         | Salesforce Field       |
+| -------------------------- | -------------------- | ---------------------- |
+| `Order.AccountId`          | SalesTransaction     | Order.AccountId        |
+| `OrderLineItem.Quantity`   | SalesTransactionItem | QuoteLineItem.Quantity |
+| `Quote.TotalPrice`         | SalesTransaction     | Quote.TotalPrice       |
+| `InsuranceItem.PolicyType` | InsuranceItem        | PolicyType\_\_c        |
 
 ### Import from Salesforce Objects
 
@@ -658,15 +693,19 @@ Table constraints can reference Salesforce objects for data-driven rules:
 2. Populate with valid combinations
 3. Reference in table constraint (SOQL query)
 
-**Benefits**: Separate data from code, business users can update, no deployment for data changes.
+**Benefits**: Separate data from code, business users can update, no deployment
+for data changes.
 
 ### Import from PCM
 
 When adding bundles to constraint models:
-- **Imported**: Product component groups, child products, classifications, relationships, cardinality
+
+- **Imported**: Product component groups, child products, classifications,
+  relationships, cardinality
 - **Not imported**: Class attributes (add manually in CML Editor)
 
 **Group-level constraints** (CML Editor only):
+
 ```c
 constraint(bundle.components[DisplayGroup].count() >= 1);
 constraint(bundle.components[DisplayGroup].sum(price) < 500);
@@ -681,15 +720,16 @@ constraint(bundle.components[DisplayGroup].sum(price) < 500);
 5. Activate
 
 **Example Extension**:
+
 ```c
 // After adding PolicyType, CoverageLimit to InsuranceContext
 type InsuranceProduct {
     @(contextPath="InsuranceItem.PolicyType")
     extern string policyType;
-    
+
     @(contextPath="InsuranceItem.CoverageLimit")
     extern decimal(2) coverageLimit;
-    
+
     constraint(policyType == "Comprehensive" -> coverageLimit >= 50000);
 }
 ```
@@ -697,12 +737,14 @@ type InsuranceProduct {
 ### Advanced Patterns
 
 **Multi-level Context Access**:
+
 ```c
 @(contextPath="Order.Account.Industry")
 extern string accountIndustry;
 ```
 
 **Conditional External Variables**:
+
 ```c
 extern bool enableAdvancedRules;
 extern string userProfile;
@@ -711,6 +753,7 @@ constraint(enableAdvancedRules && userProfile == "Admin" -> complexConstraint())
 ```
 
 **Cross-Product Context**:
+
 ```c
 type Bundle {
     extern string customerTier;  // Shared across products
@@ -734,19 +777,20 @@ Clauses support dynamic content with variables replaced at runtime.
 
 ### Rule Types
 
-| Rule Type | Purpose |
-|-----------|---------|
-| Basic Logic Constraint | Enforce conditions on products/attributes |
-| Conditional Logic Constraint | If-then constraints |
-| Dynamic Message Rule | Show info/warning/error messages |
-| Require Rule | Auto-add products/components |
-| Exclude Rule | Prevent combinations |
-| Hide/Disable Rule | Hide/disable based on conditions |
-| Preference Rule | Suggest preferred values |
+| Rule Type                    | Purpose                                   |
+| ---------------------------- | ----------------------------------------- |
+| Basic Logic Constraint       | Enforce conditions on products/attributes |
+| Conditional Logic Constraint | If-then constraints                       |
+| Dynamic Message Rule         | Show info/warning/error messages          |
+| Require Rule                 | Auto-add products/components              |
+| Exclude Rule                 | Prevent combinations                      |
+| Hide/Disable Rule            | Hide/disable based on conditions          |
+| Preference Rule              | Suggest preferred values                  |
 
 ### Expression Building
 
-1. **Left-hand element**: Product, bundle, attribute, variable, or transaction header
+1. **Left-hand element**: Product, bundle, attribute, variable, or transaction
+   header
 2. **Operator**: `==`, `!=`, `>`, `<`, `>=`, `<=`
 3. **Right-hand element**: Another element or static value
 
@@ -764,6 +808,7 @@ Reference expressions by number with `and`, `or`, `xor`:
 ```
 
 **Rules**:
+
 - Use only expression numbers, `()`, `and`, `or`, `xor`
 - Each expression number used exactly once
 - All expressions must be included
@@ -775,17 +820,18 @@ Reference expressions by number with `and`, `or`, `xor`:
 
 ### Execution Limits
 
-| Limit | Value |
-|-------|-------|
-| Maximum Execution Time | 10 seconds |
-| Performance Target | <100ms, <1000 backtracks, 0 violations |
-| Timeout Behavior | Constraint evaluation fails |
+| Limit                  | Value                                  |
+| ---------------------- | -------------------------------------- |
+| Maximum Execution Time | 10 seconds                             |
+| Performance Target     | <100ms, <1000 backtracks, 0 violations |
+| Timeout Behavior       | Constraint evaluation fails            |
 
 ### Data Type Limitations
 
 - **Datetime**: Not supported as constraint model attributes
 - **Numeric**: Must have defined domain (range or values) to avoid errors
-- **Unused Attributes**: Cause `NullPointerException`—remove or use in constraint
+- **Unused Attributes**: Cause `NullPointerException`—remove or use in
+  constraint
 
 ### Naming Restrictions
 
@@ -802,27 +848,30 @@ Reference expressions by number with `and`, `or`, `xor`:
 
 ### Constraint Evaluation
 
-- Constraints referencing multiple optional child instances fail if any instance missing
-- Complex constraints with nested filtering and unused variables cause performance issues
+- Constraints referencing multiple optional child instances fail if any instance
+  missing
+- Complex constraints with nested filtering and unused variables cause
+  performance issues
 - Cross-classification references can cause engine to auto-add instances
 - User input order affects constraint resolution behavior
 
 ### Visual Builder Limitations
 
-- Some CML Editor constraints not editable in Visual Builder (labeled "not editable")
+- Some CML Editor constraints not editable in Visual Builder (labeled "not
+  editable")
 - Limitations exist for manually created bundles in CML Editor
 
 ---
 
 ## Key Notes Summary
 
-| Topic | Note |
-|-------|------|
-| Bundle Requirements | Constraints on child products require entire bundle in model |
-| Compilation Flow | CML → constraint model → constraint engine → compliant configurations |
-| Visual Builder ↔ CML | Bidirectional; constraint names appear as comments in CML |
-| Availability | Not available in Government Cloud or EU Operating Zone |
+| Topic                 | Note                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Bundle Requirements   | Constraints on child products require entire bundle in model                                                 |
+| Compilation Flow      | CML → constraint model → constraint engine → compliant configurations                                        |
+| Visual Builder ↔ CML  | Bidirectional; constraint names appear as comments in CML                                                    |
+| Availability          | Not available in Government Cloud or EU Operating Zone                                                       |
 | Revenue Cloud Mapping | Types = products/bundles/components/classes; Variables = fields/attributes; Relationships = bundle structure |
-| Associations Required | Type + relationship associations connect CML to catalog records |
-| Permission Sets | "Product Configuration Constraints Designer" for creating/managing models |
-| Context Definitions | Specify context (e.g., `InsuranceContext`) when creating models for external variable mapping |
+| Associations Required | Type + relationship associations connect CML to catalog records                                              |
+| Permission Sets       | "Product Configuration Constraints Designer" for creating/managing models                                    |
+| Context Definitions   | Specify context (e.g., `InsuranceContext`) when creating models for external variable mapping                |

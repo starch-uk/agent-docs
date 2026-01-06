@@ -65,11 +65,13 @@ structured format optimized for AI agent consumption:
 
 - **APEXANNOTATIONS.md** - Apex annotations reference
 - **APEXDOC.md** - ApexDoc documentation tool reference
-- **CML.md** - Constraint Modeling Language (CML) reference for Salesforce Revenue Cloud Product Configurator
+- **CML.md** - Constraint Modeling Language (CML) reference for Salesforce
+  Revenue Cloud Product Configurator
 - **CODEANALYZER.md** - Salesforce Code Analyzer configuration (includes CLI
   Commands, CPD Engine, Flow Scanner Engine, Regex Engine, RetireJS Engine, and
   MCP tools)
-- **CONTEXTDEFINITIONS.md** - Salesforce Context Definitions reference for Dynamic Revenue Orchestrator (DRO)
+- **CONTEXTDEFINITIONS.md** - Salesforce Context Definitions reference for
+  Dynamic Revenue Orchestrator (DRO)
 - **ESLINT.md** - ESLint configuration and rules reference
 - **ESLINTJSDOC.md** - ESLint JSDoc plugin reference
 - **FIELDSERVICE.md** - Salesforce Field Service reference
@@ -88,7 +90,8 @@ structured format optimized for AI agent consumption:
 - **PNPM.md** - pnpm package manager reference
 - **PRETTIER.md** - Prettier code formatter reference
 - **PRETTIERAPEX.md** - Prettier Apex plugin reference
-- **REVENUETRANSACTIONMANAGEMENT.md** - Salesforce Revenue Cloud Transaction Management reference
+- **REVENUETRANSACTIONMANAGEMENT.md** - Salesforce Revenue Cloud Transaction
+  Management reference
 - **TINKERPOP.md** - Apache TinkerPop graph computing framework reference
 - **VITEST.md** - Vitest testing framework reference
 - **VSCODE.md** - VS Code editor reference
