@@ -1,6 +1,6 @@
 # Salesforce Revenue Cloud: Transaction Management
 
-> v1.0.0 | Editions: Enterprise, Unlimited, Developer (Lightning Experience)
+> v1.0.1 | Editions: Enterprise, Unlimited, Developer (Lightning Experience)
 
 ## Quick Reference
 
@@ -559,13 +559,17 @@ Contains information about asset create/update from
 **Important:** Included in `CreateAssetOrderEvent` message; cannot subscribe
 directly.
 
-**Fields:** | Field | Type | Description | |-------|------|-------------| |
-`AssetId` | Reference | Created/updated asset ID (nillable) | | `ErrorCode` |
-String | Error type reference code (nillable) | | `ErrorMessage` | String |
-Error information (nillable) | | `EventUuid` | String | Platform event message
-UUID (nillable) | | `IsSuccess` | Boolean | Request success status (default:
-false, v61.0+) | | `OrderItemId` | Reference | Order item ID used in request
-(v61.0+) | | `ReplayId` | String | Event stream position (nillable) |
+**Fields:**
+
+| Field          | Type      | Description                                     |
+| -------------- | --------- | ----------------------------------------------- |
+| `AssetId`      | Reference | Created/updated asset ID (nillable)             |
+| `ErrorCode`    | String    | Error type reference code (nillable)            |
+| `ErrorMessage` | String    | Error information (nillable)                    |
+| `EventUuid`    | String    | Platform event message UUID (nillable)          |
+| `IsSuccess`    | Boolean   | Request success status (default: false, v61.0+) |
+| `OrderItemId`  | Reference | Order item ID used in request (v61.0+)          |
+| `ReplayId`     | String    | Event stream position (nillable)                |
 
 **Supported Subscribers:** Apex Triggers, Flows, Processes, Pub/Sub API,
 Streaming API (CometD)
