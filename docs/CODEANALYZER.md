@@ -308,6 +308,91 @@ Requires network
 
 ---
 
+## VS Code Integration
+
+> **Version**: 1.0.0
+
+Salesforce Code Analyzer Visual Studio Code Extension provides real-time
+feedback and code scanning during development.
+
+**Reference**:
+[Use the VS Code Extension to Analyze Your Code](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/analyze-vscode.html)
+
+### Prerequisites
+
+- Visual Studio Code installed
+- Salesforce CLI installed and configured
+- Salesforce Extensions for VS Code installed
+
+### Installation
+
+**Step 1: Install Salesforce CLI**
+
+```bash
+sf --version
+```
+
+**Step 2: Install Salesforce Extensions for VS Code**
+
+Extension pack includes Code Analyzer: Search "Salesforce Extension Pack" in VS
+Code Extensions.
+
+**Step 3: Install Code Analyzer CLI Plugin**
+
+```bash
+sf plugins install @salesforce/sfdx-scanner
+```
+
+Verify: `sf scanner --help`
+
+### Scanning Commands
+
+| Command                       | Description              | Access                         |
+| ----------------------------- | ------------------------ | ------------------------------ |
+| **SFDX: Scan Current File**   | Analyze active file      | Command Palette (Ctrl+Shift+P) |
+| **SFDX: Scan Selected Files** | Analyze selection        | Right-click Explorer           |
+| **SFDX: Scan Workspace**      | Analyze entire workspace | Command Palette                |
+
+### Results Display
+
+**Problems Panel** (Ctrl+Shift+M): Severity icons, file navigation, rule details
+
+**Inline Annotations**: Red/Yellow/Blue squiggles by severity level
+
+**Quick Actions**: Go to definition, view rule details, copy violation
+
+### Configuration
+
+**Extension Settings** (VS Code Settings → "Salesforce Code Analyzer"):
+
+- Enable/Disable extension
+- Auto-scan on save
+- Default engine selection
+- Severity mapping to VS Code levels
+- Excluded file patterns
+
+**Project Config**: Respects `code-analyzer.yml` in project root
+
+### Troubleshooting
+
+| Issue                     | Solution                                                        |
+| ------------------------- | --------------------------------------------------------------- |
+| **Extension not working** | Verify CLI/plugin installed, check Output panel, reload VS Code |
+| **No results**            | Check file types supported, verify config, review Output panel  |
+| **Slow performance**      | Exclude patterns, disable auto-scan, scan selectively           |
+| **Plugin not found**      | Reinstall plugin, check CLI compatibility, restart VS Code      |
+
+### Best Practices
+
+1. Customize `code-analyzer.yml` for team standards
+2. Scan regularly during development
+3. Prioritize High/Critical severity fixes
+4. Use rule tags ("Recommended") for focus
+5. Understand rule rationale before fixing
+6. Exclude generated/third-party code
+
+---
+
 ## CI/CD Integration
 
 ### GitHub Actions

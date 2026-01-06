@@ -650,8 +650,8 @@ The plan should:
   GRAPHENGINE.md, GRAPHML.md, GRAPHSON.md, GREMLIN.md, GRYO.md, HUSKY.md,
   JEST30.md, JORJE.md, JSDOC.md, PMD.md, PMDAPEXAST.md, PMDSUPPRESSWARNINGS.md,
   PNPM.md, PRETTIER.md, PRETTIERAPEX.md, REGEX.md, RETIREJS.md, SFCLI.md,
-  TINKERPOP.md, VITEST.md, VSCODE.md, XPATH31.md) need to be initialized with
-  version `1.0.0` (or appropriate version based on their current state) when the
+  TINKERPOP.md, VITEST.md, XPATH31.md) need to be initialized with version
+  `1.0.0` (or appropriate version based on their current state) when the
   versioning system is first implemented. These existing docs will be tracked
   going forward using the same semver system.
 - Describe how scripts can help with versioning by:
