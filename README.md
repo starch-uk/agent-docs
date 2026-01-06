@@ -28,7 +28,8 @@ with any technology.
 
 ## Installation
 
-1. **Clone the repository:**
+1. **Clone the repository (optional, for local development of agent-docs
+   itself):**
 
     ```bash
     git clone https://github.com/starch-uk/agent-docs.git
@@ -39,10 +40,24 @@ with any technology.
 2. **Add to your project:**
 
     You can add agent-docs to your project in several ways:
-    - **As a dependency:** Add `@starch-uk/agent-docs` to your `package.json`
-    - **As a submodule:**
+    - **As an npm dependency (recommended):**  
+      Add `@starch-uk/agent-docs` to your `package.json` and install with your
+      package manager (e.g. `pnpm install`, `npm install`, or `yarn add`).
+
+        When installed this way, a `postinstall` script runs in the consuming
+        project:
+        - If your project does **not** already have a `docs/` directory, the
+          script will create a single link from your project's `docs/` directory
+          to this package's `docs/` directory:
+            - On Unix/macOS, a directory symlink is created
+            - On Windows, a junction is created
+        - If your project **already has** a `docs/` directory, the script does
+          nothing, and your existing docs layout is left unchanged.
+
+    - **As a git submodule:**  
       `git submodule add https://github.com/starch-uk/agent-docs.git`
-    - **As a symlink/junction:**
+
+    - **As a manual symlink/junction (if you want explicit control):**
         - **Unix/macOS:** `ln -s /path/to/agent-docs/docs ./docs`
         - **Windows:** `mklink /J docs C:\path\to\agent-docs\docs`
 

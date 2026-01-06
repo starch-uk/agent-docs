@@ -11,8 +11,14 @@ AI agent instruction documents ("docs") for AI-enabled IDEs.
 - **Primary contents**: Markdown documentation in `docs/`
 - **Code formatting**: Prettier (via `pnpm format` / `pnpm format:check`)
 - **CI**: GitHub Actions workflow that runs `pnpm format:check` on push/PR
+- **Postinstall script**: `postinstall.mjs` that creates symlinks/junctions to
+  `docs/` in consuming projects
+- **AI Agent Guidance**: `.cursor/plans/` contains structured workflows and
+  instructions for AI coding assistants
+- **IDE Rules**: `.cursor/rules/` contains agent rules for Cursor IDE
+  integration
 
-**Repository Documentation Files:**
+**Repository Files:**
 
 The following files should be created following the same structure and style as
 other starch-uk repositories:
@@ -42,11 +48,23 @@ The README.md should contain:
     - Steps to clone the repository and install dependencies using pnpm
     - Instructions for adding the package to a project (as a dependency or
       submodule)
-    - Instructions for symlinking (Unix/macOS) or junction linking (Windows)
-      either:
+    - Explanation of the automatic `postinstall` behavior:
+        - When `@starch-uk/agent-docs` is installed into another project, a
+          `postinstall` script will run in the consuming project.
+        - If the consuming project does **not** already have a `docs/`
+          directory, the script will create a single symlink/junction from the
+          consuming project's `docs/` directory to this package's `docs/`
+          directory:
+            - On Unix/macOS, a directory symlink is created
+            - On Windows, a junction is created
+        - If the consuming project **already has** a `docs/` directory, the
+          script does nothing and you can instead manage your own docs layout.
+    - Optional manual instructions for symlinking (Unix/macOS) or junction
+      linking (Windows) if you prefer not to rely on `postinstall`, or need a
+      custom layout:
         - Individual files from the `docs/` folder to the root of the actual
           project, OR
-        - The entire `docs/` folder to the root of the actual project
+        - The entire `docs` folder to the root of the actual project
     - Explanation of how to update IDE agent rules (e.g., Cursor's
       `.cursor/rules/` or similar) to reference the linked docs using
       `@filename` syntax or relative paths, so the AI agent can access the
@@ -348,6 +366,73 @@ considered.
 Add any other context, examples, or screenshots about the feature request here.
 ```
 
+### `postinstall.mjs`
+
+The postinstall script that runs when this package is installed in another
+project. It should create a symlink/junction from the consuming project's
+`docs/` directory to this package's `docs/` directory, but only if the consuming
+project doesn't already have a `docs/` directory.
+
+```js
+// postinstall.mjs
+// Implementation details for creating cross-platform symlinks/junctions
+```
+
+### `prettier.config.js`
+
+Prettier configuration file defining code formatting rules for the project.
+
+```js
+/** @type {import('prettier').Config} */
+export default {
+	// Configuration options for consistent code formatting
+};
+```
+
+### `.github/workflows/format.yml`
+
+GitHub Actions CI workflow that runs `pnpm format:check` on push and pull
+requests to ensure code formatting compliance.
+
+```yaml
+name: Format Check
+on:
+    push:
+    pull_request:
+jobs:
+    format:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+            - name: Install dependencies
+              run: pnpm install
+            - name: Check formatting
+              run: pnpm format:check
+```
+
+### `.cursor/rules/IMPORTANT.mdc`
+
+Cursor IDE agent rules that provide instructions for AI agents working with this
+project. These rules help AI coding assistants understand the project's
+structure, conventions, and workflows.
+
+```
+# Important Rules for agent-docs
+
+Rules and guidelines for AI agents working with this codebase...
+```
+
+### `.cursor/plans/OPTIMISE.md`
+
+AI agent guidance file containing optimization strategies and best practices for
+maintaining low token counts and efficient documentation formats.
+
+### `.cursor/plans/VERSIONING.md`
+
+AI agent guidance file containing versioning rules and workflows for managing
+semantic versioning of documentation files according to semver principles.
+
 ## Core Concept
 
 "Docs" are markdown files (e.g., `REACT.md`, `XPATH31.md`, `PMD.md`) containing
@@ -460,20 +545,27 @@ Cross-references to other docs using `[Name](FILENAME.md)` format
 ```
 agent-docs/
 ├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── pull_request_template.md
 │   └── workflows/
 │       └── format.yml
 ├── .cursor/
-│   └── plans/
-│       ├── OPTIMISE.md
-│       └── VERSIONING.md
+│   ├── plans/
+│   │   ├── OPTIMISE.md
+│   │   └── VERSIONING.md
+│   └── rules/
+│       └── IMPORTANT.mdc
 ├── docs/                     # Documentation docs (versioned using semver, includes existing seed docs)
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
-├── SECURITY.md
 ├── LICENSE.md
 ├── README.md
+├── SECURITY.md
 ├── package.json
 ├── pnpm-lock.yaml
+├── postinstall.mjs
 └── prettier.config.js
 ```
 
@@ -519,8 +611,9 @@ Standard MIT license with copyright holder: starch-uk
 - Name: `@starch-uk/agent-docs`
 - Type: module
 - Version: `1.0.0`
-- Scripts: `format`, `format:fix`, `format:check`
+- Scripts: `format`, `format:fix`, `format:check`, `postinstall`
 - Dev dependencies: `prettier`
+- Engines: Node.js >= 20.0.0
 
 **Project Versioning:** The project as a whole maintains a version in
 `package.json`. Any changes to docs files should increment the corresponding
