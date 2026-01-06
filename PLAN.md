@@ -49,8 +49,8 @@ The README.md should contain:
     - Instructions for adding the package to a project (as a dependency or
       submodule)
     - Explanation of the automatic `postinstall` behavior:
-        - When `@starch-uk/agent-docs` is installed into another project, a
-          `postinstall` script will run in the consuming project.
+        - When `agent-docs` is installed into another project, a `postinstall`
+          script will run in the consuming project.
         - If the consuming project does **not** already have a `docs/`
           directory, the script will create a single symlink/junction from the
           consuming project's `docs/` directory to this package's `docs/`
@@ -608,7 +608,7 @@ Standard MIT license with copyright holder: starch-uk
 
 ### package.json
 
-- Name: `@starch-uk/agent-docs`
+- Name: `agent-docs`
 - Type: module
 - Version: `1.0.0`
 - Scripts: `format`, `format:fix`, `format:check`, `postinstall`

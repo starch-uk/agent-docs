@@ -40,9 +40,9 @@ with any technology.
 2. **Add to your project:**
 
     You can add agent-docs to your project in several ways:
-    - **As an npm dependency (recommended):**  
-      Add `@starch-uk/agent-docs` to your `package.json` and install with your
-      package manager (e.g. `pnpm install`, `npm install`, or `yarn add`).
+    - **As an npm dependency (recommended):** Add `agent-docs` to your
+      `package.json` and install with your package manager (e.g. `pnpm install`,
+      `npm install`, or `yarn add`).
 
         When installed this way, a `postinstall` script runs in the consuming
         project:
