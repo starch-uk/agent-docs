@@ -1,5 +1,7 @@
 # Husky Reference
 
+> **Version**: 1.0.0
+
 Native Git hooks manager using `core.hooksPath` (Git 2.9+). Hooks = shell
 scripts in `.husky/`.
 

@@ -1,5 +1,7 @@
 # ESLint Reference
 
+> **Version**: 1.0.0
+
 ## Overview
 
 ESLint: JS/TS/LWC static analysis. ESLint v8 and v9 support.

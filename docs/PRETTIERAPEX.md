@@ -1,5 +1,7 @@
 # Prettier Plugin Apex - AI Agent Reference
 
+> **Version**: 1.0.0
+
 > **Quick Info**: Prettier plugin for Apex using Jorje (Salesforce's parser).
 > Correctness over configurability. **Source**:
 > https://github.com/dangmai/prettier-plugin-apex

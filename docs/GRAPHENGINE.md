@@ -1,9 +1,11 @@
 # Salesforce Graph Engine (SFGE) Quick Reference
 
+> **Version**: 1.0.0
+
 Condensed guide for Salesforce Graph Engine (SFGE) data-flow analysis and rules.
 
-**Related Docs:** [CODE_ANALYZER_CONFIG.md](CODE_ANALYZER_CONFIG.md),
-[PMD.md](PMD.md), [GREMLIN.md](GREMLIN.md), [TINKERPOP.md](TINKERPOP.md),
+**Related Docs:** [CODEANALYZER.md](CODEANALYZER.md), [PMD.md](PMD.md),
+[GREMLIN.md](GREMLIN.md), [TINKERPOP.md](TINKERPOP.md),
 [GRAPHML.md](GRAPHML.md), [GRAPHSON.md](GRAPHSON.md), [GRYO.md](GRYO.md),
 [GRAPHBINARY.md](GRAPHBINARY.md)
 

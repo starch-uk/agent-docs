@@ -1,5 +1,7 @@
 # pnpm Reference
 
+> **Version**: 1.0.0
+
 ## Core Concepts
 
 - **Content-addressable store**: Single copy per package version, hard-linked to

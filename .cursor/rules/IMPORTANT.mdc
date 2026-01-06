@@ -1,0 +1,97 @@
+# Important Project Guidelines
+
+## Documentation Files
+
+- **Use `docs/*.md` files**: Refer to and use the documentation files in the `docs/` directory for project-specific information and guidelines.
+
+- **Use `.cursor/plans/*.md` files**: Refer to and use planning documents in the `.cursor/plans/` directory for project planning and development guidance.
+
+## Updating Existing Documentation - CRITICAL REQUIREMENT
+
+**MANDATORY:** When updating any file in the `docs/` directory, you **MUST** follow the documented process. This is **NON-NEGOTIABLE**.
+
+**What you MUST do:**
+1. **Understand the workflow first** - Before making any changes to a doc file, understand the complete workflow
+2. **Extract references** - Extract repository URLs, web page URLs, or Salesforce article references from the doc file itself
+3. **Re-research sources** - Extract repository URLs, web page URLs, or other references from the doc file itself. **CRITICAL:** If a repository URL is already present in the existing `docs/*.md` file, extract the repository URL directly from the doc file and proceed to cloning.
+4. **Clone repository** - Clone repo using full permissions to system's temporary folder (if applicable)
+5. **Systematic review** - Go through every URL on the official page and every file in the repo (verify ALL files inspected)
+6. **Verify all content** - All content in markdown file must be verified or removed/changed
+7. **Add missing content** - Anything missing should be added
+8. **Cleanup** - Delete temporary repository directory after inspection
+9. **Verify ALL todos completed** - Before proceeding, verify ALL file inspection todos are completed (count must match file count exactly)
+10. **Optimize** - Actually execute the OPTIMISE.md plan after updates (ONLY after ALL todos completed, read it, apply techniques, don't just mark as done)
+11. **Version** - Follow VERSIONING.md to determine and update version numbers
+
+**What you MUST NOT do:**
+- ❌ Update doc files without understanding the workflow first
+- ❌ Make changes without re-researching sources
+- ❌ Skip repository cloning for repository-based docs
+- ❌ Skip the verification process
+- ❌ Skip file inspection (ALL files must be inspected)
+- ❌ Leave temporary directories on the system
+- ❌ Mark optimization as "done" without actually executing it
+- ❌ Skip optimization or versioning steps
+- ❌ Begin optimization before ALL file inspection todos are completed
+- ❌ Cancel or skip remaining todos because "essential review is complete"
+
+**Reason:** Following the documented workflow ensures accuracy, completeness, and consistency. Skipping steps leads to incomplete or incorrect documentation.
+
+**Enforcement:** If asked to update a doc file, **STOP** and understand the complete workflow before making any changes.
+
+## Repository Cloning and File Inspection
+
+## Repository File Review (Recommended Approach)
+
+- Aim to treat all files in a repository as potentially relevant, not just the obvious ones.
+- When documenting a repository (GitHub, GitLab, etc.), prefer a **systematic, broad review** over focusing only on a few "key files".
+
+- When cloning repositories for documentation work:
+  - Clone to a temporary location outside the main workspace (for example, using `tmpdir()`).
+  - Avoid creating ad-hoc temp folders inside the project workspace.
+
+- For a thorough review of a repository:
+  - Start by generating a complete file listing, excluding standard build and dependency directories:
+    ```bash
+    find . -type f ! -path './.git/*' ! -path './node_modules/*' ! -path './dist/*' ! -path './coverage/*' | sort
+    ```
+  - Use that listing to drive your review and note-taking process.
+  - Prioritize:
+    - All markdown files (`**/*.md`)
+    - Files that define or document the public API
+    - Exported plugins, libraries, or modules that are part of the public surface
+
+- If you use a todo system (for example via `todo_write` and a helper script like `repo-todos`):
+  - Generate todos based on the full file list rather than hand-picking a few files.
+  - Creating todos in small batches (for example, ~20 at a time) can make the process manageable.
+  - Keep todos granular (ideally one per file) so progress and coverage are easy to track.
+
+- As you review files:
+  - Read each file in full and extract the relevant technical and behavioral details.
+  - Update documentation incrementally as you go instead of waiting until the end.
+  - Keep a simple checkpoint for yourself (for example, “number of files reviewed” vs “number of files in listing”) so you can see whether anything has been skipped.
+
+- Before doing higher-level optimization (like running an OPTIMISE-style pass):
+  - Make sure the underlying documentation work is complete enough for that effort to be worthwhile.
+  - Confirm that all files you decided to cover have actually been reviewed and incorporated where relevant.
+
+- After you finish using a cloned repository for documentation:
+  - Clean up any temporary clones/directories so they don’t accumulate over time.
+
+## Versioning
+
+- **MUST follow [VERSIONING.md](.cursor/plans/VERSIONING.md)**: When creating or updating documentation files:
+  - **Creating new docs**: Initialize with version `1.0.0` (or appropriate version) and update project version in `package.json`
+  - **Updating existing docs**: Determine version bump (patch/minor/major) by comparing against latest commit in `main` branch, update doc version, and update project version in `package.json`
+  - See VERSIONING.md for complete rules, examples, and workflow
+  - Version changes are **required** and must be completed before finalizing any doc changes
+
+## Scripts
+
+- **Use scripts via pnpm**: Always run project scripts using `pnpm` as the package manager. For example:
+  - `pnpm build` - Build the project (only when explicitly needed)
+  - `pnpm test` - Run tests
+  - `pnpm lint` - Run linter
+  - `pnpm format` - Format code
+
+- **CRITICAL PERMISSION REQUIREMENT for pnpm commands**: When running `pnpm` commands (including `pnpm install`, `pnpm build`, `pnpm test`, etc.), you **MUST** use `required_permissions: ['network']` or `required_permissions: ['all']` to ensure pnpm commands have network connectivity. pnpm commands require network access to fetch packages from registries. **DO NOT** attempt pnpm commands without network permissions - they will fail with network connectivity errors.

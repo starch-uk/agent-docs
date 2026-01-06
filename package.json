@@ -1,0 +1,33 @@
+{
+	"name": "@starch-uk/agent-docs",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "A tool for generating reusable, low-token AI agent instruction documents",
+	"scripts": {
+		"format": "prettier --write \"**/*.{ts,md,json,yml,yaml}\"",
+		"format:fix": "prettier --write \"**/*.{ts,md,json,yml,yaml}\"",
+		"format:check": "prettier --check \"**/*.{ts,md,json,yml,yaml}\"",
+		"postinstall": "node postinstall.mjs"
+	},
+	"packageManager": "pnpm@10.27.0",
+	"keywords": [
+		"ai",
+		"agent",
+		"documentation",
+		"docs",
+		"ide",
+		"cursor"
+	],
+	"author": "starch-uk",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/starch-uk/agent-docs.git"
+	},
+	"devDependencies": {
+		"prettier": "^3.7.4"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	}
+}

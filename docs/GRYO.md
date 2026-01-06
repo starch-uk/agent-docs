@@ -1,11 +1,13 @@
 # Gryo Format Specification
 
-Binary format for graph serialization used by Apache TinkerPop.
+> **Version**: 1.0.0
+
+Gremlin-Kryo binary format for graph serialization used by Apache TinkerPop.
 
 **Related Docs:** [GRAPHENGINE.md](GRAPHENGINE.md),
 [TINKERPOP.md](TINKERPOP.md), [GRAPHML.md](GRAPHML.md),
 [GRAPHSON.md](GRAPHSON.md), [GRAPHBINARY.md](GRAPHBINARY.md),
-[CODE_ANALYZER_CONFIG.md](CODE_ANALYZER_CONFIG.md)
+[CODEANALYZER.md](CODEANALYZER.md)
 
 ## Overview
 
