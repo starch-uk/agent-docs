@@ -109,8 +109,6 @@ structured format optimized for AI agent consumption:
 - **[TINKERPOP.md](docs/TINKERPOP.md)** - Apache TinkerPop graph computing
   framework reference
 - **[VITEST.md](docs/VITEST.md)** - Vitest testing framework reference
-- **[CODEANALYZER.md#vs-code-integration](docs/CODEANALYZER.md#vs-code-integration)** -
-  VS Code editor integration
 - **[XPATH31.md](docs/XPATH31.md)** - XPath 3.1 query language reference
 
 ## Contributing
