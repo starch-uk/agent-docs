@@ -17,6 +17,21 @@ const packageDocsDir = path.join(packageRoot, 'docs');
 // The docs directory in the consumer project
 const consumerDocsDir = path.join(consumerRoot, 'docs');
 
+async function copyDirRecursive(src, dest) {
+  const stats = await fs.promises.stat(src);
+  if (stats.isDirectory()) {
+    await fs.promises.mkdir(dest, { recursive: true });
+    const entries = await fs.promises.readdir(src);
+    for (const entry of entries) {
+      const srcPath = path.join(src, entry);
+      const destPath = path.join(dest, entry);
+      await copyDirRecursive(srcPath, destPath);
+    }
+  } else {
+    await fs.promises.copyFile(src, dest);
+  }
+}
+
 async function main() {
   try {
     // Ensure this package actually has a docs directory
@@ -31,18 +46,14 @@ async function main() {
       return;
     }
 
-    const isWindows = process.platform === 'win32';
+    // Copy the docs directory instead of creating symlinks
+    // This is more reliable across different environments
+    await copyDirRecursive(packageDocsDir, consumerDocsDir);
 
-    if (isWindows) {
-      // On Windows, create a junction from consumerRoot/docs to this package's docs
-      // Junction target must be an absolute path
-      await fs.promises.symlink(packageDocsDir, consumerDocsDir, 'junction');
-    } else {
-      // On POSIX, create a directory symlink
-      await fs.promises.symlink(packageDocsDir, consumerDocsDir, 'dir');
-    }
-  } catch {
-    // Never fail install because of docs-linking issues
+  } catch (error) {
+    // Never fail install because of docs-copying issues
+    // In production, this should be silent, but for debugging we'll leave it
+    console.warn('Warning: Failed to copy agent-docs to consumer docs directory:', error.message);
   }
 }
 

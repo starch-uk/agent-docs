@@ -369,9 +369,9 @@ Add any other context, examples, or screenshots about the feature request here.
 ### `postinstall.mjs`
 
 The postinstall script that runs when this package is installed in another
-project. It should create a symlink/junction from the consuming project's
-`docs/` directory to this package's `docs/` directory, but only if the consuming
-project doesn't already have a `docs/` directory.
+project. It should copy this package's `docs/` directory to the consuming
+project's root directory, but only if the consuming project doesn't already have
+a `docs/` directory.
 
 ```js
 // postinstall.mjs

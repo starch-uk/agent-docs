@@ -47,19 +47,17 @@ with any technology.
         When installed this way, a `postinstall` script runs in the consuming
         project:
         - If your project does **not** already have a `docs/` directory, the
-          script will create a single link from your project's `docs/` directory
-          to this package's `docs/` directory:
-            - On Unix/macOS, a directory symlink is created
-            - On Windows, a junction is created
+          script will copy this package's `docs/` directory to your project's
+          root directory
         - If your project **already has** a `docs/` directory, the script does
           nothing, and your existing docs layout is left unchanged.
 
     - **As a git submodule:**  
       `git submodule add https://github.com/starch-uk/agent-docs.git`
 
-    - **As a manual symlink/junction (if you want explicit control):**
-        - **Unix/macOS:** `ln -s /path/to/agent-docs/docs ./docs`
-        - **Windows:** `mklink /J docs C:\path\to\agent-docs\docs`
+    - **As a manual copy (if you want explicit control):**
+        - Copy the `docs/` directory from the agent-docs package to your project
+          root
 
 3. **Configure your IDE agent:**
 
