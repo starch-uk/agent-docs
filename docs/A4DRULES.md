@@ -143,4 +143,3 @@ Usage notes for agents
 - When multiple rules conflict, enforce Global rules last modified earlier than
   Workspace (or use a defined precedence ordering).
 - Emit succinct validation errors with line/field hints to aid quick fixes.
-
