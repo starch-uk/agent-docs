@@ -120,39 +120,39 @@ To create new documentation files:
 
 1. **Create a new markdown file** in the `docs/` directory following the naming
    convention:
-   - Uppercase, no spaces, no dots
-   - Version numbers become part of the name (e.g., "XPath 3.1" → `XPATH31.md`)
-   - Remove redundant words like "plugin" when they appear between other words
-     (e.g., "prettier-plugin-apex" → `PRETTIERAPEX.md`)
+    - Uppercase, no spaces, no dots
+    - Version numbers become part of the name (e.g., "XPath 3.1" → `XPATH31.md`)
+    - Remove redundant words like "plugin" when they appear between other words
+      (e.g., "prettier-plugin-apex" → `PRETTIERAPEX.md`)
 
 2. **Follow the structured format** optimized for AI agent consumption:
-   - Overview section with brief context
-   - Core Concepts / Key Features (bulleted lists)
-   - Configuration / Setup (tables when possible)
-   - Usage / Examples (minimal, essential code only)
-   - API Reference (condensed, often in tables)
-   - Patterns & Best Practices
-   - Important Notes (critical gotchas, limitations)
+    - Overview section with brief context
+    - Core Concepts / Key Features (bulleted lists)
+    - Configuration / Setup (tables when possible)
+    - Usage / Examples (minimal, essential code only)
+    - API Reference (condensed, often in tables)
+    - Patterns & Best Practices
+    - Important Notes (critical gotchas, limitations)
 
 3. **Apply optimization guidelines**:
-   - Keep token count low - be terse but precise
-   - Use bullet points over prose for scannability
-   - Prefer tables for structured data (config options, APIs, properties)
-   - Include code snippets only when essential
-   - Cross-reference related docs using `[Name](FILENAME.md)` format
-   - Include a document in a prompt or rule with @FILENAME.md
+    - Keep token count low - be terse but precise
+    - Use bullet points over prose for scannability
+    - Prefer tables for structured data (config options, APIs, properties)
+    - Include code snippets only when essential
+    - Cross-reference related docs using `[Name](FILENAME.md)` format
+    - Include a document in a prompt or rule with @FILENAME.md
 
 ### AI Agent Guidance
 
-This repository includes AI Agent Guidance files in `.cursor/plans/` that provide
-structured instructions and workflows for AI coding assistants (like Cursor's
-Agent). These plan files document processes, best practices, and step-by-step
-workflows for various tasks, making them accessible to AI agents through the
-`.cursor/plans/` directory structure.
+This repository includes AI Agent Guidance files in `.cursor/plans/` that
+provide structured instructions and workflows for AI coding assistants (like
+Cursor's Agent). These plan files document processes, best practices, and
+step-by-step workflows for various tasks, making them accessible to AI agents
+through the `.cursor/plans/` directory structure.
 
 When AI agents need guidance on how to perform specific tasks or follow certain
-workflows, they can reference these plan files to understand the expected process
-and provide accurate assistance. Key plan files include:
+workflows, they can reference these plan files to understand the expected
+process and provide accurate assistance. Key plan files include:
 
 - **VERSIONING.md** - Semantic versioning rules and workflows for documentation
   files

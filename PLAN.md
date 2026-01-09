@@ -366,9 +366,9 @@ Add any other context, examples, or screenshots about the feature request here.
 
 The postinstall script that runs when this package is installed in another
 project. It copies this package's `docs/` directory to the consuming project's
-root directory, but only if the consuming project doesn't already have a
-`docs/` directory. The script uses file copying instead of symlinks/junctions
-for better cross-platform reliability.
+root directory, but only if the consuming project doesn't already have a `docs/`
+directory. The script uses file copying instead of symlinks/junctions for better
+cross-platform reliability.
 
 ```js
 // postinstall.mjs
