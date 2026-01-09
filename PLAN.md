@@ -11,8 +11,8 @@ AI agent instruction documents ("docs") for AI-enabled IDEs.
 - **Primary contents**: Markdown documentation in `docs/`
 - **Code formatting**: Prettier (via `pnpm format` / `pnpm format:check`)
 - **CI**: GitHub Actions workflow that runs `pnpm format:check` on push/PR
-- **Postinstall script**: `postinstall.mjs` that creates symlinks/junctions to
-  `docs/` in consuming projects
+- **Postinstall script**: `postinstall.mjs` that copies the `docs/` directory to
+  consuming projects if they don't already have one
 - **AI Agent Guidance**: `.cursor/plans/` contains structured workflows and
   instructions for AI coding assistants
 - **IDE Rules**: `.cursor/rules/` contains agent rules for Cursor IDE
@@ -52,19 +52,15 @@ The README.md should contain:
         - When `agent-docs` is installed into another project, a `postinstall`
           script will run in the consuming project.
         - If the consuming project does **not** already have a `docs/`
-          directory, the script will create a single symlink/junction from the
-          consuming project's `docs/` directory to this package's `docs/`
-          directory:
-            - On Unix/macOS, a directory symlink is created
-            - On Windows, a junction is created
+          directory, the script will copy this package's `docs/` directory to
+          the consuming project's root directory.
         - If the consuming project **already has** a `docs/` directory, the
-          script does nothing and you can instead manage your own docs layout.
-    - Optional manual instructions for symlinking (Unix/macOS) or junction
-      linking (Windows) if you prefer not to rely on `postinstall`, or need a
-      custom layout:
-        - Individual files from the `docs/` folder to the root of the actual
-          project, OR
-        - The entire `docs` folder to the root of the actual project
+          script does nothing, and your existing docs layout is left unchanged.
+    - Optional manual instructions for copying files if you prefer not to rely
+      on `postinstall`, or need a custom layout:
+        - Copy individual files from the `docs/` folder to the root of the
+          actual project, OR
+        - Copy the entire `docs` folder to the root of the actual project
     - Explanation of how to update IDE agent rules (e.g., Cursor's
       `.cursor/rules/` or similar) to reference the linked docs using
       `@filename` syntax or relative paths, so the AI agent can access the
@@ -369,13 +365,14 @@ Add any other context, examples, or screenshots about the feature request here.
 ### `postinstall.mjs`
 
 The postinstall script that runs when this package is installed in another
-project. It should copy this package's `docs/` directory to the consuming
-project's root directory, but only if the consuming project doesn't already have
-a `docs/` directory.
+project. It copies this package's `docs/` directory to the consuming project's
+root directory, but only if the consuming project doesn't already have a
+`docs/` directory. The script uses file copying instead of symlinks/junctions
+for better cross-platform reliability.
 
 ```js
 // postinstall.mjs
-// Implementation details for creating cross-platform symlinks/junctions
+// Implementation details for copying docs directory cross-platform
 ```
 
 ### `prettier.config.js`
@@ -610,7 +607,7 @@ Standard MIT license with copyright holder: starch-uk
 
 - Name: `agent-docs`
 - Type: module
-- Version: `1.0.0`
+- Version: `1.1.0` (current)
 - Scripts: `format`, `format:fix`, `format:check`, `postinstall`
 - Dev dependencies: `prettier`
 - Engines: Node.js >= 20.0.0
@@ -640,20 +637,20 @@ The plan should:
     - **Major version bump** - Sections replaced or removed from a file compared
       to the version in the latest commit in the `main` branch
 - Document that the project as a whole maintains a version in `package.json`
-  (currently `1.0.0`)
+  (currently `1.1.0`)
 - Explain that changes to docs files should increment the project version
   (patch/minor/major based on the greatest change in any docs file) compared to
   the version in the latest commit in the `main` branch
 - **Document initialization of existing docs:** The existing documentation files
-  in the `docs/` directory (APEXANNOTATIONS.md, APEXDOC.md, CODEANALYZER.md,
-  CPD.md, ESLINT.md, ESLINTJSDOC.md, FLOWSCANNER.md, GRAPHBINARY.md,
-  GRAPHENGINE.md, GRAPHML.md, GRAPHSON.md, GREMLIN.md, GRYO.md, HUSKY.md,
-  JEST30.md, JORJE.md, JSDOC.md, PMD.md, PMDAPEXAST.md, PMDSUPPRESSWARNINGS.md,
-  PNPM.md, PRETTIER.md, PRETTIERAPEX.md, REGEX.md, RETIREJS.md, SFCLI.md,
-  TINKERPOP.md, VITEST.md, XPATH31.md) need to be initialized with version
-  `1.0.0` (or appropriate version based on their current state) when the
-  versioning system is first implemented. These existing docs will be tracked
-  going forward using the same semver system.
+  in the `docs/` directory (A4DRULES.md, APEXANNOTATIONS.md, APEXDOC.md, CML.md,
+  CODEANALYZER.md, CONTEXTDEFINITIONS.md, ESLINT.md, ESLINTJSDOC.md,
+  FIELDSERVICE.md, GRAPHBINARY.md, GRAPHENGINE.md, GRAPHML.md, GRAPHSON.md,
+  GREMLIN.md, GRYO.md, HUSKY.md, JEST.md, JORJE.md, JSDOC.md, PMD.md, PNPM.md,
+  PRETTIER.md, PRETTIERAPEX.md, REVENUETRANSACTIONMANAGEMENT.md, TINKERPOP.md,
+  VITEST.md, XPATH31.md) need to be initialized with version `1.0.0` (or
+  appropriate version based on their current state) when the versioning system
+  is first implemented. These existing docs will be tracked going forward using
+  the same semver system.
 - Describe how scripts can help with versioning by:
     - Reading markdown files and detecting headers/sections
     - Comparing current state with the latest commit in `main` branch
