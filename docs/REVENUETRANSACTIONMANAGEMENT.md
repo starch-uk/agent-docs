@@ -1,6 +1,6 @@
 # Salesforce Revenue Cloud: Transaction Management
 
-> v1.0.1 | Editions: Enterprise, Unlimited, Developer (Lightning Experience)
+> v1.0.2 | Editions: Enterprise, Unlimited, Developer (Lightning Experience)
 
 ## Quick Reference
 
@@ -106,12 +106,14 @@ configuration.
 | `RecordResource`                 | Create record object from sales transaction field values                                         |
 | `RecordWithReferenceRequest`     | Associate record object with reference identifier                                                |
 
-**ConfigurationOptionsInput Properties:** | Property | Type | Description |
-|----------|------|-------------| | `addDefaultConfiguration` | Boolean |
-Auto-add default configuration (bundle/product attributes) | |
-`executeConfigurationRules` | Boolean | Require adherence to configuration rules
-| | `validateAmendRenewCancel` | Boolean | Run amend/renew/cancel validations |
-| `validateProductCatalog` | Boolean | Validate against product catalog |
+**ConfigurationOptionsInput Properties:**
+
+| Property                    | Type    | Description                                                |
+| --------------------------- | ------- | ---------------------------------------------------------- |
+| `addDefaultConfiguration`   | Boolean | Auto-add default configuration (bundle/product attributes) |
+| `executeConfigurationRules` | Boolean | Require adherence to configuration rules                   |
+| `validateAmendRenewCancel`  | Boolean | Run amend/renew/cancel validations                         |
+| `validateProductCatalog`    | Boolean | Validate against product catalog                           |
 
 **PlaceSalesTransactionExecutor.execute() Parameters:**
 
@@ -124,34 +126,39 @@ Auto-add default configuration (bundle/product attributes) | |
 - `catalogRatesPreferenceEnum` (CatalogRatesPreferenceEnum) — Rate card entries
   preference (optional)
 
-**Enums:** | Enum | Values | Description | |------|--------|-------------| |
-`CatalogRatesPreferenceEnum` | `Fetch`, `Skip` | Rate card entries for
-usage-based selling | | `ConfigurationExecutionEnum` | `RunAndAllowErrors`,
-`RunAndBlockErrors`, `Skip` | Configuration execution mode | |
-`PricingPreferenceEnum` | `Force`, `Skip`, `System` | Pricing preference during
-transaction |
+**Enums:**
+
+| Enum                         | Values                                           | Description                               |
+| ---------------------------- | ------------------------------------------------ | ----------------------------------------- |
+| `CatalogRatesPreferenceEnum` | `Fetch`, `Skip`                                  | Rate card entries for usage-based selling |
+| `ConfigurationExecutionEnum` | `RunAndAllowErrors`, `RunAndBlockErrors`, `Skip` | Configuration execution mode              |
+| `PricingPreferenceEnum`      | `Force`, `Skip`, `System`                        | Pricing preference during transaction     |
 
 ### CommerceTax
 
 Manages communication between Salesforce and external tax engines.
 
-**Classes:** | Class | Purpose | |-------|---------| | `AddressesResponse` |
-Ship To, Ship From, Sold To address responses | | `AmountDetailsResponse` | Tax
-amount, total with tax, exempt amount | | `CustomTaxAttributesResponse` |
-Additional custom tax attributes | | `DocumentCodeRequest` | Document code for
-tax calculation | | `ExemptDetailsResponse` | Exemption ID, number, reason | |
-`ImpositionResponse` | Tax imposition details (id, name, type, subType) | |
-`JurisdictionResponse` | Tax jurisdiction (country, region, state, level) | |
-`LineItemResponse` | Line item tax calculation results | |
-`LineTaxAddressesRequest` | Per-line-item addresses for tax calculation | |
-`RuleDetailsResponse` | Tax rules used (nonTaxableRuleId, rateRuleId,
-rateSourceId) | | `TaxAddressesRequest` | Ship From/To, Sold To, Bill To
-addresses | | `TaxAddressRequest` | Address details (city, country, state,
-postalCode, lat/long) | | `TaxApiException` | Tax calculation exceptions | |
-`TaxCustomerDetailsRequest` | Customer details (accountId, code,
-exemptionNo/Reason) | | `TaxDetailsResponse` | Tax calculation details per line
-| | `TaxEngineRequest` | Tax engine request payload | | `TaxEngineResponse` |
-Tax engine response |
+**Classes:**
+
+| Class                         | Purpose                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `AddressesResponse`           | Ship To, Ship From, Sold To address responses                |
+| `AmountDetailsResponse`       | Tax amount, total with tax, exempt amount                    |
+| `CustomTaxAttributesResponse` | Additional custom tax attributes                             |
+| `DocumentCodeRequest`         | Document code for tax calculation                            |
+| `ExemptDetailsResponse`       | Exemption ID, number, reason                                 |
+| `ImpositionResponse`          | Tax imposition details (id, name, type, subType)             |
+| `JurisdictionResponse`        | Tax jurisdiction (country, region, state, level)             |
+| `LineItemResponse`            | Line item tax calculation results                            |
+| `LineTaxAddressesRequest`     | Per-line-item addresses for tax calculation                  |
+| `RuleDetailsResponse`         | Tax rules used (nonTaxableRuleId, rateRuleId, rateSourceId)  |
+| `TaxAddressesRequest`         | Ship From/To, Sold To, Bill To addresses                     |
+| `TaxAddressRequest`           | Address details (city, country, state, postalCode, lat/long) |
+| `TaxApiException`             | Tax calculation exceptions                                   |
+| `TaxCustomerDetailsRequest`   | Customer details (accountId, code, exemptionNo/Reason)       |
+| `TaxDetailsResponse`          | Tax calculation details per line                             |
+| `TaxEngineRequest`            | Tax engine request payload                                   |
+| `TaxEngineResponse`           | Tax engine response                                          |
 
 **TaxAddressRequest Properties:** `city`, `country`, `countryCode`, `latitude`,
 `locationCode`, `longitude`, `postalCode`, `state`, `stateCode`, `street`
@@ -169,10 +176,13 @@ Tax engine response |
 - `RecordResource` — Create record from quote field values
 - `RecordWithReferenceRequest` — Associate record with reference ID
 
-**Enums:** | Enum | Values | |------|--------| | `CatalogRatesPreferenceEnum` |
-`Fetch`, `Skip` | | `ConfigurationInputEnum` | `RunAndAllowErrors`,
-`RunAndBlockErrors`, `Skip` | | `PricingPreferenceEnum` | `Force`, `Skip`,
-`System` |
+**Enums:**
+
+| Enum                         | Values                                           |
+| ---------------------------- | ------------------------------------------------ |
+| `CatalogRatesPreferenceEnum` | `Fetch`, `Skip`                                  |
+| `ConfigurationInputEnum`     | `RunAndAllowErrors`, `RunAndBlockErrors`, `Skip` |
+| `PricingPreferenceEnum`      | `Force`, `Skip`, `System`                        |
 
 ---
 
