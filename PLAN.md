@@ -642,15 +642,15 @@ The plan should:
   (patch/minor/major based on the greatest change in any docs file) compared to
   the version in the latest commit in the `main` branch
 - **Document initialization of existing docs:** The existing documentation files
-  in the `docs/` directory (A4DRULES.md, APEXANNOTATIONS.md, APEXDOC.md, CML.md,
-  CODEANALYZER.md, CONTEXTDEFINITIONS.md, ESLINT.md, ESLINTJSDOC.md,
-  FIELDSERVICE.md, GRAPHBINARY.md, GRAPHENGINE.md, GRAPHML.md, GRAPHSON.md,
-  GREMLIN.md, GRYO.md, HUSKY.md, JEST.md, JORJE.md, JSDOC.md, PMD.md, PNPM.md,
-  PRETTIER.md, PRETTIERAPEX.md, REVENUETRANSACTIONMANAGEMENT.md, TINKERPOP.md,
-  VITEST.md, XPATH31.md) need to be initialized with version `1.0.0` (or
-  appropriate version based on their current state) when the versioning system
-  is first implemented. These existing docs will be tracked going forward using
-  the same semver system.
+  in the `docs/` directory (A4DRULES.md, A4DWORKFLOWS.md, APEXANNOTATIONS.md,
+  APEXDOC.md, CML.md, CODEANALYZER.md, CONTEXTDEFINITIONS.md, ESLINT.md,
+  ESLINTJSDOC.md, FIELDSERVICE.md, GRAPHBINARY.md, GRAPHENGINE.md, GRAPHML.md,
+  GRAPHSON.md, GREMLIN.md, GRYO.md, HUSKY.md, JEST.md, JORJE.md, JSDOC.md,
+  PMD.md, PNPM.md, PRETTIER.md, PRETTIERAPEX.md, REVENUETRANSACTIONMANAGEMENT.md,
+  TINKERPOP.md, VITEST.md, XPATH31.md) need to be initialized with version
+  `1.0.0` (or appropriate version based on their current state) when the
+  versioning system is first implemented. These existing docs will be tracked
+  going forward using the same semver system.
 - Describe how scripts can help with versioning by:
     - Reading markdown files and detecting headers/sections
     - Comparing current state with the latest commit in `main` branch

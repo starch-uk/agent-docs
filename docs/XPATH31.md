@@ -1,4 +1,3 @@
-````markdown
 # XPath 3.1 Reference
 
 > **Version**: 1.0.0
@@ -207,7 +206,3 @@ $seq ! (./child/@attr)   # apply to each, flatten
 - Document order preserved
 - Namespaces: prefixes or `Q{uri}local`
 - Errors: `try/catch` in 3.1
-
-```
-
-```

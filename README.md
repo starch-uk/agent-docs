@@ -77,6 +77,7 @@ The `docs/` directory contains generated documentation files. Each doc follows a
 structured format optimized for AI agent consumption:
 
 - **[A4DRULES.md](docs/A4DRULES.md)** - Agentforce Rules Reference
+- **[A4DWORKFLOWS.md](docs/A4DWORKFLOWS.md)** - Agentforce Workflows reference
 - **[APEXANNOTATIONS.md](docs/APEXANNOTATIONS.md)** - Apex annotations reference
 - **[APEXDOC.md](docs/APEXDOC.md)** - ApexDoc documentation tool reference
 - **[CML.md](docs/CML.md)** - Constraint Modeling Language (CML) reference for
