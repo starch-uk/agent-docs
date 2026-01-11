@@ -80,6 +80,7 @@ structured format optimized for AI agent consumption:
 - **[A4DWORKFLOWS.md](docs/A4DWORKFLOWS.md)** - Agentforce Workflows reference
 - **[APEXANNOTATIONS.md](docs/APEXANNOTATIONS.md)** - Apex annotations reference
 - **[APEXDOC.md](docs/APEXDOC.md)** - ApexDoc documentation tool reference
+- **[AURACOMPONENTS.md](docs/AURACOMPONENTS.md)** - Aura Component reference
 - **[CML.md](docs/CML.md)** - Constraint Modeling Language (CML) reference for
   Salesforce Revenue Cloud Product Configurator
 - **[CODEANALYZER.md](docs/CODEANALYZER.md)** - Salesforce Code Analyzer
