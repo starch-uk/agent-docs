@@ -607,7 +607,7 @@ Standard MIT license with copyright holder: starch-uk
 
 - Name: `agent-docs`
 - Type: module
-- Version: `1.1.0` (current)
+- Version: `1.0.0`
 - Scripts: `format`, `format:fix`, `format:check`, `postinstall`
 - Dev dependencies: `prettier`
 - Engines: Node.js >= 20.0.0
@@ -646,11 +646,11 @@ The plan should:
   APEXDOC.md, CML.md, CODEANALYZER.md, CONTEXTDEFINITIONS.md, ESLINT.md,
   ESLINTJSDOC.md, FIELDSERVICE.md, GRAPHBINARY.md, GRAPHENGINE.md, GRAPHML.md,
   GRAPHSON.md, GREMLIN.md, GRYO.md, HUSKY.md, JEST.md, JORJE.md, JSDOC.md,
-  PMD.md, PNPM.md, PRETTIER.md, PRETTIERAPEX.md, REVENUETRANSACTIONMANAGEMENT.md,
-  TINKERPOP.md, VITEST.md, XPATH31.md) need to be initialized with version
-  `1.0.0` (or appropriate version based on their current state) when the
-  versioning system is first implemented. These existing docs will be tracked
-  going forward using the same semver system.
+  LIGHTNINGBASECOMPONENTS.md, LWCHTMLTEMPLATES.md, PMD.md, PNPM.md, PRETTIER.md,
+  PRETTIERAPEX.md, REVENUETRANSACTIONMANAGEMENT.md, TINKERPOP.md, VITEST.md,
+  XPATH31.md) need to be initialized with version `1.0.0` (or appropriate version
+  based on their current state) when the versioning system is first implemented.
+  These existing docs will be tracked going forward using the same semver system.
 - Describe how scripts can help with versioning by:
     - Reading markdown files and detecting headers/sections
     - Comparing current state with the latest commit in `main` branch

@@ -1,12 +1,10 @@
 # Prettier Reference
 
-> **Version**: 1.0.0
+> **Version**: 1.1.0
 
 > **Architecture**: Parse → AST → Doc → Format. Plugins extend via
 > parsers/printers. **Philosophy**: Opinionated, correctness over
 > configurability, consistency across codebase.
-
----
 
 ## Core APIs
 
@@ -39,8 +37,6 @@ All APIs are **async**. For sync:
 }
 ```
 
----
-
 ## Debug APIs
 
 Via `prettier.__debug` namespace (internal/testing):
@@ -64,8 +60,6 @@ Via `prettier.__debug` namespace (internal/testing):
 --debug-repeat N       # Repeat N times, measure duration
 --debug-benchmark      # Performance mode
 ```
-
----
 
 ## CLI
 
@@ -95,8 +89,6 @@ prettier [options] [file/dir/glob ...]
 | `--cache`                 | Enable caching             |
 | `--cache-strategy`        | `metadata` or `content`    |
 | `--stdin-filepath <path>` | Parser inference for stdin |
-
----
 
 ## Plugin API
 
@@ -193,8 +185,6 @@ interface SupportLanguage {
 }
 ```
 
----
-
 ## AstPath API
 
 ```typescript
@@ -244,8 +234,6 @@ const parent = path.getParentNode();
 // Check ancestry
 path.match((node) => node.type === 'Function');
 ```
-
----
 
 ## Doc Builders
 
@@ -307,8 +295,6 @@ interface GroupOptions {
 type Doc = string | Doc[] | Group | Indent | Align | Line | IfBreak | Fill | ...
 ```
 
----
-
 ## Doc Utilities
 
 Via `prettier.doc.utils`:
@@ -324,8 +310,6 @@ Via `prettier.doc.utils`:
 | `stripTrailingHardline` | `(doc) → Doc`                                           | Remove trailing hardline |
 | `replaceEndOfLine`      | `(doc, replacement?) → Doc`                             | Replace end of line      |
 
----
-
 ## Doc Printer
 
 ```typescript
@@ -336,8 +320,6 @@ printDocToString(doc: Doc, options: {
   parentParser?: string;
 }): { formatted: string; cursorNodeStart?: number; cursorNodeText?: string }
 ```
-
----
 
 ## Options
 
@@ -393,8 +375,6 @@ interface SupportOption {
 }
 ```
 
----
-
 ## Config
 
 ### Config Interface
@@ -433,8 +413,6 @@ Search walks up directory tree. No global config.
 | `indent_style`            | `useTabs`    |
 | `indent_size`/`tab_width` | `tabWidth`   |
 | `max_line_length`         | `printWidth` |
-
----
 
 ## Utilities
 
@@ -496,8 +474,6 @@ All return `number | false`:
 | `addTrailingComment` | `(node, comment)`         | Add trailing comment |
 | `addDanglingComment` | `(node, comment, marker)` | Add dangling comment |
 
----
-
 ## Architecture
 
 ### Formatting Pipeline
@@ -530,8 +506,6 @@ All return `number | false`:
 
 From filepath: extension → filename → shebang → isSupported function
 
----
-
 ## Symbols
 
 ### Global (Symbol.for)
@@ -548,8 +522,6 @@ From filepath: extension → filename → shebang → isSupported function
 | ------------------ | ----------------------------------- |
 | `Symbol("cursor")` | Cursor marker in diff algorithm     |
 | Group ID Symbols   | For ifBreak/indentIfBreak reference |
-
----
 
 ## Ignored Regions
 
@@ -575,8 +547,6 @@ From filepath: extension → filename → shebang → isSupported function
 ### Default Ignores
 
 `.git`, `.jj`, `.sl`, `.svn`, `.hg`, `node_modules`
-
----
 
 ## Comment Handling
 
@@ -612,8 +582,6 @@ Each handler receives:
 ) => boolean; // true = handled, false = let Prettier handle
 ```
 
----
-
 ## Error Types
 
 | Error                  | Description                                     |
@@ -621,8 +589,6 @@ Each handler receives:
 | `ConfigError`          | Configuration errors (parser/printer not found) |
 | `UndefinedParserError` | Parser could not be inferred                    |
 | `InvalidDocError`      | Invalid document structure                      |
-
----
 
 ## Browser/Standalone
 
@@ -637,8 +603,6 @@ await prettier.format(code, {
 ```
 
 Plugins: `https://unpkg.com/prettier@VERSION/plugins/PLUGIN.mjs`
-
----
 
 ## Patterns
 
@@ -701,8 +665,6 @@ embed: (path, options) => {
 	return null;
 };
 ```
-
----
 
 ## Formatting Behavior Notes
 
