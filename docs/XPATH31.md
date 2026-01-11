@@ -75,6 +75,7 @@ map { 'k': v }                    # Constructor
 $m('k')  $m?k  $m?('k')  ?k       # Lookup
 map:keys  map:contains  map:get  map:put  map:remove  map:size  map:merge  map:entry
 ```
+
 ````
 
 ## Arrays
@@ -206,3 +207,4 @@ $seq ! (./child/@attr)   # apply to each, flatten
 - Document order preserved
 - Namespaces: prefixes or `Q{uri}local`
 - Errors: `try/catch` in 3.1
+````

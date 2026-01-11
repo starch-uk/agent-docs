@@ -7,9 +7,10 @@
 		"format": "prettier --write \"**/*.{ts,md,json,yml,yaml}\"",
 		"format:fix": "prettier --write \"**/*.{ts,md,json,yml,yaml}\"",
 		"format:check": "prettier --check \"**/*.{ts,md,json,yml,yaml}\"",
-		"postinstall": "node postinstall.mjs"
+		"postinstall": "node postinstall.mjs",
+		"prepare": "husky || true"
 	},
-	"packageManager": "pnpm@10.27.0",
+	"packageManager": "pnpm@10.28.0",
 	"keywords": [
 		"ai",
 		"agent",
@@ -25,6 +26,7 @@
 		"url": "https://github.com/starch-uk/agent-docs.git"
 	},
 	"devDependencies": {
+		"husky": "^9.1.7",
 		"prettier": "^3.7.4"
 	},
 	"engines": {

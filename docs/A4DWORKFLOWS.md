@@ -4,20 +4,22 @@
 
 ## Overview
 
-Workflows are reusable `.md` files defining multi-step Salesforce dev tasks. Invoke with `/[workflow-name.md]` in chat.
+Workflows are reusable `.md` files defining multi-step Salesforce dev tasks.
+Invoke with `/[workflow-name.md]` in chat.
 
-**Benefits:** Automation, consistency, error reduction, time savings, team sharing.
+**Benefits:** Automation, consistency, error reduction, time savings, team
+sharing.
 
 ---
 
 ## Creating & Managing
 
-| Action | Method |
-|--------|--------|
-| Access | Click **Rules & Workflows** (justice icon) in chat |
-| Scope | Choose **Global** or **Workspace** workflows |
-| Create | Click **+** |
-| Storage | Workspace: `.a4drules/workflows/` folder |
+| Action  | Method                                             |
+| ------- | -------------------------------------------------- |
+| Access  | Click **Rules & Workflows** (justice icon) in chat |
+| Scope   | Choose **Global** or **Workspace** workflows       |
+| Create  | Click **+**                                        |
+| Storage | Workspace: `.a4drules/workflows/` folder           |
 
 Interface allows: view active workflows, toggle on/off, add/delete.
 
@@ -25,7 +27,8 @@ Interface allows: view active workflows, toggle on/off, add/delete.
 
 ## Workflow Capabilities
 
-- **Built-in tools:** `ask_followup_question`, `read_file`, `search_files`, `new_task`
+- **Built-in tools:** `ask_followup_question`, `read_file`, `search_files`,
+  `new_task`
 - **CLI tools:** `sf` (Salesforce CLI), `git`
 - **External:** MCP tool calls
 - **Chaining:** Sequential action execution
@@ -34,13 +37,13 @@ Interface allows: view active workflows, toggle on/off, add/delete.
 
 ## Common Workflow Types
 
-| Type | Purpose |
-|------|---------|
-| Deployment | Deploy/validate components across orgs |
-| Testing | Run test suites, analyze results |
-| Release | Package, validate, deploy releases |
-| Component | Create/test/deploy Lightning components |
-| Integration | Set up/validate external integrations |
+| Type        | Purpose                                 |
+| ----------- | --------------------------------------- |
+| Deployment  | Deploy/validate components across orgs  |
+| Testing     | Run test suites, analyze results        |
+| Release     | Package, validate, deploy releases      |
+| Component   | Create/test/deploy Lightning components |
+| Integration | Set up/validate external integrations   |
 
 ---
 
@@ -54,7 +57,7 @@ You have access to the `sf` terminal command. Deploy components following this p
      <question>Which components to deploy and to which org?</question>
      <options>["Specific files/folders", "All local changes", "Specific metadata types"]</options>
    </ask_followup_question>
-   
+
    sf org display --target-org <target-org>
 
 2. **Pre-Deployment Validation**
@@ -81,6 +84,7 @@ You have access to the `sf` terminal command. Deploy components following this p
 ## SF CLI Quick Reference
 
 ### Org Commands
+
 ```bash
 sf org list                              # List authorized orgs
 sf org display --target-org <alias>      # Display org info
@@ -88,6 +92,7 @@ sf config set target-org <alias>         # Set default org
 ```
 
 ### Deployment
+
 ```bash
 sf project deploy start --target-org <alias>            # Deploy
 sf project deploy start --dry-run --target-org <alias>  # Validate only
@@ -96,6 +101,7 @@ sf project retrieve start --target-org <alias>          # Retrieve metadata
 ```
 
 ### Testing
+
 ```bash
 sf apex test run --target-org <alias> --code-coverage --result-format human
 sf apex test run --class-names "Test1,Test2" --target-org <alias>
@@ -103,6 +109,7 @@ sf apex test report --target-org <alias>
 ```
 
 ### Data
+
 ```bash
 sf data query --query "SELECT Id FROM Account LIMIT 10" --target-org <alias>
 sf data import tree --plan data/plan.json --target-org <alias>
@@ -113,9 +120,9 @@ sf data export tree --query "SELECT Id FROM Account" --target-org <alias>
 
 ## Custom Workflow Ideas
 
-| Workflow | Key Steps |
-|----------|-----------|
-| **Release** | Gather merged changes → Build changelog → Bump version → Create/validate package |
-| **New Component** | Create folder structure → Generate boilerplate files → Set up Jest tests → Deploy to dev |
-| **Integration Test** | Validate credentials → Test endpoints → Check error handling → Generate reports |
-| **Code Quality** | Run PMD analysis → Check accessibility → Validate naming → Generate reports |
+| Workflow             | Key Steps                                                                                |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| **Release**          | Gather merged changes → Build changelog → Bump version → Create/validate package         |
+| **New Component**    | Create folder structure → Generate boilerplate files → Set up Jest tests → Deploy to dev |
+| **Integration Test** | Validate credentials → Test endpoints → Check error handling → Generate reports          |
+| **Code Quality**     | Run PMD analysis → Check accessibility → Validate naming → Generate reports              |

@@ -101,9 +101,10 @@ structured format optimized for AI agent consumption:
 - **[JEST.md](docs/JEST.md)** - Jest testing framework reference
 - **[JORJE.md](docs/JORJE.md)** - Jorje Apex parser reference
 - **[JSDOC.md](docs/JSDOC.md)** - JSDoc documentation generator reference
-- **[LIGHTNINGBASECOMPONENTS.md](docs/LIGHTNINGBASECOMPONENTS.md)** - Lightning Base
-  Components reference
-- **[LWCHTMLTEMPLATES.md](docs/LWCHTMLTEMPLATES.md)** - LWC HTML Templates reference
+- **[LIGHTNINGBASECOMPONENTS.md](docs/LIGHTNINGBASECOMPONENTS.md)** - Lightning
+  Base Components reference
+- **[LWCHTMLTEMPLATES.md](docs/LWCHTMLTEMPLATES.md)** - LWC HTML Templates
+  reference
 - **[PMD.md](docs/PMD.md)** - PMD static analysis tool reference (includes Apex
   AST reference and suppressing warnings)
 - **[PNPM.md](docs/PNPM.md)** - pnpm package manager reference

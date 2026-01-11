@@ -648,9 +648,10 @@ The plan should:
   GRAPHSON.md, GREMLIN.md, GRYO.md, HUSKY.md, JEST.md, JORJE.md, JSDOC.md,
   LIGHTNINGBASECOMPONENTS.md, LWCHTMLTEMPLATES.md, PMD.md, PNPM.md, PRETTIER.md,
   PRETTIERAPEX.md, REVENUETRANSACTIONMANAGEMENT.md, TINKERPOP.md, VITEST.md,
-  XPATH31.md) need to be initialized with version `1.0.0` (or appropriate version
-  based on their current state) when the versioning system is first implemented.
-  These existing docs will be tracked going forward using the same semver system.
+  XPATH31.md) need to be initialized with version `1.0.0` (or appropriate
+  version based on their current state) when the versioning system is first
+  implemented. These existing docs will be tracked going forward using the same
+  semver system.
 - Describe how scripts can help with versioning by:
     - Reading markdown files and detecting headers/sections
     - Comparing current state with the latest commit in `main` branch
